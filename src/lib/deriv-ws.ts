@@ -15,7 +15,8 @@ let useSimulation = false;
 let hasEverConnected = false;
 
 // Promise-based request/response over WebSocket
-const pendingRequests = new Map<string, { resolve: (data: any) => void; reject: (err: Error) => void; timer: ReturnType<typeof setTimeout> }>();
+let reqIdCounter = 1;
+const pendingRequests = new Map<number, { resolve: (data: any) => void; reject: (err: Error) => void; timer: ReturnType<typeof setTimeout> }>();
 
 function sendWSRequest(msg: Record<string, unknown>, timeoutMs = 15000): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -25,7 +26,7 @@ function sendWSRequest(msg: Record<string, unknown>, timeoutMs = 15000): Promise
       return;
     }
 
-    const reqId = `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    const reqId = reqIdCounter++;
     const payload = { ...msg, req_id: reqId };
 
     const timer = setTimeout(() => {
