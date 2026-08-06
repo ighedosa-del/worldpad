@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://developers.deriv.com/docs/workflows",
+    "name": "Complete Workflows",
+    "snippet": "Use REST APIs for account setup and the OTP endpoint to get an authenticated WebSocket URL for real-time trading. REST: Get an authenticated WebSocket URL via ... Read more\nUsers receive a default demo account upon signup. REST call requires your authorization token ( PAT or JWT). With a PAT app, the user generates a Personal ...",
+    "host_name": "developers.deriv.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/intro/api-overview",
+    "name": "API Overview",
+    "snippet": "Deriv API provides programmatic access to trading services, account management, and market data . REST endpoints . Bearer token (OAuth 2.0 or PAT ) Examples POST ...\nDeriv API provides programmatic access to trading services, account management , and market data for the Options trading platform.",
+    "host_name": "developers.deriv.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options",
+    "name": "Options Setup REST",
+    "snippet": "The Options Setup APIs allow you to create and manage Options trading accounts using REST endpoints . Bearer YOUR_OAUTH_TOKEN token for authenticated endpoints .\nThe Options Setup APIs allow you to create and manage Options trading accounts using REST endpoints. These endpoints handle account creation, balance management ...",
+    "host_name": "developers.deriv.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options/get-accounts",
+    "name": "Get All Accounts — Options API",
+    "snippet": "This endpoint returns all Options trading accounts associated with your authentication credentials, including both demo and real accounts.\nAccount Information. This endpoint returns all Options trading accounts associated with your authentication credentials, including both demo and real accounts .",
+    "host_name": "developers.deriv.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://docs.tradier.com/docs/account-details",
+    "name": "Account Details",
+    "snippet": "This guide walks you through the Account endpoints available. These endpoints let you retrieve account balances, positions, orders, history, gain/loss data , ...",
+    "host_name": "docs.tradier.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

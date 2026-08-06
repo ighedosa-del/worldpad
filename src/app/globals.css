@@ -1,0 +1,594 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #0d1117;
+  --foreground: #e6edf3;
+  --card: #161b22;
+  --card-foreground: #e6edf3;
+  --popover: #161b22;
+  --popover-foreground: #e6edf3;
+  --primary: #00d4aa;
+  --primary-foreground: #0d1117;
+  --secondary: #1c2333;
+  --secondary-foreground: #e6edf3;
+  --muted: #21262d;
+  --muted-foreground: #7d8590;
+  --accent: #1c2333;
+  --accent-foreground: #e6edf3;
+  --destructive: #f85149;
+  --border: rgba(255,255,255,0.08);
+  --input: rgba(255,255,255,0.08);
+  --ring: #00d4aa;
+  --chart-1: #00d4aa;
+  --chart-2: #ff6b35;
+  --chart-3: #e040fb;
+  --chart-4: #f59e0b;
+  --chart-5: #f85149;
+
+  /* Worldpad design tokens */
+  --wp-bg: #0d1117;
+  --wp-surface: #161b22;
+  --wp-border: rgba(255,255,255,0.06);
+  --wp-cyan: #00d4aa;
+  --wp-pink: #e040fb;
+  --wp-orange: #ff6b35;
+  --wp-teal: #00b8a9;
+  --wp-gold: #ffd700;
+  --wp-blue: #0a2463;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ============================================ */
+/* CUSTOM SCROLLBAR (global)                    */
+/* ============================================ */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+.wp-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.wp-scroll::-webkit-scrollbar-track { background: transparent; }
+.wp-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+.wp-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============================================ */
+/* KEYFRAME ANIMATIONS                          */
+/* ============================================ */
+
+/* Pulse animation for live dot */
+@keyframes wp-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+.animate-wp-pulse { animation: wp-pulse 2s ease-in-out infinite; }
+
+/* Loading bar animation */
+@keyframes wp-loading-bar {
+  0% { width: 0%; }
+  50% { width: 70%; }
+  100% { width: 100%; }
+}
+.animate-wp-loading { animation: wp-loading-bar 3s ease-in-out infinite; }
+
+/* Glow pulse — box-shadow breathing */
+@keyframes glow-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Gradient shift — slow background-position animation */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease infinite;
+}
+
+/* Shimmer — light sweep across element */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Float — subtle up-down movement */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+/* Rotate glow — for decorative spinning glow */
+@keyframes rotate-glow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-rotate-glow { animation: rotate-glow 8s linear infinite; }
+
+/* Scanline effect for terminal */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* Progress bar fill animation */
+@keyframes progress-fill {
+  0% { width: 0%; }
+}
+.animate-progress-fill { animation: progress-fill 1s ease-out forwards; }
+
+/* Border glow rotate — for animated gradient borders */
+@keyframes border-glow-rotate {
+  0% { --border-angle: 0deg; }
+  100% { --border-angle: 360deg; }
+}
+
+/* Text glow pulse */
+@keyframes text-glow-pulse {
+  0%, 100% { text-shadow: 0 0 8px currentColor, 0 0 16px currentColor; }
+  50% { text-shadow: 0 0 16px currentColor, 0 0 32px currentColor, 0 0 48px currentColor; }
+}
+.animate-text-glow { animation: text-glow-pulse 2s ease-in-out infinite; }
+
+/* Fade in up */
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+
+/* Fade in out — for flash overlays */
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Scale in */
+@keyframes scale-in {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in { animation: scale-in 0.3s ease-out forwards; }
+
+/* ============================================ */
+/* GRADIENT TEXT                                */
+/* ============================================ */
+.text-gradient-wp {
+  background: linear-gradient(135deg, #00d4aa 0%, #e040fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #f59e0b 0%, #ffd700 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-cyan {
+  background: linear-gradient(135deg, #00d4aa 0%, #00b8a9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================ */
+/* GLOW EFFECTS                                 */
+/* ============================================ */
+.glow-teal { box-shadow: 0 0 20px rgba(0, 212, 170, 0.3), inset 0 0 20px rgba(0, 212, 170, 0.05); }
+.glow-pink { box-shadow: 0 0 20px rgba(224, 64, 251, 0.3), inset 0 0 20px rgba(224, 64, 251, 0.05); }
+.glow-orange { box-shadow: 0 0 20px rgba(255, 107, 53, 0.3), inset 0 0 20px rgba(255, 107, 53, 0.05); }
+.glow-gold { box-shadow: 0 0 20px rgba(255, 215, 0, 0.3), inset 0 0 20px rgba(255, 215, 0, 0.05); }
+.glow-blue { box-shadow: 0 0 20px rgba(10, 36, 99, 0.5), inset 0 0 20px rgba(10, 36, 99, 0.1); }
+.glow-cyan-sm { box-shadow: 0 0 12px rgba(0, 212, 170, 0.2); }
+.glow-pink-sm { box-shadow: 0 0 12px rgba(224, 64, 251, 0.2); }
+.glow-orange-sm { box-shadow: 0 0 12px rgba(255, 107, 53, 0.2); }
+.glow-gold-sm { box-shadow: 0 0 12px rgba(255, 215, 0, 0.2); }
+
+/* Hover glow variants */
+.hover-glow-teal { transition: box-shadow 0.3s ease; }
+.hover-glow-teal:hover { box-shadow: 0 0 24px rgba(0, 212, 170, 0.35), 0 0 48px rgba(0, 212, 170, 0.1); }
+.hover-glow-pink { transition: box-shadow 0.3s ease; }
+.hover-glow-pink:hover { box-shadow: 0 0 24px rgba(224, 64, 251, 0.35), 0 0 48px rgba(224, 64, 251, 0.1); }
+.hover-glow-gold { transition: box-shadow 0.3s ease; }
+.hover-glow-gold:hover { box-shadow: 0 0 24px rgba(255, 215, 0, 0.35), 0 0 48px rgba(255, 215, 0, 0.1); }
+.hover-glow-orange { transition: box-shadow 0.3s ease; }
+.hover-glow-orange:hover { box-shadow: 0 0 24px rgba(255, 107, 53, 0.35), 0 0 48px rgba(255, 107, 53, 0.1); }
+
+/* ============================================ */
+/* GRADIENT BORDERS (pseudo-element technique)  */
+/* ============================================ */
+.wp-gradient-border {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.wp-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.4), rgba(224, 64, 251, 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.wp-gradient-border-gold {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.wp-gradient-border-gold::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.5), rgba(255, 215, 0, 0.5));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.wp-gradient-border-cyan {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.wp-gradient-border-cyan::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 212, 170, 0.3), rgba(0, 184, 169, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Animated rotating gradient border */
+.wp-animated-border {
+  position: relative;
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+.wp-animated-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, #00d4aa, #e040fb, #ff6b35, #ffd700, #00d4aa);
+  animation: rotate-glow 4s linear infinite;
+  z-index: -1;
+}
+.wp-animated-border::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: #161b22;
+  z-index: -1;
+}
+
+/* ============================================ */
+/* GLASSMORPHISM CARDS                          */
+/* ============================================ */
+.wp-glass {
+  background: rgba(22, 27, 34, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.wp-glass-hover {
+  background: rgba(22, 27, 34, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.3s ease;
+}
+.wp-glass-hover:hover {
+  background: rgba(22, 27, 34, 0.95);
+  border-color: rgba(0, 212, 170, 0.2);
+  box-shadow: 0 0 30px rgba(0, 212, 170, 0.08), 0 8px 32px rgba(0, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+/* ============================================ */
+/* BUTTON STYLES                                */
+/* ============================================ */
+.wp-btn-teal {
+  background: linear-gradient(135deg, #00d4aa 0%, #00b8a9 100%);
+  color: #0d1117;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 16px rgba(0, 212, 170, 0.25);
+}
+.wp-btn-teal:hover {
+  box-shadow: 0 0 28px rgba(0, 212, 170, 0.45), 0 0 56px rgba(0, 212, 170, 0.15);
+  transform: translateY(-1px);
+}
+.wp-btn-teal:active {
+  transform: translateY(0px);
+  box-shadow: 0 0 12px rgba(0, 212, 170, 0.2);
+}
+
+.wp-btn-gold {
+  background: linear-gradient(135deg, #f59e0b 0%, #ffd700 50%, #f59e0b 100%);
+  background-size: 200% 100%;
+  color: #0d1117;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.25);
+}
+.wp-btn-gold:hover {
+  background-position: 100% 0;
+  box-shadow: 0 0 28px rgba(255, 215, 0, 0.45), 0 0 56px rgba(255, 215, 0, 0.15);
+  transform: translateY(-1px);
+}
+.wp-btn-gold:active {
+  transform: translateY(0px);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+}
+
+.wp-btn-pink {
+  background: linear-gradient(135deg, #e040fb 0%, #d946ef 100%);
+  color: white;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 16px rgba(224, 64, 251, 0.25);
+}
+.wp-btn-pink:hover {
+  box-shadow: 0 0 28px rgba(224, 64, 251, 0.45), 0 0 56px rgba(224, 64, 251, 0.15);
+  transform: translateY(-1px);
+}
+
+/* ============================================ */
+/* NAV TAB ACTIVE UNDERLINE                     */
+/* ============================================ */
+.nav-tab-active {
+  position: relative;
+}
+.nav-tab-active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 2px;
+  right: 2px;
+  height: 2px;
+  background: linear-gradient(90deg, #00d4aa, #e040fb);
+  border-radius: 1px;
+  box-shadow: 0 0 8px rgba(0, 212, 170, 0.5);
+}
+
+/* ============================================ */
+/* TERMINAL TEXT                                */
+/* ============================================ */
+.terminal-text {
+  font-family: var(--font-geist-mono), monospace;
+  color: #00d4aa;
+}
+
+.terminal-glow {
+  font-family: var(--font-geist-mono), monospace;
+  color: #00d4aa;
+  text-shadow: 0 0 8px rgba(0, 212, 170, 0.6), 0 0 16px rgba(0, 212, 170, 0.3);
+}
+
+/* CRT scanline overlay */
+.wp-scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+/* Moving scanline beam */
+.wp-scanline-beam::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(0, 212, 170, 0.03),
+    transparent
+  );
+  animation: scanline 6s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* ============================================ */
+/* PILL INPUT STYLE                             */
+/* ============================================ */
+.wp-pill-input {
+  background: #000000;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  outline: none;
+}
+.wp-pill-input:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.wp-pill-input:focus {
+  border-color: rgba(0, 212, 170, 0.4);
+  box-shadow: 0 0 12px rgba(0, 212, 170, 0.1);
+}
+
+/* ============================================ */
+/* SECTION HEADER GRADIENT                      */
+/* ============================================ */
+.wp-section-header {
+  background: linear-gradient(135deg, #0a2463 0%, #1a3a7a 100%);
+  position: relative;
+  overflow: hidden;
+}
+.wp-section-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 212, 170, 0.3), transparent);
+}
+
+/* ============================================ */
+/* PROGRESS BAR WITH GRADIENT + GLOW            */
+/* ============================================ */
+.wp-progress-glow {
+  position: relative;
+}
+.wp-progress-glow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 100%;
+  border-radius: 50%;
+  filter: blur(3px);
+  background: inherit;
+}
+
+/* ============================================ */
+/* MESH GRADIENT BACKGROUND                     */
+/* ============================================ */
+.wp-mesh-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 212, 170, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(224, 64, 251, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(10, 36, 99, 0.08) 0%, transparent 50%),
+    #0d1117;
+}
+
+/* Animated mesh background */
+.wp-animated-mesh {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 212, 170, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(224, 64, 251, 0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(10, 36, 99, 0.1) 0%, transparent 50%),
+    #0d1117;
+  background-size: 200% 200%;
+  animation: gradient-shift 12s ease infinite;
+}
+
+/* ============================================ */
+/* NOISE TEXTURE OVERLAY                        */
+/* ============================================ */
+.wp-noise {
+  position: relative;
+}
+.wp-noise::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================ */
+/* GRID BACKGROUND PATTERN                      */
+/* ============================================ */
+.wp-grid-bg {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+}

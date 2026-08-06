@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://developers.deriv.com",
+    "name": "Deriv API",
+    "snippet": "Use our free, fast, and flexible APIs to customise your platform and create experiences tailored to your business. Browse API docs. Build trading platforms ... Read more\nUse our free, fast, and flexible APIs to customise your platform and create experiences tailored to your business. , account creation, verification, and more ...",
+    "host_name": "developers.deriv.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/workflows",
+    "name": "Complete Workflows",
+    "snippet": "Log in to developers.deriv.com and register a new application with the correct type (PAT or OAuth) to get a new App ID.",
+    "host_name": "developers.deriv.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://deriv.com/partners-help-centre/deriv-api",
+    "name": "Deriv API | Partners Help and FAQs",
+    "snippet": "Deriv API accounts are easy to setup ! Our help centre explains how to get your Deriv API token, register your app, earn, and check commissions.",
+    "host_name": "deriv.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.facebook.com/groups/icthubkenya/posts/4331666923643294",
+    "name": "Deriv API Login Integration Support for Third- Party App",
+    "snippet": "Many third-party applications are currently facing authentication and compatibility challenges due to the transition to Deriv's updated API ... Read more\nThe Companies House API uses HTTP basic access authentication to send an API key or stream key between the client application and the server.",
+    "host_name": "www.facebook.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com/deriv-com/deriv-api-docs",
+    "name": "deriv-com/deriv-api-docs",
+    "snippet": "To create your own version of the Deriv API application , you need to fork the project to your own GitHub repository. Follow these steps to fork a repository:. Read more\nHere, you will find comprehensive guides and documentation to help you start working with our APIs as quickly as possible, as well as support if you get stuck. Read more",
+    "host_name": "github.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

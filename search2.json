@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://developers.deriv.com/docs/workflows",
+    "name": "Complete Workflows",
+    "snippet": "In the Dashboard, go to the API tokens section. Create a new PAT ( Personal Access Token ) and select the appropriate scopes. Copy and securely store your token .\nGenerate an authorization token : If using PAT type: In the Dashboard, go to the API tokens section. Create a new PAT ( Personal Access Token ) and select the ... Read more\nThroughout this documentation, ' authorization token ' refers to either your PAT token ( Personal Access Token ) or your JWT token (obtained via the OAuth 2.0 flow) ... Read more",
+    "host_name": "developers.deriv.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/intro/authentication",
+    "name": "Authentication | Deriv API",
+    "snippet": "With a PAT app, the user generates a Personal Access Token in Deriv and manually enters it into your application. The app stores the token and includes it in ... Read more",
+    "host_name": "developers.deriv.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/intro/api-overview",
+    "name": "API Overview",
+    "snippet": "Learn about REST and WebSocket APIs , architecture, authentication, Personal Access Token (PAT) Authorization: Bearer token (OAuth 2.0 or PAT) auth), demo, and ...\nLearn about REST and WebSocket APIs, Personal Access Token ( PAT ) API . Authorization : Bearer token (OAuth 2.0 or PAT ) WebSocket APIs. Valid Deriv -App-ID and ...\n. Learn about REST and WebSocket APIs , or Personal Access Token (PAT) Authorization: Bearer token (OAuth 2.0 or PAT) (OAuth 2.0 or PAT)",
+    "host_name": "developers.deriv.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.scribd.com/document/729010420/api-deriv-com-API-authentication",
+    "name": "Deriv API WebSocket Authorization Guide | PDF",
+    "snippet": "It provides details on the authorization process, including redirecting users to the Deriv OAuth page, mapping the returned accounts and tokens , and making an ... Read more",
+    "host_name": "www.scribd.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.deriv.com/t/api-login-authentication-issue-error-403/88124",
+    "name": "Api login authentication issue error 403 - Developers",
+    "snippet": "May 5, 2025 — Dear Deriv Support Team, I am encountering a persistent issue when trying to connect my application to the Deriv WebSocket API using my ...\nMay 5, 2025 — Issue: I consistently receive an HTTP 403 Forbidden error immediately upon attempting to establish the WebSocket connection. The connection ... Read more",
+    "host_name": "community.deriv.com",
+    "rank": 4,
+    "date": "May 5, 2025",
+    "favicon": ""
+  }
+]

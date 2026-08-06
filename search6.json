@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://developers.deriv.com/docs/options",
+    "name": "Options Setup REST",
+    "snippet": "The Options Setup APIs allow you to create and manage Options trading accounts using REST endpoints . These endpoints handle account creation, balance management ...\nThe Options Setup APIs allow you to create and manage Options trading accounts using REST endpoints . These endpoints handle account creation, balance management ... Read more",
+    "host_name": "developers.deriv.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options-legacy",
+    "name": "Options Trading (Legacy) REST",
+    "snippet": "List the user's pre-upgrade loginids and accounts via GET / trading / v1 / options /legacy/ accounts . Pull the pre-upgrade transaction history per loginid via GET / ...",
+    "host_name": "developers.deriv.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/intro/api-overview",
+    "name": "API Overview",
+    "snippet": "Deriv API provides programmatic access to trading services, account management, and market data for the Options trading platform. / v1 / options / accounts",
+    "host_name": "developers.deriv.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/workflows",
+    "name": "Complete Workflows",
+    "snippet": "Use REST APIs for account setup and the OTP endpoint to get an authenticated WebSocket URL for real-time trading.",
+    "host_name": "developers.deriv.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/trading/bulk-purchase",
+    "name": "Bulk Purchase — Trading Operations",
+    "snippet": "The POST /trading/v1/options/contracts/bulk-purchase/{account_type} endpoint : Buy the same options contract for multiple end-user accounts in a single call.",
+    "host_name": "developers.deriv.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

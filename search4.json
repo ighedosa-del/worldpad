@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://developers.deriv.com/docs/intro/api-overview",
+    "name": "API Overview",
+    "snippet": "Bearer token (OAuth 2.0 or PAT) the OTP endpoint . The OTP is obtained by calling POST . Bearer token for REST calls and OTP generation\nThe OTP is obtained by calling POST /trading/v1/options/accounts/{accountId}/otp — the response contains a ready-to-use WebSocket URL with the OTP already ... Read more\nREST: Get an authenticated WebSocket URL via the OTP endpoint (requires your Bearer token); WebSocket: Connect using the authenticated URL returned in the OTP ... Read more",
+    "host_name": "developers.deriv.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options",
+    "name": "Options Setup REST",
+    "snippet": "The Options Setup APIs allow you to create and manage Options trading accounts using REST endpoints . Bearer YOUR_OAUTH_TOKEN token for authenticated endpoints . ...\nRequest a WebSocket URL via POST /trading/v1/options/accounts/{accountId}/otp . Connect directly to the WebSocket URL returned. Start trading operations through ... Read more\nThe Options Setup APIs allow you to create and manage Options trading accounts using REST endpoints. Bearer YOUR_OAUTH_TOKEN token for authenticated endpoints.",
+    "host_name": "developers.deriv.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/workflows",
+    "name": "Complete Workflows",
+    "snippet": "Both token types work the same way: as a Bearer token in the Authorization header for REST API calls, and to obtain an authenticated WebSocket URL via the OTP ... Read more\nUse REST APIs for account setup and the OTP endpoint to get an authenticated WebSocket URL for real-time trading. REST: Get an authenticated WebSocket URL via ... Read more",
+    "host_name": "developers.deriv.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options/websocket",
+    "name": "WebSockets — Options API",
+    "snippet": "Step 1: Get your WebSocket URL . Call the OTP endpoint with your Bearer token. · Step 2: Connect to the WebSocket. Use the URL returned in the previous step ... Read more\nThe response includes the OTP and a ready-to-use WebSocket URL with the OTP attached as a query parameter. The OTP is valid for 120 seconds and can be used ...\nStep 1: Get your WebSocket URL. Call the OTP endpoint with your Bearer token . · Step 2: Connect to the WebSocket. Use the URL returned in the previous step ... Read more",
+    "host_name": "developers.deriv.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com/deriv-com/trading-bot-template/blob/master/user-guide/05-websocket-integration.md",
+    "name": "trading-bot-template/user-guide/05-websocket-integration.",
+    "snippet": "When a user logs in, the system fetches a dynamic authenticated WebSocket URL from the DerivWS API (with OTP ) and creates a new connection, replacing the public ... Read more",
+    "host_name": "github.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

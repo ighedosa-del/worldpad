@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://developers.deriv.com/docs/workflows",
+    "name": "Complete Workflows",
+    "snippet": "This REST call requires your authorization token (PAT or JWT). The response contains an authenticated WebSocket URL that you can connect to directly. The URL ...\nTo connect to an authenticated WebSocket endpoint, you need to call the OTP REST endpoint using your authorization token (PAT or JWT). The response contains an ...\nBoth token types work the same way: as a Bearer token in the Authorization header for REST API calls, and to obtain an authenticated WebSocket URL via the OTP\nTo connect to an authenticated WebSocket endpoint, you need to call the OTP REST endpoint using your authorization token (PAT or JWT). The response contains an authenticated WebSocket URL that you can connect to directly.",
+    "host_name": "developers.deriv.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options/websocket",
+    "name": "WebSockets — Options API",
+    "snippet": "Step 1: Get your WebSocket URL. Call the OTP endpoint with your Bearer token. · Step 2: Connect to the WebSocket. Use the URL returned in the previous step ...\nStep 1: Get your WebSocket URL. Call the OTP endpoint with your Bearer token. · Step 2: Connect to the WebSocket. Use the URL returned in the previous step ...\nIssues a short-lived one-time password (OTP) that authenticates a subsequent WebSocket connection for the specified account. The response includes the OTP and a ready-to-use WebSocket URL with the OTP attached as a query parameter.",
+    "host_name": "developers.deriv.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/intro/api-overview",
+    "name": "API Overview",
+    "snippet": "Authentication via Deriv-App-ID header + Authorization: Bearer token (OAuth 2.0 or PAT). WebSocket APIs. Real-time trading operations (buy, sell, proposals) ...\nAuthentication via Deriv-App-ID header + Authorization: Bearer token (OAuth 2.0 or PAT). WebSocket APIs. Real-time trading operations (buy, sell, proposals) ... Api Architecture · When To Use Rest Vs... · Api Endpoints",
+    "host_name": "developers.deriv.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com/deriv-com/deriv-api",
+    "name": "Websocket API for deriv.app",
+    "snippet": "The basic library is a lighter version of the Deriv API, suitable for apps that want to directly deal with API calls. your own app_id and use\nIn order to make a websocket connection, we need the websocket (ws) library. The basic library is a lighter version of the Deriv API, suitable for apps that ...\nIn order to make a websocket connection, The basic library is a lighter version of the Deriv API, suitable for apps that want to directly deal with API calls. ...\nIn order to make a websocket connection, we need the websocket (ws) library. The basic library is a lighter version of the Deriv API, suitable for apps that want to directly deal with API calls.",
+    "host_name": "github.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options",
+    "name": "Options Setup REST",
+    "snippet": "All requests require the Deriv-App-ID: YOUR_APP_ID header and an Authorization: Bearer. Request a WebSocket URL via POST\nAll requests require the Deriv-App-ID: YOUR_APP_ID header and an Authorization: Bearer YOUR_OAUTH_TOKEN. Request a WebSocket URL via POST",
+    "host_name": "developers.deriv.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "code": 200,
+  "data": {
+    "description": "",
+    "html": "<html><head><meta name=\"color-scheme\" content=\"light dark\"></head><body><pre style=\"word-wrap: break-word; white-space: pre-wrap;\">{\n  \"short_name\": \"Matches Pro\",\n  \"name\": \"Matches Pro\",\n  \"icons\": [\n    {\n      \"src\": \"favicon.ico\",\n      \"sizes\": \"64x64 32x32 24x24 16x16\",\n      \"type\": \"image/x-icon\"\n    },\n    {\n      \"src\": \"logo192.png\",\n      \"type\": \"image/png\",\n      \"sizes\": \"192x192\"\n    },\n    {\n      \"src\": \"logo512.png\",\n      \"type\": \"image/png\",\n      \"sizes\": \"512x512\"\n    }\n  ],\n  \"start_url\": \".\",\n  \"display\": \"standalone\",\n  \"theme_color\": \"#0f1514\",\n  \"background_color\": \"#0f1514\"\n}\n</pre></body></html>",
+    "httpStatus": 200,
+    "httpStatusText": "",
+    "publishedTime": "Wed, 29 Jul 2026 11:36:04 GMT",
+    "title": "",
+    "url": "https://www.matchespro.site/manifest.json",
+    "usage": {
+      "tokens": 207
+    }
+  },
+  "meta": {
+    "usage": {
+      "tokens": 207
+    }
+  },
+  "status": 200
+}

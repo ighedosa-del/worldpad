@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://www.scribd.com/document/820962087/Deriv-Bot-Builder-help-guide",
+    "name": "Martingale Strategy in Deriv Bot Guide | PDF",
+    "snippet": "The Martingale strategy in Deriv Bot involves increasing the stake after each loss by a multiplier greater than 1, intending to recoup previous losses with a ... Read more\nThe Martingale strategy involves increasing your stake after each loss to recoup prior losses with a single successful trade.",
+    "host_name": "www.scribd.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.facebook.com/derivdotcom/videos/how-to-use-martingale-strategy-on-deriv-bot/1697432151063927",
+    "name": "Get to know Deriv | Platforms Deriv Bot brings a new approach",
+    "snippet": "Kick off with Martingale as the first strategy and automate your trades with one click . Trade Automation: Seamless and efficient.",
+    "host_name": "www.facebook.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://github.com/97joseph/DerivTestedBots1",
+    "name": "Deriv Bots: An Analysis of Automated Trading",
+    "snippet": "Earn significant profits when your prediction is correct . The Even-Odd Bot predicts the last digit of an asset's price after a specific timeframe (e.g., 5 ...\nDescription: This method allows you to speculate on the price movements of various assets without physically owning them. You can profit from both rising and ...",
+    "host_name": "github.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.deriv.com/t/quick-strategy-reverse-martingale-in-dbot/70374",
+    "name": "Quick Strategy: Reverse Martingale in Dbot",
+    "snippet": "Nov 29, 2023 — With this strategy, traders can maximize their profit by multiplying the stake with the chosen multiplier after every successful trade.",
+    "host_name": "community.deriv.com",
+    "rank": 3,
+    "date": "Nov 29, 2023",
+    "favicon": ""
+  },
+  {
+    "url": "https://blog.nextrader.live/deriv-bot-guide",
+    "name": "The Complete Deriv Bot Guide — Nextrader Blog",
+    "snippet": "Every Deriv bot strategy, tutorial, and tip in one place . Digit trading, money management, volatility indices, and more — updated daily.",
+    "host_name": "blog.nextrader.live",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://changelly.com/blog/what-is-martingale-strategy-in-crypto-trading",
+    "name": "Martingale Strategy in Crypto Trading: How It Works, Risks",
+    "snippet": "May 18, 2026 — The martingale strategy is a position-sizing method where you increase the trade size after a loss, often by doubling it. The goal is to let one ... Read more",
+    "host_name": "changelly.com",
+    "rank": 5,
+    "date": "May 18, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.tiktok.com/discover/how-to-set-martingale-on-deriv-bot",
+    "name": "How to Set Martingale on Deriv Bot",
+    "snippet": "May 18, 2026 — Learn how to set Martingale strategy in Deriv Bots for automated trading success. Optimize your Deriv trading with effective strategies!",
+    "host_name": "www.tiktok.com",
+    "rank": 6,
+    "date": "May 18, 2026",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=T_lsTTMsaQM",
+    "name": "I tested Anti Martingale Trading Strategy and this happened",
+    "snippet": "Anti - martingale works effectively if the minimum win rate is 75%. At a 75% win rate, it can produce 3–6 consecutive winning streaks.",
+    "host_name": "www.youtube.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  }
+]

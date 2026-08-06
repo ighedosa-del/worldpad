@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+@page {
+    size: 720px 1020px;
+    margin: 0;
+}
+:root {
+    --c-bg: #0a0f0e;
+    --c-card: #111916;
+    --c-text: #e2e8f0;
+    --c-muted: #6b7280;
+    --c-accent: #10b981;
+    --c-accent2: #f59e0b;
+    --c-red: #ef4444;
+    --c-border: rgba(255,255,255,0.08);
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 720px;
+    background: var(--c-bg);
+    color: var(--c-text);
+    font-family: 'Inter', sans-serif;
+}
+@media screen {
+    html {
+        height: auto;
+        display: flex;
+        justify-content: center;
+        background: #222;
+    }
+    body {
+        transform-origin: top center;
+        margin: 20px auto;
+    }
+}
+
+/* ═══ COVER ═══ */
+.cover {
+    width: 720px;
+    height: 1020px;
+    box-sizing: border-box;
+    break-after: page;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    background: var(--c-bg);
+    padding: 60px;
+}
+.cover::before {
+    content: '';
+    position: absolute;
+    top: 80px;
+    right: 60px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%);
+    border-radius: 50%;
+}
+.cover::after {
+    content: '';
+    position: absolute;
+    bottom: 100px;
+    left: 60px;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+}
+.cover-tag {
+    display: inline-block;
+    padding: 6px 18px;
+    border: 1px solid var(--c-accent);
+    border-radius: 999px;
+    color: var(--c-accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+}
+.cover-title {
+    font-size: 46px;
+    font-weight: 900;
+    line-height: 1.15;
+    margin: 0 0 20px 0;
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.cover-sub {
+    font-size: 18px;
+    color: var(--c-muted);
+    font-weight: 400;
+    max-width: 480px;
+    line-height: 1.6;
+}
+.cover-bottom {
+    position: absolute;
+    bottom: 40px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.05em;
+}
+
+/* ═══ MAIN CONTENT ═══ */
+.main-content {
+    padding: 50px 55px 40px 55px;
+}
+
+.chapter-header {
+    break-after: avoid;
+    break-inside: avoid;
+    margin-top: 28px;
+}
+.section-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--c-accent);
+    margin-bottom: 6px;
+}
+.section-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+}
+.divider {
+    width: 40px;
+    height: 3px;
+    background: var(--c-accent);
+    border-radius: 2px;
+    margin-bottom: 20px;
+}
+.body-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 14px;
+}
+.body-text strong {
+    color: #f1f5f9;
+}
+
+/* ═══ STEP CARD ═══ */
+.step-card {
+    background: var(--c-card);
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin-bottom: 16px;
+    break-inside: avoid;
+}
+.step-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+.step-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(16,185,129,0.12);
+    color: var(--c-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 900;
+    flex-shrink: 0;
+}
+.step-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+.step-desc {
+    font-size: 13px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 14px;
+}
+
+/* ═══ MOCKUP SCREEN ═══ */
+.mockup {
+    background: #0d1117;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+.mockup-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.mockup-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+}
+.mockup-dot:nth-child(1) { background: #ef4444; }
+.mockup-dot:nth-child(2) { background: #f59e0b; }
+.mockup-dot:nth-child(3) { background: #10b981; }
+.mockup-url {
+    margin-left: 10px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    font-family: monospace;
+}
+.mockup-body {
+    padding: 14px 16px;
+}
+
+/* ═══ UI MOCKUP ELEMENTS ═══ */
+.ui-nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 12px;
+}
+.ui-logo {
+    font-size: 13px;
+    font-weight: 800;
+    color: #10b981;
+}
+.ui-tab {
+    padding: 4px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    border-radius: 5px;
+    background: rgba(255,255,255,0.03);
+}
+.ui-tab.active {
+    color: #10b981;
+    background: rgba(16,185,129,0.1);
+}
+.ui-card-row {
+    display: flex;
+    gap: 10px;
+}
+.ui-card {
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 10px;
+}
+.ui-card-highlight {
+    border-color: rgba(16,185,129,0.3);
+    box-shadow: 0 0 12px rgba(16,185,129,0.08);
+}
+.ui-card-name {
+    font-size: 10px;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin-bottom: 4px;
+}
+.ui-card-pill {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(16,185,129,0.15);
+    color: #10b981;
+    margin-bottom: 4px;
+}
+.ui-card-pred {
+    font-size: 14px;
+    font-weight: 800;
+    color: #10b981;
+    margin-bottom: 2px;
+}
+.ui-card-sub {
+    font-size: 8px;
+    color: rgba(255,255,255,0.3);
+}
+.ui-card-ring {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.ui-ring-circle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid rgba(16,185,129,0.2);
+    border-top-color: #10b981;
+}
+.ui-ring-pct {
+    font-size: 9px;
+    font-weight: 700;
+    color: #10b981;
+}
+
+/* Deriv platform mockup */
+.deriv-sidebar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.deriv-side-item {
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 9px;
+    font-weight: 600;
+    text-align: center;
+    border-radius: 6px;
+    color: rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.03);
+}
+.deriv-side-item.active {
+    color: #10b981;
+    background: rgba(16,185,129,0.1);
+}
+.deriv-contract {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.deriv-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.deriv-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+}
+.deriv-value {
+    font-size: 11px;
+    font-weight: 700;
+    color: #f1f5f9;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 5px;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+.deriv-value.accent {
+    color: #10b981;
+    border-color: rgba(16,185,129,0.2);
+    background: rgba(16,185,129,0.08);
+}
+.deriv-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    background: #10b981;
+    color: #0a0f0e;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 4px;
+}
+.deriv-dropdown {
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.deriv-dropdown::after {
+    content: '\25BE';
+    font-size: 8px;
+}
+
+/* ═══ CALLOUT ═══ */
+.callout {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    margin: 12px 0;
+    break-inside: avoid;
+}
+.callout-warn {
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.15);
+}
+.callout-danger {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.15);
+}
+.callout-info {
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.15);
+}
+.callout-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    line-height: 1.3;
+}
+.callout-text {
+    font-size: 12px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
+}
+.callout-text strong {
+    color: #f1f5f9;
+}
+
+/* ═══ TABLE ═══ */
+.ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 12px;
+    break-inside: avoid;
+}
+.ref-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.04);
+    color: var(--c-accent);
+    font-weight: 700;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--c-border);
+}
+.ref-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.65);
+}
+.ref-table tr:last-child td { border-bottom: none; }
+.ref-table code {
+    background: rgba(16,185,129,0.1);
+    color: #10b981;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: monospace;
+}
+
+/* ═══ ARROW CONNECTOR ═══ */
+.arrow-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 0;
+    color: var(--c-accent);
+    font-size: 20px;
+    opacity: 0.5;
+}
+
+/* ═══ ENDING ═══ */
+.ending {
+    width: 720px;
+    height: 1020px;
+    box-sizing: border-box;
+    break-before: page;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: var(--c-bg);
+    padding: 60px;
+    position: relative;
+}
+.ending::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+}
+.ending-big {
+    font-size: 32px;
+    font-weight: 900;
+    color: #f1f5f9;
+    margin-bottom: 16px;
+}
+.ending-sub {
+    font-size: 15px;
+    color: var(--c-muted);
+    line-height: 1.6;
+    max-width: 420px;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════ -->
+<!-- COVER -->
+<!-- ══════════════════════════════════════ -->
+<div class="cover">
+    <div class="cover-tag">Step-by-Step Visual Guide</div>
+    <h1 class="cover-title">How to Trade<br>Signal Vision on Deriv</h1>
+    <p class="cover-sub">A complete walkthrough from reading signals to placing your first trade on Deriv's synthetic indices platform.</p>
+    <div class="cover-bottom">Signal Vision Guide v1.0</div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- BODY CONTENT -->
+<!-- ══════════════════════════════════════ -->
+<div class="main-content">
+
+    <!-- CHAPTER 1 -->
+    <div class="chapter-header">
+        <div class="section-tag">Step 1</div>
+        <div class="section-title">Open Signal Vision Dashboard</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="body-text">
+        Go to <strong>my-project-psi-topaz.vercel.app</strong> in your browser. Wait about 15-30 seconds for the dashboard to connect and collect tick data from Deriv's servers. You will see 10 signal cards appear, one for each volatility index. Each card shows a real-time analysis with a confidence percentage, prediction, and countdown timer.
+    </div>
+
+    <div class="mockup">
+        <div class="mockup-bar">
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-url">my-project-psi-topaz.vercel.app</div>
+        </div>
+        <div class="mockup-body">
+            <div class="ui-nav">
+                <div class="ui-logo">Signal Vision</div>
+                <div class="ui-tag" style="margin-left:auto; padding:3px 8px; font-size:9px; font-weight:700; border-radius:999px; background:rgba(16,185,129,0.15); color:#10b981;">LIVE</div>
+                <div class="ui-tab active">Matches/Differs</div>
+                <div class="ui-tab">Even/Odd</div>
+                <div class="ui-tab">Over/Under</div>
+                <div class="ui-tab">Rise/Fall</div>
+            </div>
+            <div class="ui-card-row">
+                <div class="ui-card ui-card-highlight">
+                    <div class="ui-card-name">Volatility 25</div>
+                    <div class="ui-card-pill">TRADE NOW</div>
+                    <div class="ui-card-pred">MATCH 7</div>
+                    <div class="ui-card-sub">3 ticks | Strong | 12s left</div>
+                    <div class="ui-card-ring" style="margin-top:4px;"><div class="ui-ring-circle"></div><span class="ui-ring-pct">72%</span></div>
+                </div>
+                <div class="ui-card">
+                    <div class="ui-card-name">Volatility 50</div>
+                    <div class="ui-card-pill" style="background:rgba(245,158,11,0.12); color:#f59e0b;">TRADE NOW</div>
+                    <div class="ui-card-pred" style="color:#f59e0b;">EVEN</div>
+                    <div class="ui-card-sub">5 ticks | Moderate | 8s left</div>
+                    <div class="ui-card-ring" style="margin-top:4px;"><div class="ui-ring-circle" style="border-top-color:#f59e0b;"></div><span class="ui-ring-pct" style="color:#f59e0b;">64%</span></div>
+                </div>
+                <div class="ui-card">
+                    <div class="ui-card-name">Volatility 100</div>
+                    <div class="ui-card-pill" style="background:rgba(107,114,128,0.1); color:#6b7280;">WAIT</div>
+                    <div style="font-size:10px; color:rgba(255,255,255,0.3); margin-top:4px;">No edge detected</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="callout callout-info">
+        <div class="callout-icon">&#9679;</div>
+        <div class="callout-text"><strong>What to look for:</strong> Only trade on cards showing the green <strong>TRADE NOW</strong> pill. Cards showing WAIT (gray) or PREPARING (yellow) mean there is no statistical edge right now. Skip those.</div>
+    </div>
+
+    <div class="body-text">
+        Pick the <strong>trade type tab</strong> at the top that matches what you want to trade: Matches/Differs, Even/Odd, Over/Under, or Rise/Fall. The signals change based on which tab you select, because the prediction engine analyzes different patterns for each type. Focus on one tab at a time rather than switching constantly.
+    </div>
+
+    <!-- CHAPTER 2 -->
+    <div class="chapter-header">
+        <div class="section-tag">Step 2</div>
+        <div class="section-title">Create Your Deriv Account</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="body-text">
+        Open <strong>deriv.com</strong> in a new browser tab. Click <strong>Sign Up</strong> in the top-right corner. You can register with your email address or use a Google/Facebook/Apple account for faster setup. Complete the identity verification step by uploading a government-issued ID and proof of address. This is required by Deriv's regulators before you can trade real money.
+    </div>
+
+    <div class="callout callout-info">
+        <div class="callout-icon">&#9733;</div>
+        <div class="callout-text"><strong>Start with a Demo Account.</strong> Deriv gives you a free $10,000 virtual money demo account. Use this to practice matching signals to trades before risking any real money. You can switch between Demo and Real accounts from the account dropdown in the top-right corner of the Deriv platform.</div>
+    </div>
+
+    <div class="body-text">
+        Once verified, you will have access to both a <strong>Real Account</strong> (your actual funds) and a <strong>Demo Account</strong> (virtual money for practice). Always test your strategy on Demo first. The prediction accuracy badge on each Signal Vision card tracks real hit/miss ratios, so monitor those numbers before committing real capital.
+    </div>
+
+    <!-- CHAPTER 3 -->
+    <div class="chapter-header">
+        <div class="section-tag">Step 3</div>
+        <div class="section-title">Navigate to Synthetic Indices</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="body-text">
+        On the Deriv platform, click <strong>Trade</strong> in the left sidebar, then select <strong>Synthetic Indices</strong> from the market categories. You will see all the volatility indices: Volatility 10, 25, 50, 75, and 100 (available in both regular and 1-second versions). These are the exact same indices that Signal Vision monitors.
+    </div>
+
+    <div class="mockup">
+        <div class="mockup-bar">
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-url">deriv.com/trading</div>
+        </div>
+        <div class="mockup-body">
+            <div class="deriv-sidebar">
+                <div class="deriv-side-item">Forex</div>
+                <div class="deriv-side-item">Commodities</div>
+                <div class="deriv-side-item active">Synthetic Indices</div>
+                <div class="deriv-side-item">Crypto</div>
+                <div class="deriv-side-item">Stocks</div>
+            </div>
+            <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.2);">Volatility 10</div>
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.2);">Volatility 25</div>
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.2);">Volatility 50</div>
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(16,185,127,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.2);">Volatility 75</div>
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.2);">Volatility 100</div>
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.06);">Vol 10 (1s)</div>
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.06);">Vol 25 (1s)</div>
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.06);">Vol 50 (1s)</div>
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.06);">Vol 75 (1s)</div>
+                <div style="padding:6px 10px; font-size:9px; font-weight:600; border-radius:6px; background:rgba(255,255,255,0.03); color:rgba(255,255,255,0.4); border:1px solid rgba(255,255,255,0.06);">Vol 100 (1s)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="body-text">
+        Click on the <strong>same volatility index</strong> that the Signal Vision card shows. For example, if your signal card says "Volatility 25" with a MATCH 7 prediction, click "Volatility 25" on Deriv. This is critical: the signal is index-specific, so trading on a different index will not match the prediction.
+    </div>
+
+    <!-- CHAPTER 4 -->
+    <div class="chapter-header">
+        <div class="section-tag">Step 4</div>
+        <div class="section-title">Select the Correct Contract Type</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="body-text">
+        After selecting the index on Deriv, you need to choose the contract type that matches the signal. The contract picker is the dropdown at the top of the trading panel. Click it to see all available contract types, then select the one that corresponds to your signal. Here is the exact mapping:
+    </div>
+
+    <table class="ref-table">
+        <thead>
+            <tr>
+                <th>Signal Vision Shows</th>
+                <th>Select on Deriv</th>
+                <th>What It Means</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><code>MATCH 7</code></td>
+                <td>Digit Matches</td>
+                <td>Last digit of the price will be 7</td>
+            </tr>
+            <tr>
+                <td><code>DIFFER 3</code></td>
+                <td>Digit Differs</td>
+                <td>Last digit will NOT be 3</td>
+            </tr>
+            <tr>
+                <td><code>EVEN</code></td>
+                <td>Even</td>
+                <td>Last digit will be 0, 2, 4, 6, or 8</td>
+            </tr>
+            <tr>
+                <td><code>ODD</code></td>
+                <td>Odd</td>
+                <td>Last digit will be 1, 3, 5, 7, or 9</td>
+            </tr>
+            <tr>
+                <td><code>OVER 4</code></td>
+                <td>Over/Under &rarr; Over</td>
+                <td>Last digit will be higher than 4</td>
+            </tr>
+            <tr>
+                <td><code>UNDER 5</code></td>
+                <td>Over/Under &rarr; Under</td>
+                <td>Last digit will be lower than 5</td>
+            </tr>
+            <tr>
+                <td><code>RISE</code></td>
+                <td>Rise/Fall &rarr; Rise</td>
+                <td>Next tick price will be higher</td>
+            </tr>
+            <tr>
+                <td><code>FALL</code></td>
+                <td>Rise/Fall &rarr; Fall</td>
+                <td>Next tick price will be lower</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="body-text">
+        For <strong>Digit Matches</strong> and <strong>Digit Differs</strong>, you also need to set the predicted digit on Deriv. After selecting the contract type, a digit selector (0-9) will appear. Enter the digit number that Signal Vision shows. For <strong>Over/Under</strong>, set the barrier digit (the number after OVER or UNDER) in the barrier field on Deriv.
+    </div>
+
+    <!-- CHAPTER 5 -->
+    <div class="chapter-header">
+        <div class="section-tag">Step 5</div>
+        <div class="section-title">Set Duration and Stake</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="body-text">
+        In the trading panel, set the duration to match the signal's recommendation. Signal Vision shows <strong>"3 ticks"</strong> or <strong>"5 ticks"</strong> as the recommended duration. On Deriv, change the duration type from "Seconds" to <strong>"Ticks"</strong> using the dropdown, then enter the matching number. This tells Deriv how many price updates (ticks) to watch before deciding if you won or lost.
+    </div>
+
+    <div class="mockup">
+        <div class="mockup-bar">
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-dot"></div>
+            <div class="mockup-url">deriv.com/trading</div>
+        </div>
+        <div class="mockup-body">
+            <div class="deriv-contract">
+                <div class="deriv-row">
+                    <div class="deriv-label">Contract</div>
+                    <div class="deriv-dropdown">Digit Matches &#9662;</div>
+                </div>
+                <div class="deriv-row">
+                    <div class="deriv-label">Digit</div>
+                    <div class="deriv-value accent">7</div>
+                </div>
+                <div class="deriv-row">
+                    <div class="deriv-label">Duration</div>
+                    <div class="deriv-value">3 Ticks</div>
+                </div>
+                <div class="deriv-row">
+                    <div class="deriv-label">Stake</div>
+                    <div class="deriv-value">$1.00</div>
+                </div>
+                <div class="deriv-row">
+                    <div class="deriv-label">Payout</div>
+                    <div class="deriv-value" style="color:#10b981;">$9.50</div>
+                </div>
+                <div class="deriv-btn">Buy Contract</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="callout callout-warn">
+        <div class="callout-icon">!</div>
+        <div class="callout-text"><strong>Keep stakes small while testing.</strong> Start with $0.35 or $1.00 per trade. A Digit Matches contract with 3 ticks typically pays around 7-9x your stake, so a $1 trade returns roughly $7-9 if correct. But the base probability is only 10% for matching a specific digit, so expect many losses. The signal's confidence percentage is your edge estimate, not a guarantee.
+        </div>
+    </div>
+
+    <!-- CHAPTER 6 -->
+    <div class="chapter-header">
+        <div class="section-tag">Step 6</div>
+        <div class="section-title">Time Your Entry</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="body-text">
+        Each signal has a <strong>countdown timer</strong> (the green/yellow bar on the card). The pattern the engine detected is freshest at the start of the signal window and decays over time. You want to enter your trade <strong>as early as possible</strong> after a signal appears. The card shows how many seconds are left before the signal expires and a new analysis runs.
+    </div>
+
+    <div class="callout callout-danger">
+        <div class="callout-icon">X</div>
+        <div class="callout-text"><strong>Do not enter if less than 3 seconds remain.</strong> The statistical edge has decayed significantly by then. Wait for the next fresh signal instead. Rushing late entries is the most common mistake and will lose you money faster than random trading.
+        </div>
+    </div>
+
+    <div class="body-text">
+        The <strong>"Enter in X ticks"</strong> field on strong signals tells you the optimal entry point within the signal window. "Enter in 1 tick" means place your trade immediately. "Enter in 2 ticks" means wait one tick (watch one price update), then enter on the second tick. This timing accounts for micro-patterns the engine detects in the most recent data.
+    </div>
+
+    <!-- CHAPTER 7 -->
+    <div class="chapter-header">
+        <div class="section-tag">Step 7</div>
+        <div class="section-title">Click Buy and Monitor</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="body-text">
+        Once everything is set correctly (contract type, digit/barrier, duration in ticks, stake amount), click the <strong>"Buy Contract"</strong> button on Deriv. The contract opens immediately and Deriv starts monitoring ticks. You will see a live countdown showing how many ticks remain. The contract resolves automatically when the tick count reaches zero.
+    </div>
+
+    <div class="body-text">
+        While the contract is active, <strong>do not close it manually</strong>. Let it run to completion. The outcome depends on the final tick's last digit (for digit contracts) or the final tick direction (for Rise/Fall). Deriv shows the result instantly: you either win the payout or lose the stake. There is no partial win or early exit for tick-based contracts.
+    </div>
+
+    <div class="body-text">
+        After the contract settles, check the result against what Signal Vision predicted. Over time, the <strong>trust badge</strong> at the bottom of each signal card will update with your real accuracy: showing how many predictions were correct out of the total. If the badge turns red and says "Accuracy below random," stop trading that particular symbol or contract type until the patterns improve.
+    </div>
+
+    <!-- CHAPTER 8 -->
+    <div class="chapter-header">
+        <div class="section-tag">Step 8</div>
+        <div class="section-title">Risk Management Rules</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">$</div>
+            <div class="step-title">Maximum $1-2 Per Trade While Testing</div>
+        </div>
+        <div class="step-desc">
+            While you are learning and verifying the signal accuracy, never risk more than $1-2 per trade. Even if a signal shows 75% confidence, that is an estimate based on statistical patterns, not a guarantee. Synthetic indices are pseudo-random number generators, and patterns can shift without warning. Small stakes mean a losing streak will not wipe out your account.
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">5</div>
+            <div class="step-title">Stop After 5 Losses Per Session</div>
+        </div>
+        <div class="step-desc">
+            Set a hard daily loss limit. If you lose 5 trades in a row, close the platform and walk away. Losing streaks happen with any system, and chasing losses by increasing your stake is the fastest path to blowing your account. Come back later when the market patterns may have shifted.
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">&#9733;</div>
+            <div class="step-title">Only Trade Strong Signals (72%+)</div>
+        </div>
+        <div class="step-desc">
+            The Signal Vision dashboard shows three strength levels: Strong (72%+ confidence, green border), Moderate (62-71%, yellow), and Weak (below 62%, shown as WAIT). While testing, only trade Strong signals. These have the highest statistical edge and the best backtest validation. Moderate signals can be profitable but require more discipline and smaller stakes.
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">&#10003;</div>
+            <div class="step-title">Check the Trust Badge Before Every Trade</div>
+        </div>
+        <div class="step-desc">
+            Each card's trust badge shows live accuracy tracked from real predictions. If it says "Live: 3/20 (15%)" for a Matches signal, that means only 3 out of 20 predictions were correct. For digit matching, random chance is 10%, so 15% is only marginally better. If the badge turns red with "Accuracy below random," do not trade that symbol until accuracy improves.
+        </div>
+    </div>
+
+    <div class="callout callout-danger">
+        <div class="callout-icon">!</div>
+        <div class="callout-text"><strong>Never invest money you cannot afford to lose.</strong> Synthetic indices are designed for entertainment and speculation. There is no guaranteed winning strategy. The prediction engine detects short-term statistical patterns in pseudo-random data, but these patterns are not reliable enough to serve as a primary income source. Treat this as a learning tool, not a money-making system.
+        </div>
+    </div>
+
+    <!-- CHAPTER 9 -->
+    <div class="chapter-header">
+        <div class="section-tag">Quick Reference</div>
+        <div class="section-title">Complete Signal-to-Trade Workflow</div>
+        <div class="divider"></div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">1</div>
+            <div class="step-title">Open Signal Vision and wait for LIVE status</div>
+        </div>
+        <div class="step-desc">The green LIVE badge in the header means data is streaming. Wait 15-30 seconds after loading for tick data to accumulate.
+        </div>
+    </div>
+    <div class="arrow-connector">&#8595;</div>
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">2</div>
+            <div class="step-title">Find a TRADE NOW card with 72%+ confidence</div>
+        </div>
+        <div class="step-desc">Look for the green TRADE NOW pill, Strong label, and a confidence ring at 72% or higher. Check the trust badge shows decent accuracy.
+        </div>
+    </div>
+    <div class="arrow-connector">&#8595;</div>
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">3</div>
+            <div class="step-title">Note the symbol, prediction, and duration</div>
+        </div>
+        <div class="step-desc">Write down: which index (e.g., Volatility 25), what the signal says (e.g., MATCH 7), how many ticks (3 or 5), and seconds remaining.
+        </div>
+    </div>
+    <div class="arrow-connector">&#8595;</div>
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">4</div>
+            <div class="step-title">Open Deriv, select the matching index and contract</div>
+        </div>
+        <div class="step-desc">On deriv.com, go to Synthetic Indices, click the same volatility index, pick the correct contract type, set the digit/barrier, and set duration to Ticks.
+        </div>
+    </div>
+    <div class="arrow-connector">&#8595;</div>
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">5</div>
+            <div class="step-title">Set stake to $1, check seconds left, click Buy</div>
+        </div>
+        <div class="step-desc">Only enter if the signal has 5+ seconds remaining. Click Buy Contract and let it run to completion. Record the result.
+        </div>
+    </div>
+    <div class="arrow-connector">&#8595;</div>
+    <div class="step-card">
+        <div class="step-header">
+            <div class="step-num">6</div>
+            <div class="step-title">Wait for the next signal, track your results</div>
+        </div>
+        <div class="step-desc">After each trade, the trust badge updates. After 20+ trades, you will have a real accuracy number. Use this to decide whether to continue or adjust.
+        </div>
+    </div>
+
+</div>
+
+<!-- ENDING -->
+<div class="ending">
+    <div class="ending-big">Start Small. Stay Disciplined.</div>
+    <p class="ending-sub">Use the demo account first. Track every trade. Only increase stakes after 50+ trades show consistent accuracy above random chance. This tool analyzes patterns, but no system can predict pseudo-random numbers with certainty.</p>
+</div>
+
+</body>
+</html>

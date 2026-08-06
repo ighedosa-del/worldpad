@@ -1,0 +1,7 @@
+node_modules/.cache
+.next/cache
+.git
+*.md
+!README.md
+scripts/
+download/

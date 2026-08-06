@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://developers.deriv.com/docs/intro/api-overview",
+    "name": "API Overview",
+    "snippet": "Deriv API provides programmatic access to trading services, account management, and market data for the Options trading platform.\nDeriv API provide s programmatic access to trading services, account management, and market data for the Options trading platform. REST endpoints",
+    "host_name": "developers.deriv.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options",
+    "name": "Options Setup REST",
+    "snippet": "The Options Setup APIs allow you to create and manage Options trading accounts using REST endpoints . These endpoints handle account creation, balance ...",
+    "host_name": "developers.deriv.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/workflows",
+    "name": "Complete Workflows",
+    "snippet": "Use REST APIs for account setup and the OTP endpoint to get an authenticated WebSocket URL for real-time trading .\nUse REST APIs for account setup and the OTP endpoint to get an authenticated WebSocket URL for real-time trading.",
+    "host_name": "developers.deriv.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options-legacy/legacy-migration-status",
+    "name": "Options Trading (Legacy) - Migration Status",
+    "snippet": "This endpoint exposes data sourced from the legacy options platform. It will be removed once all users have been fully migrated to the new platform.\nThis endpoint exposes data sourced from the legacy options platform. It will be removed once all users have been fully migrated to the new platform. Read more",
+    "host_name": "developers.deriv.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options/get-accounts",
+    "name": "Get All Accounts — Options API",
+    "snippet": "This endpoint returns all Options trading accounts associated with your authentication credentials, including both demo and real accounts.",
+    "host_name": "developers.deriv.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/options/create-account",
+    "name": "Create Account — Options API",
+    "snippet": "Endpoint Post /trading/v1/options/accounts Base URL: https://api.derivws.com. Practice trading with virtual funds. Perfect for testing and learning.",
+    "host_name": "developers.deriv.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=TdwVGaVeuDI",
+    "name": "What is Deriv API?",
+    "snippet": "Discover how to leverage the Deriv API to create custom trading applications and generate potential income through markup commissions.",
+    "host_name": "www.youtube.com",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://massive.com/docs/rest/options/overview",
+    "name": "Overview | Options REST API",
+    "snippet": "This endpoint supports monitoring recent trading activity and updating dashboards or applications with the most current trade information, providing timely ...",
+    "host_name": "massive.com",
+    "rank": 7,
+    "date": "",
+    "favicon": ""
+  }
+]

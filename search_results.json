@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://developers.deriv.com/docs/workflows",
+    "name": "Complete Workflows",
+    "snippet": "With a PAT app, the user generates a Personal Access Token in Deriv and manually enters or pastes it into your application. The app securely stores the token",
+    "host_name": "developers.deriv.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/intro/api-overview",
+    "name": "API Overview",
+    "snippet": "Deriv API provides programmatic access to trading services, Personal Access Token ( PAT ) Authorization : Bearer token ( OAuth 2.0 or PAT )\nThe API enables developers to integrate Deriv's robust trading infrastructure into their applications using REST endpoints for account setup and WebSocket ...",
+    "host_name": "developers.deriv.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://developers.deriv.com/docs/intro/authentication",
+    "name": "Authentication | Deriv API",
+    "snippet": "With a PAT app, the user generates a Personal Access Token in Deriv and manually enters it into your application. The app stores the token and includes it in ... Read more",
+    "host_name": "developers.deriv.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://community.deriv.com/t/api-login-authentication-issue-error-403/88124",
+    "name": "Api login authentication issue error 403 - Developers",
+    "snippet": "May 5, 2025 — Issue: I consistently receive an HTTP 403 Forbidden error immediately upon attempting to establish the WebSocket connection. The connection ... Read more",
+    "host_name": "community.deriv.com",
+    "rank": 3,
+    "date": "May 5, 2025",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.scribd.com/document/729010420/api-deriv-com-API-authentication",
+    "name": "Deriv API WebSocket Authorization Guide | PDF",
+    "snippet": "It provides details on the authorization process, including redirecting users to the Deriv OAuth page, mapping the returned accounts and tokens , and making an ... Read more",
+    "host_name": "www.scribd.com",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  }
+]

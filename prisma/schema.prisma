@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Settings {
+  id            String   @id @default(cuid())
+  derivToken    String   @unique
+  accountName   String?
+  balance       Float    @default(0)
+  currency      String   @default("USD")
+  riskPercent   Float    @default(1.0)
+  minConfidence Float    @default(70.0)
+  autoTrading   Boolean  @default(false)
+  activeTypes   String   @default("MATCH,OVERUNDER,EVENODD")
+  maxDailyLoss Float    @default(5.0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  trades        Trade[]
+}
+
+model Trade {
+  id           String   @id @default(cuid())
+  settingsId   String
+  settings     Settings @relation(fields: [settingsId], references: [id])
+  contractId   Int?
+  symbol       String
+  tradeType    String
+  prediction   String
+  confidence   Float
+  stake        Float
+  entryValue   Float?
+  exitValue    Float?
+  payout       Float?
+  profit       Float?
+  status       String   @default("PENDING")
+  aiReasoning  String?
+  openedAt     DateTime @default(now())
+  closedAt     DateTime?
+}
+
+model TickRecord {
+  id        String   @id @default(cuid())
+  symbol    String
+  epoch     Float
+  quote     Float
+  digit     Int
+  createdAt DateTime @default(now())
+}
+
+model DailyStats {
+  id          String   @id @default(cuid())
+  date        String   @unique
+  totalTrades Int      @default(0)
+  wins        Int      @default(0)
+  losses      Int      @default(0)
+  totalProfit Float    @default(0)
+  totalLoss   Float    @default(0)
+  bestStreak  Int      @default(0)
+  worstStreak Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
