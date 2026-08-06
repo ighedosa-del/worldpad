@@ -62,10 +62,8 @@ export function useAIBot() {
       // Feed to AI engine for learning
       feedTickToAI(symbol, data);
 
-      // Update ranking every ~500ms (throttled by the tick rate)
-      if (runningRef.current) {
-        updateRanking();
-      }
+      // Update ranking every ~500ms (always, not just when running)
+      updateRanking();
     });
     return unsubscribe;
   }, []);
@@ -156,7 +154,7 @@ export function useAIBot() {
     setStatus('waiting');
   }, [executeTradeOnMarket, botConfig.stake]);
 
-  // Start the AI bot
+  // Start the AI bot (scanning starts on mount; START only enables trading)
   const startBot = useCallback(() => {
     // Load learning data
     aiEngine.loadLearningData();
@@ -174,10 +172,8 @@ export function useAIBot() {
     addAutoTraderLog(`[AI] Scanning ${SCANNED_MARKETS.length} markets | Stake: $${botConfig.stake} | Stop Loss: $${botConfig.stopLoss}`);
     addAutoTraderLog(`[AI] Logic weight 60% + AI weight 40% | Max concurrent: 2`);
 
-    // Start multi-market scanner
-    startMultiMarketScan();
-
-    // Start the cycle timer (every 2.5 seconds)
+    // Start the trading cycle timer (every 2.5 seconds)
+    // Note: scanning is already running from mount effect
     const runLoop = async () => {
       if (!runningRef.current) return;
       await runCycle();
@@ -203,14 +199,22 @@ export function useAIBot() {
 
     addAutoTraderLog(`[AI] === AI BOT STOPPED === | Cycles: ${cycleCount} | P/L: ${totalProfitRef.current >= 0 ? '+' : ''}$${totalProfitRef.current.toFixed(2)}`);
     aiEngine.saveLearningData();
+    // Restart scanning (keep data flowing, just stop trading)
+    startMultiMarketScan();
   }, [addAutoTraderLog, cycleCount]);
 
-  // Track scanner connection
+  // Track scanner connection + auto-start scanning on mount
   useEffect(() => {
+    // Start scanning immediately (data collection, no trading)
+    startMultiMarketScan();
+    aiEngine.loadLearningData();
+
     const interval = setInterval(() => {
       setScannerConnected(isScannerConnected());
     }, 1000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   // Cleanup on unmount

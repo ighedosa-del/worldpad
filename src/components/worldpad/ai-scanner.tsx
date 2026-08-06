@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Play, Square, Brain, Wifi, WifiOff, ChevronDown, ChevronUp, Trophy, TrendingUp, BarChart3, GraduationCap } from 'lucide-react';
+import { Play, Square, Brain, Wifi, WifiOff, ChevronDown, ChevronUp, Trophy, TrendingUp, BarChart3, GraduationCap, Activity } from 'lucide-react';
 import { useAIBot } from '@/hooks/use-ai-bot';
 import { SCANNED_MARKETS, getMarketData } from '@/lib/multi-market-ws';
 
@@ -354,12 +354,21 @@ export function AIScanner() {
     stopBot,
   } = useAIBot();
 
-  // Get last digit per market — recompute on every render (ticks drive this)
+  // Get last digit + tick count per market
   const marketDigits = useMemo(() => {
     const map: Record<string, number | null> = {};
     for (const m of SCANNED_MARKETS) {
       const data = getMarketData(m.symbol);
       map[m.symbol] = data.lastTick?.digit ?? null;
+    }
+    return map;
+  });
+
+  const marketTickCounts = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const m of SCANNED_MARKETS) {
+      const data = getMarketData(m.symbol);
+      map[m.symbol] = data.tickCount;
     }
     return map;
   });
@@ -484,6 +493,13 @@ export function AIScanner() {
 
       {/* Market Grid */}
       <div className="flex-1 overflow-y-auto wp-scroll">
+        {/* Data loading banner */
+        {scannerConnected && displayMarkets.every(m => marketTickCounts[m.symbol] < 30) && (
+          <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
+            <Activity className="w-4 h-4 text-blue-400 animate-pulse" />
+            <span className="text-xs text-blue-300">Collecting tick data — signals appear after ~30 ticks per market. Current max: {Math.max(...Object.values(marketTickCounts))} ticks</span>
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {displayMarkets.map((market) => (
             <MarketCard
