@@ -16,6 +16,7 @@ import { StrategyPro } from '@/components/worldpad/strategy-pro';
 import { Speedbot } from '@/components/worldpad/speedbot';
 import { BulkTrader } from '@/components/worldpad/bulk-trader';
 import { AISoftware } from '@/components/worldpad/ai-software';
+import { AIScanner } from '@/components/worldpad/ai-scanner';
 import { AuthModal } from '@/components/worldpad/auth-modal';
 import {
   Bot, Zap, Settings, Gauge, Brain,
@@ -30,6 +31,7 @@ const TABS = [
   { id: 'strategy-pro', label: 'Strategy Pro', icon: Settings },
   { id: 'speedbot', label: 'Speedbot', icon: Gauge },
   { id: 'ai-software', label: 'AI Software', icon: Brain },
+  { id: 'ai-scanner', label: 'AI Scanner', icon: Brain },
   { id: 'auto-trader', label: 'Auto Trader', icon: ScanSearch },
   { id: 'analysis-tool', label: 'Analysis Tool', icon: Hand },
   { id: 'manual-trader', label: 'Manual Trader', icon: Layers },
@@ -66,6 +68,7 @@ export default function WorldpadPage() {
       case 'speedbot': return <Speedbot />;
       case 'bulk-trader': return <BulkTrader />;
       case 'ai-software': return <AISoftware />;
+      case 'ai-scanner': return <AIScanner />;
       case 'copy-trader': return <CopyTrader />;
       default:
         const tab = TABS.find(t => t.id === activeTab);

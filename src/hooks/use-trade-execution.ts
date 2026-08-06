@@ -8,6 +8,7 @@ export interface TradeParams {
   contractType: string;  // DIGITOVER, DIGITUNDER, DIGITMATCH, DIGITDIFF, DIGITEVEN, DIGITODD
   barrier?: number;      // 0-9 for digit barrier
   stake: number;
+  symbol?: string;      // Optional: specific market symbol (for AI multi-market)
   duration?: number;
   durationUnit?: string;
 }
@@ -32,22 +33,31 @@ export function useTradeExecution() {
   } = useWorldpadStore();
 
   const placeTrade = useCallback(async (params: TradeParams): Promise<TradeResult | null> => {
-    if (isPlacingTrade) return null;
-
-    setIsPlacingTrade(true);
+    // For AI multi-market: don't block on isPlacingTrade
+    const tradeSymbol = params.symbol || activeMarket;
     const simMode = isSimulating() || !isAuthorized;
 
     try {
       if (simMode) {
         // === SIMULATION MODE ===
+        // Get the current digit from the scanned market data
+        let simDigit = currentDigit;
+        if (params.symbol) {
+          try {
+            const { getMarketData } = await import('@/lib/multi-market-ws');
+            const md = getMarketData(params.symbol as any);
+            if (md.lastTick) simDigit = md.lastTick.digit;
+          } catch { /* fall back to currentDigit */ }
+        }
+
         let won = false;
         switch (params.contractType) {
-          case 'DIGITMATCH': won = currentDigit === params.barrier; break;
-          case 'DIGITDIFF': won = currentDigit !== params.barrier; break;
-          case 'DIGITOVER': won = currentDigit > (params.barrier ?? 4); break;
-          case 'DIGITUNDER': won = currentDigit < (params.barrier ?? 5); break;
-          case 'DIGITEVEN': won = currentDigit % 2 === 0; break;
-          case 'DIGITODD': won = currentDigit % 2 === 1; break;
+          case 'DIGITMATCH': won = simDigit === params.barrier; break;
+          case 'DIGITDIFF': won = simDigit !== params.barrier; break;
+          case 'DIGITOVER': won = simDigit > (params.barrier ?? 4); break;
+          case 'DIGITUNDER': won = simDigit < (params.barrier ?? 5); break;
+          case 'DIGITEVEN': won = simDigit % 2 === 0; break;
+          case 'DIGITODD': won = simDigit % 2 === 1; break;
           default: won = Math.random() > 0.5;
         }
 
@@ -61,7 +71,7 @@ export function useTradeExecution() {
         const result: TradeResult = {
           id: `SIM-${Date.now()}`,
           type: params.contractType,
-          symbol: activeMarket,
+          symbol: tradeSymbol,
           stake: params.stake,
           payout,
           profit,
@@ -72,17 +82,17 @@ export function useTradeExecution() {
         };
 
         addTradeResult(result);
-        addAutoTraderLog(`[SIM] ${won ? 'WIN' : 'LOSS'}: ${params.contractType} barrier ${params.barrier ?? '-'} | digit was ${currentDigit} | ${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`);
+        addAutoTraderLog(`[SIM] ${won ? 'WIN' : 'LOSS'}: ${params.contractType} on ${tradeSymbol} barrier ${params.barrier ?? '-'} | digit was ${simDigit} | ${profit >= 0 ? '+' : ''}$${profit.toFixed(2)}`);
         return result;
       }
 
       // === LIVE MODE via WebSocket ===
-      addAutoTraderLog(`Placing ${params.contractType} trade on ${activeMarket}...`);
+      addAutoTraderLog(`Placing ${params.contractType} trade on ${tradeSymbol}...`);
 
       // Step 1: Get proposal via WebSocket
       const proposal = await getProposalWS({
         contractType: params.contractType,
-        symbol: activeMarket,
+        symbol: tradeSymbol,
         stake: params.stake,
         barrier: params.barrier,
         duration: params.duration || 1,
@@ -98,7 +108,7 @@ export function useTradeExecution() {
       const result: TradeResult = {
         id: buyResult.contract_id,
         type: params.contractType,
-        symbol: activeMarket,
+        symbol: tradeSymbol,
         stake: params.stake,
         payout: buyResult.payout,
         profit: buyResult.profit,
@@ -112,12 +122,10 @@ export function useTradeExecution() {
       addAutoTraderLog(`${won ? 'WIN' : 'LOSS'}: ${params.contractType} — ${won ? '+$' : '-$'}${Math.abs(result.profit).toFixed(2)}`);
       return result;
     } catch (err) {
-      addAutoTraderLog(`ERROR: ${(err as Error).message}`);
+      addAutoTraderLog(`ERROR on ${tradeSymbol}: ${(err as Error).message}`);
       return null;
-    } finally {
-      setIsPlacingTrade(false);
     }
-  }, [isAuthorized, activeMarket, isPlacingTrade, currentDigit, addTradeResult, setIsPlacingTrade, addAutoTraderLog]);
+  }, [isAuthorized, activeMarket, currentDigit, addTradeResult, addAutoTraderLog]);
 
   const quickTrade = useCallback(async (type: 'match' | 'differ' | 'over' | 'under' | 'even' | 'odd', digit: number, stake: number) => {
     const contractMap = {
