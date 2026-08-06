@@ -40,7 +40,7 @@ const TABS = [
 ];
 
 export default function WorldpadPage() {
-  const { activeTab, setActiveTab, balance, isConnected, isConnecting, isAuthorized } = useWorldpadStore();
+  const { activeTab, setActiveTab, balance, isConnected, isConnecting, isAuthorized, accountMode } = useWorldpadStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
 
@@ -168,8 +168,8 @@ export default function WorldpadPage() {
                 border: `1px solid ${isAuthorized ? 'rgba(0,212,170,0.2)' : 'rgba(255,255,255,0.06)'}`,
               }}
             >
-              <Key className="w-3.5 h-3.5" style={{ color: isAuthorized ? '#00d4aa' : '#7d8590' }} />
-              <span className={`text-[10px] font-bold hidden sm:inline ${isAuthorized ? 'text-[#00d4aa]' : 'text-gray-500'}`}>{isAuthorized ? 'LIVE' : 'LOGIN'}</span>
+              <Key className="w-3.5 h-3.5" style={{ color: isAuthorized ? (accountMode === 'real' ? '#ef4444' : '#00d4aa') : '#7d8590' }} />
+              <span className={`text-[10px] font-bold hidden sm:inline ${isAuthorized ? (accountMode === 'real' ? 'text-[#ef4444]' : 'text-[#00d4aa]') : 'text-gray-500'}`}>{isAuthorized ? (accountMode === 'real' ? 'REAL' : 'DEMO') : 'LOGIN'}</span>
             </button>
 
             {/* Connection status dot with glow */}

@@ -55,6 +55,9 @@ export interface WorldpadState {
   lastTickTime: number;
   // Auth & Trading
   apiToken: string;
+  demoToken: string;
+  realToken: string;
+  accountMode: 'demo' | 'real';
   isAuthorized: boolean;
   authorizing: boolean;
   accountInfo: { fullname: string; loginid: string; balance: number; currency: string } | null;
@@ -96,6 +99,9 @@ export interface WorldpadState {
   setLastTickTime: (time: number) => void;
   // Auth & Trading actions
   setApiToken: (token: string) => void;
+  setDemoToken: (token: string) => void;
+  setRealToken: (token: string) => void;
+  setAccountMode: (mode: 'demo' | 'real') => void;
   setIsAuthorized: (val: boolean) => void;
   setAuthorizing: (val: boolean) => void;
   setAccountInfo: (info: WorldpadState['accountInfo']) => void;
@@ -152,6 +158,9 @@ export const useWorldpadStore = create<WorldpadState>((set) => ({
   lastTickTime: 0,
   // Auth & Trading
   apiToken: '',
+  demoToken: '',
+  realToken: '',
+  accountMode: 'demo',
   isAuthorized: false,
   authorizing: false,
   accountInfo: null,
@@ -206,6 +215,24 @@ export const useWorldpadStore = create<WorldpadState>((set) => ({
   setLastTickTime: (time) => set({ lastTickTime: time }),
   // Auth & Trading actions
   setApiToken: (token) => set({ apiToken: token }),
+  setDemoToken: (token) => set((s) => ({
+    demoToken: token,
+    // If currently in demo mode, also update active token
+    ...(s.accountMode === 'demo' ? { apiToken: token } : {}),
+  })),
+  setRealToken: (token) => set((s) => ({
+    realToken: token,
+    // If currently in real mode, also update active token
+    ...(s.accountMode === 'real' ? { apiToken: token } : {}),
+  })),
+  setAccountMode: (mode) => set((s) => {
+    const token = mode === 'demo' ? s.demoToken : s.realToken;
+    return {
+      accountMode: mode,
+      apiToken: token,
+      isAuthorized: !!token,
+    };
+  }),
   setIsAuthorized: (val) => set({ isAuthorized: val }),
   setAuthorizing: (val) => set({ authorizing: val }),
   setAccountInfo: (info) => set({ accountInfo: info }),
