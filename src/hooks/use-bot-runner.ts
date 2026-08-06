@@ -21,6 +21,9 @@ export function useBotRunner() {
   const profitRef = useRef(0);
   const lossesRef = useRef(0);
   const currentStakeRef = useRef(botConfig.stake);
+  // FIX #1: Lock to prevent overlapping trades (the main crash cause)
+  const tradeInProgressRef = useRef(false);
+  const consecutiveErrorsRef = useRef(0);
 
   // Sync refs
   useEffect(() => { tradeCountRef.current = botTradeCount; }, [botTradeCount]);
@@ -44,60 +47,92 @@ export function useBotRunner() {
   }, [activeBotId]);
 
   const executeBotCycle = useCallback(async () => {
-    const s = useWorldpadStore.getState();
+    // FIX #1: Skip if a trade is already in flight — this prevents the race condition
+    if (tradeInProgressRef.current) return;
+    tradeInProgressRef.current = true;
 
-    // Check stop loss
-    if (profitRef.current <= -s.botConfig.stopLoss) {
-      addAutoTraderLog(`[BOT] Stop loss reached (-$${Math.abs(profitRef.current).toFixed(2)}). Stopping.`);
-      setIsBotRunning(false);
-      return;
-    }
+    try {
+      const s = useWorldpadStore.getState();
 
-    const signal = getNextSignal();
-    if (!signal) return;
+      // Check stop loss
+      if (profitRef.current <= -s.botConfig.stopLoss) {
+        addAutoTraderLog(`[BOT] Stop loss reached (-$${Math.abs(profitRef.current).toFixed(2)}). Stopping.`);
+        setIsBotRunning(false);
+        return;
+      }
 
-    // Calculate stake with martingale
-    const stake = currentStakeRef.current;
+      const signal = getNextSignal();
+      if (!signal) return;
 
-    addAutoTraderLog(`[BOT] ${signal.contractType} barrier ${signal.barrier ?? '-'} @ $${stake.toFixed(2)} | ${signal.reason}`);
+      // FIX #5: Validate stake is above minimum before trading
+      let stake = currentStakeRef.current;
+      const MIN_STAKE = 0.35;
+      if (stake < MIN_STAKE) {
+        addAutoTraderLog(`[BOT] Stake $${stake.toFixed(2)} below minimum. Resetting to base.`);
+        stake = s.botConfig.stake;
+        currentStakeRef.current = stake;
+      }
 
-    const result = await placeTrade({
-      contractType: signal.contractType,
-      barrier: signal.barrier,
-      stake,
-      duration: 1,
-      durationUnit: 't',
-    });
+      addAutoTraderLog(`[BOT] ${signal.contractType} barrier ${signal.barrier ?? '-'} @ $${stake.toFixed(2)} | ${signal.reason}`);
 
-    if (!result) return;
+      const result = await placeTrade({
+        contractType: signal.contractType,
+        barrier: signal.barrier,
+        stake,
+        duration: 1,
+        durationUnit: 't',
+      });
 
-    const newCount = tradeCountRef.current + 1;
-    const newProfit = profitRef.current + result.profit;
+      // FIX: Reset error counter on successful trade call (even if result is null)
+      consecutiveErrorsRef.current = 0;
 
-    setBotTradeCount(newCount);
-    setBotSessionProfit(newProfit);
+      if (!result) return;
 
-    if (result.won) {
-      // Reset martingale on win
-      currentStakeRef.current = s.botConfig.stake;
-      setBotConsecutiveLosses(0);
-      lossesRef.current = 0;
-    } else {
-      // Apply martingale on loss
-      const newLosses = lossesRef.current + 1;
-      setBotConsecutiveLosses(newLosses);
-      lossesRef.current = newLosses;
-      currentStakeRef.current = s.botConfig.stake * Math.pow(s.botConfig.martingale, newLosses);
+      const newCount = tradeCountRef.current + 1;
+      const newProfit = profitRef.current + result.profit;
 
-      // Cap stake at 50% of remaining stop loss budget
-      const maxStake = Math.max(s.botConfig.stopLoss - Math.abs(newProfit), 0.5) * 0.5;
-      currentStakeRef.current = Math.min(currentStakeRef.current, maxStake);
-    }
+      setBotTradeCount(newCount);
+      setBotSessionProfit(newProfit);
 
-    // Check expected profit target
-    if (newProfit >= s.botConfig.expectedProfit) {
-      addAutoTraderLog(`[BOT] Profit target reached (+$${newProfit.toFixed(2)}). Stopping.`);
-      setIsBotRunning(false);
+      if (result.won) {
+        // Reset martingale on win
+        currentStakeRef.current = s.botConfig.stake;
+        setBotConsecutiveLosses(0);
+        lossesRef.current = 0;
+      } else {
+        // Apply martingale on loss
+        const newLosses = lossesRef.current + 1;
+        setBotConsecutiveLosses(newLosses);
+        lossesRef.current = newLosses;
+        currentStakeRef.current = s.botConfig.stake * Math.pow(s.botConfig.martingale, newLosses);
+
+        // FIX #5: Properly cap stake — ensure it never goes below minimum
+        const remainingBudget = Math.max(s.botConfig.stopLoss - Math.abs(newProfit), 0);
+        const maxStake = Math.max(remainingBudget * 0.5, MIN_STAKE);
+        currentStakeRef.current = Math.min(currentStakeRef.current, maxStake);
+        // Final safety clamp
+        currentStakeRef.current = Math.max(currentStakeRef.current, MIN_STAKE);
+      }
+
+      // Check expected profit target
+      if (newProfit >= s.botConfig.expectedProfit) {
+        addAutoTraderLog(`[BOT] Profit target reached (+$${newProfit.toFixed(2)}). Stopping.`);
+        setIsBotRunning(false);
+      }
+    } catch (err) {
+      // FIX: Catch errors gracefully instead of crashing
+      const errMsg = err instanceof Error ? err.message : 'Unknown error';
+      addAutoTraderLog(`[BOT] ERROR: ${errMsg}`);
+      consecutiveErrorsRef.current++;
+
+      // Auto-stop after 5 consecutive errors to prevent infinite error loops
+      if (consecutiveErrorsRef.current >= 5) {
+        addAutoTraderLog(`[BOT] Too many consecutive errors (${consecutiveErrorsRef.current}). Stopping bot.`);
+        setIsBotRunning(false);
+      }
+    } finally {
+      // FIX #1: Always release the lock when done
+      tradeInProgressRef.current = false;
     }
   }, [getNextSignal, placeTrade, addAutoTraderLog, setIsBotRunning, setBotTradeCount, setBotSessionProfit, setBotConsecutiveLosses]);
 
@@ -107,6 +142,8 @@ export function useBotRunner() {
     tradeCountRef.current = 0;
     profitRef.current = 0;
     lossesRef.current = 0;
+    consecutiveErrorsRef.current = 0;
+    tradeInProgressRef.current = false;
 
     const simMode = isSimulating() || !store.isAuthorized;
     addAutoTraderLog(`[BOT] Starting bot${activeBotId ? ` (${activeBotId})` : ''}... (${simMode ? 'SIMULATION' : 'LIVE'})`);
@@ -132,6 +169,7 @@ export function useBotRunner() {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    tradeInProgressRef.current = false;
   }, [addAutoTraderLog, setIsBotRunning]);
 
   // Cleanup on unmount

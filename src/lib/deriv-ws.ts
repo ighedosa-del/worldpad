@@ -1,6 +1,6 @@
 'use client';
 
-// ---- New Deriv API (OTP-based auth) ----
+// ---- Deriv WebSocket Layer with OTP auth ----
 
 let ws: WebSocket | null = null;
 let tickCallback: ((data: { tick: number; digit: number; price: string }) => void) | null = null;
@@ -21,6 +21,10 @@ let storedAccountId: string = '';
 // Promise-based request/response over WebSocket
 let reqIdCounter = 1;
 const pendingRequests = new Map<number, { resolve: (data: any) => void; reject: (err: Error) => void; timer: ReturnType<typeof setTimeout> }>();
+
+// FIX #2: Connection lock to prevent parallel connection attempts
+let connectionPromise: Promise<void> | null = null;
+let isConnecting = false;
 
 function sendWSRequest(msg: Record<string, unknown>, timeoutMs = 15000): Promise<any> {
   return new Promise((resolve, reject) => {
@@ -77,7 +81,7 @@ export interface AuthorizeResult {
   accountType: 'demo' | 'real';
 }
 
-// ---- NEW AUTH FLOW: REST OTP ----
+// ---- AUTH FLOW: REST OTP ----
 
 export async function getDerivAccounts(patToken: string, appId: string): Promise<DerivAccount[]> {
   const res = await fetch('/api/deriv-auth?action=accounts', {
@@ -150,7 +154,7 @@ export async function authorizeViaWS(patToken: string, appId: string, accountId:
   };
 }
 
-// ---- TRADE via WebSocket (uses underlying_symbol) ----
+// ---- TRADE via WebSocket ----
 
 export interface ProposalResult {
   id: string;
@@ -173,8 +177,11 @@ export async function getProposalWS(params: {
   duration?: number;
   durationUnit?: string;
 }): Promise<ProposalResult> {
+  // FIX #2: Use the connection lock — wait for connection to be ready
+  await ensureWSConnected();
+
   if (!ws || ws.readyState !== WebSocket.OPEN) {
-    await ensureWSConnected();
+    throw new Error('WebSocket not connected after retry');
   }
 
   const payload: Record<string, unknown> = {
@@ -191,69 +198,139 @@ export async function getProposalWS(params: {
     payload.barrier = params.barrier.toString();
   }
 
-  const data = await sendWSRequest(payload, 10000);
+  // FIX #7: Add retry logic for proposals
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const data = await sendWSRequest(payload, 10000);
 
-  if (!data.proposal) {
-    throw new Error(data.error?.message || 'No proposal received');
+      if (!data.proposal) {
+        throw new Error(data.error?.message || 'No proposal received');
+      }
+
+      return {
+        id: data.proposal.id,
+        ask_price: parseFloat(data.proposal.ask_price) || 0,
+        payout: parseFloat(data.proposal.payout) || 0,
+      };
+    } catch (err) {
+      lastError = err as Error;
+      // If it's a connection error, try reconnecting once
+      if (attempt === 0 && (lastError.message.includes('not connected') || lastError.message.includes('timed out') || lastError.message.includes('closed'))) {
+        console.log('[DerivWS] Proposal failed, attempting reconnect...');
+        connectionPromise = null;
+        isConnecting = false;
+        try {
+          await ensureWSConnected();
+          continue;
+        } catch {
+          break;
+        }
+      }
+      break;
+    }
   }
-
-  return {
-    id: data.proposal.id,
-    ask_price: parseFloat(data.proposal.ask_price) || 0,
-    payout: parseFloat(data.proposal.payout) || 0,
-  };
+  throw lastError || new Error('Proposal failed after retries');
 }
 
 export async function buyContractWS(proposalId: string, askPrice: number): Promise<BuyResult> {
-  const data = await sendWSRequest({ buy: proposalId, price: askPrice }, 10000);
-
-  if (!data.buy) {
-    throw new Error(data.error?.message || 'Buy failed');
+  if (!ws || ws.readyState !== WebSocket.OPEN) {
+    throw new Error('WebSocket not connected');
   }
 
-  return {
-    contract_id: data.buy.contract_id?.toString() || '',
-    payout: parseFloat(data.buy.payout) || 0,
-    profit: parseFloat(data.buy.profit) || 0,
-    buy_price: parseFloat(data.buy.buy_price) || 0,
-  };
+  // FIX #7: Retry buy once on connection error
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const data = await sendWSRequest({ buy: proposalId, price: askPrice }, 10000);
+
+      if (!data.buy) {
+        throw new Error(data.error?.message || 'Buy failed');
+      }
+
+      return {
+        contract_id: data.buy.contract_id?.toString() || '',
+        payout: parseFloat(data.buy.payout) || 0,
+        profit: parseFloat(data.buy.profit) || 0,
+        buy_price: parseFloat(data.buy.buy_price) || 0,
+      };
+    } catch (err) {
+      lastError = err as Error;
+      if (attempt === 0 && (lastError.message.includes('not connected') || lastError.message.includes('timed out'))) {
+        console.log('[DerivWS] Buy failed, attempting reconnect...');
+        connectionPromise = null;
+        isConnecting = false;
+        try {
+          await ensureWSConnected();
+          continue;
+        } catch {
+          break;
+        }
+      }
+      break;
+    }
+  }
+  throw lastError || new Error('Buy failed after retries');
 }
 
 // ---- Ensure WS is connected (via OTP) ----
 
 async function ensureWSConnected(): Promise<void> {
- return new Promise((resolve, reject) => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-      resolve();
-      return;
-    }
+  // FIX #2: If connection is already open, return immediately
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    return;
+  }
 
-    if (ws && ws.readyState === WebSocket.CONNECTING) {
+  // FIX #2: If a connection is already in progress, wait for it
+  if (connectionPromise) {
+    return connectionPromise;
+  }
+
+  // FIX #2: If currently connecting, wait briefly
+  if (ws && ws.readyState === WebSocket.CONNECTING) {
+    return new Promise((resolve, reject) => {
       const check = setInterval(() => {
         if (ws?.readyState === WebSocket.OPEN) { clearInterval(check); resolve(); }
         else if (!ws || ws.readyState === WebSocket.CLOSED) { clearInterval(check); reject(new Error('Connection failed')); }
       }, 200);
       setTimeout(() => { clearInterval(check); reject(new Error('Connection timeout')); }, 15000);
-      return;
-    }
+    });
+  }
 
-    // If we have auth credentials, get OTP and connect
-    if (storedPatToken && storedAppId && storedAccountId) {
-      requestOtpWsUrl(storedPatToken, storedAppId, storedAccountId)
-        .then(wsUrl => {
+  // If we have auth credentials, get OTP and connect
+  if (storedPatToken && storedAppId && storedAccountId) {
+    // FIX #2: Set the connection promise lock to prevent parallel attempts
+    isConnecting = true;
+    connectionPromise = requestOtpWsUrl(storedPatToken, storedAppId, storedAccountId)
+      .then(wsUrl => {
+        return new Promise<void>((resolve, reject) => {
           connectToWsUrl(wsUrl, resolve, reject);
-        })
-        .catch(err => {
-          reject(new Error('Failed to get OTP: ' + err.message));
         });
-      return;
-    }
+      })
+      .finally(() => {
+        isConnecting = false;
+        // Don't null connectionPromise here — it's resolved/rejected now
+      });
 
-    reject(new Error('Not authenticated. Please connect your Deriv account.'));
-  });
+    try {
+      await connectionPromise;
+      return;
+    } catch (err) {
+      connectionPromise = null;
+      throw new Error('Failed to get OTP: ' + (err as Error).message);
+    }
+  }
+
+  throw new Error('Not authenticated. Please connect your Deriv account.');
 }
 
 function connectToWsUrl(wsUrl: string, resolve: () => void, reject: (err: Error) => void) {
+  // FIX #2: Close any existing WebSocket before creating a new one
+  if (ws) {
+    try { ws.close(); } catch { /* ignore */ }
+    ws = null;
+  }
+
   try {
     ws = new WebSocket(wsUrl);
   } catch {
@@ -280,7 +357,6 @@ function connectToWsUrl(wsUrl: string, resolve: () => void, reject: (err: Error)
 
   ws.onclose = () => {
     clearTimeout(timer);
-    // Don't reject here - onclose is handled by the reconnect logic
   };
 }
 
@@ -350,11 +426,20 @@ export function connectDerivWS(
 
   // If we have OTP credentials, connect via OTP
   if (storedPatToken && storedAppId && storedAccountId) {
+    // FIX #2: Use connection lock
+    if (isConnecting) {
+      console.log('[DerivWS] Connection already in progress, waiting...');
+      return;
+    }
+
+    isConnecting = true;
     requestOtpWsUrl(storedPatToken, storedAppId, storedAccountId)
       .then(wsUrl => {
+        isConnecting = false;
         setupWsConnection(wsUrl, symbol, onTick, onBalance, onConnect, onDisconnect);
       })
       .catch(() => {
+        isConnecting = false;
         console.log('[DerivWS] OTP failed, switching to simulation');
         startSimulation(symbol, onTick);
         onConnect?.();
@@ -375,6 +460,12 @@ function setupWsConnection(
   onConnect?: (() => void) | null,
   onDisconnect?: (() => void) | null
 ) {
+  // FIX #2: Close existing WS before creating new one
+  if (ws) {
+    try { ws.close(); } catch { /* ignore */ }
+    ws = null;
+  }
+
   try {
     ws = new WebSocket(wsUrl);
   } catch {
@@ -397,6 +488,7 @@ function setupWsConnection(
     clearTimeout(connectTimeout);
     hasEverConnected = true;
     useSimulation = false;
+    connectionPromise = null; // Reset connection lock on successful connect
     console.log('[DerivWS] Connected to Deriv via OTP (live)');
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
@@ -439,7 +531,7 @@ function setupWsConnection(
         console.warn('[DerivWS] API error:', data.error.message);
       }
     } catch {
-      // ignore
+      // ignore parse errors
     }
   };
 
@@ -447,6 +539,8 @@ function setupWsConnection(
     clearTimeout(connectTimeout);
     tickSubId = null;
     balanceSubId = null;
+    connectionPromise = null; // Reset lock on close
+
     for (const [id, pending] of pendingRequests) {
       clearTimeout(pending.timer);
       pending.reject(new Error('WebSocket closed'));
@@ -461,6 +555,12 @@ function setupWsConnection(
     }
     console.log('[DerivWS] Disconnected, reconnecting with new OTP...');
     onDisconnect?.();
+
+    // FIX #2: Prevent multiple reconnect timers
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer);
+    }
+
     reconnectTimer = setTimeout(() => {
       console.log('[DerivWS] Reconnecting...');
       if (storedPatToken && storedAppId && storedAccountId) {
@@ -515,6 +615,8 @@ export function disconnectDerivWS() {
   storedPatToken = '';
   storedAppId = '';
   storedAccountId = '';
+  connectionPromise = null;
+  isConnecting = false;
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
     reconnectTimer = null;
