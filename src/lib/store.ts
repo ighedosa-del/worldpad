@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import type { DerivAccount } from './deriv-ws';
 
 export interface BotConfig {
   market: string;
@@ -57,7 +58,10 @@ export interface WorldpadState {
   apiToken: string;
   demoToken: string;
   realToken: string;
+  derivAppId: string;
   accountMode: 'demo' | 'real';
+  selectedAccountId: string;
+  availableAccounts: DerivAccount[];
   isAuthorized: boolean;
   authorizing: boolean;
   accountInfo: { fullname: string; loginid: string; balance: number; currency: string } | null;
@@ -101,7 +105,10 @@ export interface WorldpadState {
   setApiToken: (token: string) => void;
   setDemoToken: (token: string) => void;
   setRealToken: (token: string) => void;
+  setDerivAppId: (id: string) => void;
   setAccountMode: (mode: 'demo' | 'real') => void;
+  setSelectedAccountId: (id: string) => void;
+  setAvailableAccounts: (accounts: DerivAccount[]) => void;
   setIsAuthorized: (val: boolean) => void;
   setAuthorizing: (val: boolean) => void;
   setAccountInfo: (info: WorldpadState['accountInfo']) => void;
@@ -160,7 +167,10 @@ export const useWorldpadStore = create<WorldpadState>((set) => ({
   apiToken: '',
   demoToken: '',
   realToken: '',
+  derivAppId: '',
   accountMode: 'demo',
+  selectedAccountId: '',
+  availableAccounts: [],
   isAuthorized: false,
   authorizing: false,
   accountInfo: null,
@@ -215,6 +225,9 @@ export const useWorldpadStore = create<WorldpadState>((set) => ({
   setLastTickTime: (time) => set({ lastTickTime: time }),
   // Auth & Trading actions
   setApiToken: (token) => set({ apiToken: token }),
+  setDerivAppId: (id) => set({ derivAppId: id }),
+  setSelectedAccountId: (id) => set({ selectedAccountId: id }),
+  setAvailableAccounts: (accounts) => set({ availableAccounts: accounts }),
   setDemoToken: (token) => set((s) => ({
     demoToken: token,
     // If currently in demo mode, also update active token

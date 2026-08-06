@@ -2,7 +2,7 @@
   {
     "url": "https://developers.deriv.com/docs/workflows",
     "name": "Complete Workflows",
-    "snippet": "Use REST APIs for account setup and the OTP endpoint to get an authenticated WebSocket URL for real-time trading. REST: Get an authenticated WebSocket URL via ... Read more\nUsers receive a default demo account upon signup. REST call requires your authorization token ( PAT or JWT). With a PAT app, the user generates a Personal ...",
+    "snippet": "To connect to an authenticated WebSocket endpoint , you need to call the OTP REST endpoint using your authorization token ( PAT or JWT). The response contains ...\nWith a PAT app, the user generates a Personal Access Token in Deriv . The app securely stores the token and includes it in API requests as a bearer token . This ...",
     "host_name": "developers.deriv.com",
     "rank": 0,
     "date": "",
@@ -11,35 +11,35 @@
   {
     "url": "https://developers.deriv.com/docs/intro/api-overview",
     "name": "API Overview",
-    "snippet": "Deriv API provides programmatic access to trading services, account management, and market data . REST endpoints . Bearer token (OAuth 2.0 or PAT ) Examples POST ...\nDeriv API provides programmatic access to trading services, account management , and market data for the Options trading platform.",
+    "snippet": "Deriv API provides programmatic access to trading services, account management, and market data . Token ( PAT ) API Architecture. Authorization : Bearer token ( ...\nDeriv API provides programmatic access to trading services, account management, and market data . Token ( PAT ) API Architecture ( GET , POST) Bearer token (OAuth 2 ...",
     "host_name": "developers.deriv.com",
     "rank": 1,
     "date": "",
     "favicon": ""
   },
   {
-    "url": "https://developers.deriv.com/docs/options",
-    "name": "Options Setup REST",
-    "snippet": "The Options Setup APIs allow you to create and manage Options trading accounts using REST endpoints . Bearer YOUR_OAUTH_TOKEN token for authenticated endpoints .\nThe Options Setup APIs allow you to create and manage Options trading accounts using REST endpoints. These endpoints handle account creation, balance management ...",
+    "url": "https://developers.deriv.com/docs/options-legacy/legacy-accounts",
+    "name": "Legacy Accounts — Options Trading (Legacy)",
+    "snippet": "Bearer token for authentication . This endpoint requires the Deriv -App-ID header to identify your application, plus a valid OAuth2 Bearer token . List the ...\nBearer token for authentication. ... The GET /trading/v1/options/legacy/ accounts endpoint : List the authenticated user's legacy accounts , grouped by loginid.",
     "host_name": "developers.deriv.com",
     "rank": 2,
     "date": "",
     "favicon": ""
   },
   {
-    "url": "https://developers.deriv.com/docs/options/get-accounts",
-    "name": "Get All Accounts — Options API",
-    "snippet": "This endpoint returns all Options trading accounts associated with your authentication credentials, including both demo and real accounts.\nAccount Information. This endpoint returns all Options trading accounts associated with your authentication credentials, including both demo and real accounts .",
-    "host_name": "developers.deriv.com",
+    "url": "https://www.facebook.com/groups/icthubkenya/posts/4331666923643294",
+    "name": "Deriv API Login Integration Support for Third- Party App",
+    "snippet": "✓ Deriv API login/authentication integration ✓ Troubleshooting failed API connections ✓ Updating existing applications to meet new API ...",
+    "host_name": "www.facebook.com",
     "rank": 3,
     "date": "",
     "favicon": ""
   },
   {
-    "url": "https://docs.tradier.com/docs/account-details",
-    "name": "Account Details",
-    "snippet": "This guide walks you through the Account endpoints available. These endpoints let you retrieve account balances, positions, orders, history, gain/loss data , ...",
-    "host_name": "docs.tradier.com",
+    "url": "https://public.com/api/docs/resources/list-accounts/get-accounts",
+    "name": "Get Brokerage Account List via Public API",
+    "snippet": "Retrieve a list of all brokerage accounts linked to your API credentials . Access account IDs, types, and statuses needed to initiate trades and portfolio ...",
+    "host_name": "public.com",
     "rank": 4,
     "date": "",
     "favicon": ""

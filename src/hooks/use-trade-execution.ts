@@ -27,7 +27,7 @@ export interface TradeResult {
 
 export function useTradeExecution() {
   const {
-    apiToken, isAuthorized, activeMarket, addTradeResult,
+    isAuthorized, activeMarket, addTradeResult,
     setIsPlacingTrade, isPlacingTrade, addAutoTraderLog, currentDigit,
   } = useWorldpadStore();
 
@@ -35,7 +35,7 @@ export function useTradeExecution() {
     if (isPlacingTrade) return null;
 
     setIsPlacingTrade(true);
-    const simMode = isSimulating() || !isAuthorized || !apiToken;
+    const simMode = isSimulating() || !isAuthorized;
 
     try {
       if (simMode) {
@@ -117,7 +117,7 @@ export function useTradeExecution() {
     } finally {
       setIsPlacingTrade(false);
     }
-  }, [apiToken, isAuthorized, activeMarket, isPlacingTrade, currentDigit, addTradeResult, setIsPlacingTrade, addAutoTraderLog]);
+  }, [isAuthorized, activeMarket, isPlacingTrade, currentDigit, addTradeResult, setIsPlacingTrade, addAutoTraderLog]);
 
   const quickTrade = useCallback(async (type: 'match' | 'differ' | 'over' | 'under' | 'even' | 'odd', digit: number, stake: number) => {
     const contractMap = {

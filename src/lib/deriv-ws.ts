@@ -1,7 +1,6 @@
 'use client';
 
-const DERIV_APP_ID = '1089';
-const DERIV_WS_URL = `wss://ws.derivws.com/websockets/v3?app_id=${DERIV_APP_ID}`;
+// ---- New Deriv API (OTP-based auth) ----
 
 let ws: WebSocket | null = null;
 let tickCallback: ((data: { tick: number; digit: number; price: string }) => void) | null = null;
@@ -14,13 +13,17 @@ let simulationInterval: ReturnType<typeof setInterval> | null = null;
 let useSimulation = false;
 let hasEverConnected = false;
 
+// Auth state for OTP reconnection
+let storedPatToken: string = '';
+let storedAppId: string = '';
+let storedAccountId: string = '';
+
 // Promise-based request/response over WebSocket
 let reqIdCounter = 1;
 const pendingRequests = new Map<number, { resolve: (data: any) => void; reject: (err: Error) => void; timer: ReturnType<typeof setTimeout> }>();
 
 function sendWSRequest(msg: Record<string, unknown>, timeoutMs = 15000): Promise<any> {
   return new Promise((resolve, reject) => {
-    // If we don't have a live WS, fail immediately
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       reject(new Error('WebSocket not connected'));
       return;
@@ -41,7 +44,6 @@ function sendWSRequest(msg: Record<string, unknown>, timeoutMs = 15000): Promise
 
 // Match incoming WS messages to pending requests
 function handleIncomingMessage(data: any) {
-  // Check if this is a response to a pending request
   if (data.req_id && pendingRequests.has(data.req_id)) {
     const pending = pendingRequests.get(data.req_id)!;
     clearTimeout(pending.timer);
@@ -52,41 +54,103 @@ function handleIncomingMessage(data: any) {
     } else {
       pending.resolve(data);
     }
-    return true; // consumed
+    return true;
   }
-  return false; // not consumed, let tick/balance handlers process it
+  return false;
 }
 
-// ---- AUTH via WebSocket ----
+// ---- Types ----
+
+export interface DerivAccount {
+  account_id: string;
+  balance: string;
+  currency: string;
+  account_type: 'demo' | 'real';
+  status: string;
+}
 
 export interface AuthorizeResult {
   fullname: string;
   loginid: string;
   balance: number;
   currency: string;
+  accountType: 'demo' | 'real';
 }
 
-export async function authorizeViaWS(token: string): Promise<AuthorizeResult> {
-  // Ensure we have a live WebSocket connection
-  if (!ws || ws.readyState !== WebSocket.OPEN) {
-    await ensureWSConnected();
+// ---- NEW AUTH FLOW: REST OTP ----
+
+export async function getDerivAccounts(patToken: string, appId: string): Promise<DerivAccount[]> {
+  const res = await fetch('/api/deriv-auth?action=accounts', {
+    headers: {
+      'authorization': `Bearer ${patToken}`,
+      'x-deriv-app-id': appId,
+    },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Failed to fetch accounts (HTTP ${res.status})`);
   }
+  const data = await res.json();
+  if (!data.data || !Array.isArray(data.data)) {
+    throw new Error('Invalid response from Deriv');
+  }
+  return data.data.map((a: any) => ({
+    account_id: a.account_id,
+    balance: a.balance,
+    currency: a.currency,
+    account_type: a.account_type,
+    status: a.status,
+  }));
+}
 
-  const data = await sendWSRequest({ authorize: token }, 10000);
+async function requestOtpWsUrl(patToken: string, appId: string, accountId: string): Promise<string> {
+  const res = await fetch('/api/deriv-auth', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'authorization': `Bearer ${patToken}`,
+      'x-deriv-app-id': appId,
+    },
+    body: JSON.stringify({ accountId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Failed to get OTP (HTTP ${res.status})`);
+  }
+  const data = await res.json();
+  if (!data.data?.url) {
+    throw new Error(data.errors?.[0]?.message || 'No WebSocket URL returned');
+  }
+  return data.data.url;
+}
 
-  if (!data.authorize) {
-    throw new Error(data.error?.message || 'Authorization failed');
+export async function authorizeViaWS(patToken: string, appId: string, accountId: string): Promise<AuthorizeResult> {
+  // Store for reconnection
+  storedPatToken = patToken;
+  storedAppId = appId;
+  storedAccountId = accountId;
+
+  // Get OTP WebSocket URL via server proxy
+  const wsUrl = await requestOtpWsUrl(patToken, appId, accountId);
+  console.log('[DerivWS] Got OTP WebSocket URL');
+
+  // Get account info from the accounts list to return balance etc.
+  const accounts = await getDerivAccounts(patToken, appId);
+  const account = accounts.find(a => a.account_id === accountId);
+  if (!account) {
+    throw new Error('Account not found');
   }
 
   return {
-    fullname: data.authorize.fullname || '',
-    loginid: data.authorize.loginid || '',
-    balance: parseFloat(data.authorize.balance) || 0,
-    currency: data.authorize.currency || 'USD',
+    fullname: '',
+    loginid: account.account_id,
+    balance: parseFloat(account.balance) || 0,
+    currency: account.currency || 'USD',
+    accountType: account.account_type,
   };
 }
 
-// ---- TRADE via WebSocket ----
+// ---- TRADE via WebSocket (uses underlying_symbol) ----
 
 export interface ProposalResult {
   id: string;
@@ -118,7 +182,7 @@ export async function getProposalWS(params: {
     amount: params.stake,
     basis: 'stake',
     contract_type: params.contractType,
-    symbol: params.symbol,
+    underlying_symbol: params.symbol,
     duration: params.duration || 1,
     duration_unit: params.durationUnit || 't',
     currency: 'USD',
@@ -148,66 +212,76 @@ export async function buyContractWS(proposalId: string, askPrice: number): Promi
   }
 
   return {
-    contract_id: data.buy.contract_id.toString(),
+    contract_id: data.buy.contract_id?.toString() || '',
     payout: parseFloat(data.buy.payout) || 0,
     profit: parseFloat(data.buy.profit) || 0,
     buy_price: parseFloat(data.buy.buy_price) || 0,
   };
 }
 
-// ---- Ensure WS is connected ----
+// ---- Ensure WS is connected (via OTP) ----
 
-function ensureWSConnected(): Promise<void> {
-  return new Promise((resolve, reject) => {
+async function ensureWSConnected(): Promise<void> {
+ return new Promise((resolve, reject) => {
     if (ws && ws.readyState === WebSocket.OPEN) {
       resolve();
       return;
     }
 
     if (ws && ws.readyState === WebSocket.CONNECTING) {
-      // Wait for existing connection
       const check = setInterval(() => {
-        if (ws?.readyState === WebSocket.OPEN) {
-          clearInterval(check);
-          resolve();
-        } else if (!ws || ws.readyState === WebSocket.CLOSED) {
-          clearInterval(check);
-          reject(new Error('Connection failed'));
-        }
+        if (ws?.readyState === WebSocket.OPEN) { clearInterval(check); resolve(); }
+        else if (!ws || ws.readyState === WebSocket.CLOSED) { clearInterval(check); reject(new Error('Connection failed')); }
       }, 200);
-      setTimeout(() => { clearInterval(check); reject(new Error('Connection timeout')); }, 10000);
+      setTimeout(() => { clearInterval(check); reject(new Error('Connection timeout')); }, 15000);
       return;
     }
 
-    // Fresh connection
-    try {
-      ws = new WebSocket(DERIV_WS_URL);
-    } catch {
-      reject(new Error('Cannot create WebSocket'));
+    // If we have auth credentials, get OTP and connect
+    if (storedPatToken && storedAppId && storedAccountId) {
+      requestOtpWsUrl(storedPatToken, storedAppId, storedAccountId)
+        .then(wsUrl => {
+          connectToWsUrl(wsUrl, resolve, reject);
+        })
+        .catch(err => {
+          reject(new Error('Failed to get OTP: ' + err.message));
+        });
       return;
     }
 
-    const timer = setTimeout(() => {
-      reject(new Error('WebSocket connection timeout'));
-    }, 8000);
-
-    ws.onopen = () => {
-      clearTimeout(timer);
-      hasEverConnected = true;
-      useSimulation = false;
-      resolve();
-    };
-
-    ws.onerror = () => {
-      clearTimeout(timer);
-      reject(new Error('WebSocket connection error'));
-    };
-
-    ws.onclose = () => {
-      clearTimeout(timer);
-      reject(new Error('WebSocket closed'));
-    };
+    reject(new Error('Not authenticated. Please connect your Deriv account.'));
   });
+}
+
+function connectToWsUrl(wsUrl: string, resolve: () => void, reject: (err: Error) => void) {
+  try {
+    ws = new WebSocket(wsUrl);
+  } catch {
+    reject(new Error('Cannot create WebSocket'));
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    reject(new Error('WebSocket connection timeout'));
+  }, 10000);
+
+  ws.onopen = () => {
+    clearTimeout(timer);
+    hasEverConnected = true;
+    useSimulation = false;
+    console.log('[DerivWS] Connected via OTP');
+    resolve();
+  };
+
+  ws.onerror = () => {
+    clearTimeout(timer);
+    reject(new Error('WebSocket connection error'));
+  };
+
+  ws.onclose = () => {
+    clearTimeout(timer);
+    // Don't reject here - onclose is handled by the reconnect logic
+  };
 }
 
 // ---- Simulation ----
@@ -274,8 +348,35 @@ export function connectDerivWS(
     return;
   }
 
+  // If we have OTP credentials, connect via OTP
+  if (storedPatToken && storedAppId && storedAccountId) {
+    requestOtpWsUrl(storedPatToken, storedAppId, storedAccountId)
+      .then(wsUrl => {
+        setupWsConnection(wsUrl, symbol, onTick, onBalance, onConnect, onDisconnect);
+      })
+      .catch(() => {
+        console.log('[DerivWS] OTP failed, switching to simulation');
+        startSimulation(symbol, onTick);
+        onConnect?.();
+      });
+    return;
+  }
+
+  // No auth — simulation mode
+  startSimulation(symbol, onTick);
+  onConnect?.();
+}
+
+function setupWsConnection(
+  wsUrl: string,
+  symbol: string,
+  onTick: (data: { tick: number; digit: number; price: string }) => void,
+  onBalance?: ((balance: number) => void) | null,
+  onConnect?: (() => void) | null,
+  onDisconnect?: (() => void) | null
+) {
   try {
-    ws = new WebSocket(DERIV_WS_URL);
+    ws = new WebSocket(wsUrl);
   } catch {
     startSimulation(symbol, onTick);
     onConnect?.();
@@ -290,13 +391,13 @@ export function connectDerivWS(
       startSimulation(symbol, onTick);
       onConnect?.();
     }
-  }, 5000);
+  }, 10000);
 
   ws.onopen = () => {
     clearTimeout(connectTimeout);
     hasEverConnected = true;
     useSimulation = false;
-    console.log('[DerivWS] Connected to Deriv (live)');
+    console.log('[DerivWS] Connected to Deriv via OTP (live)');
     if (reconnectTimer) {
       clearTimeout(reconnectTimer);
       reconnectTimer = null;
@@ -312,7 +413,6 @@ export function connectDerivWS(
     try {
       const data = JSON.parse(event.data);
 
-      // Let request/response handler try to consume this first
       if (handleIncomingMessage(data)) return;
 
       if (data.subscription) {
@@ -347,7 +447,6 @@ export function connectDerivWS(
     clearTimeout(connectTimeout);
     tickSubId = null;
     balanceSubId = null;
-    // Reject all pending requests
     for (const [id, pending] of pendingRequests) {
       clearTimeout(pending.timer);
       pending.reject(new Error('WebSocket closed'));
@@ -356,15 +455,26 @@ export function connectDerivWS(
     if (!hasEverConnected) {
       console.log('[DerivWS] Never connected live, switching to simulation');
       ws = null;
-      startSimulation(currentSymbol, onTick!);
+      startSimulation(currentSymbol, onTick);
       onConnect?.();
       return;
     }
-    console.log('[DerivWS] Disconnected (was live before, reconnecting)');
+    console.log('[DerivWS] Disconnected, reconnecting with new OTP...');
     onDisconnect?.();
     reconnectTimer = setTimeout(() => {
       console.log('[DerivWS] Reconnecting...');
-      connectDerivWS(currentSymbol, onTick!, onBalance, onConnect, onDisconnect);
+      if (storedPatToken && storedAppId && storedAccountId) {
+        requestOtpWsUrl(storedPatToken, storedAppId, storedAccountId)
+          .then(wsUrl => {
+            setupWsConnection(wsUrl, currentSymbol, onTick, onBalance, onConnect, onDisconnect);
+          })
+          .catch(() => {
+            // If OTP fails, try again in 5s
+            reconnectTimer = setTimeout(() => {
+              connectDerivWS(currentSymbol, onTick, onBalance ?? undefined, onConnect ?? undefined, onDisconnect ?? undefined);
+            }, 5000);
+          });
+      }
     }, 3000);
   };
 
@@ -402,11 +512,13 @@ export function switchSymbol(symbol: string) {
 export function disconnectDerivWS() {
   stopSimulation();
   hasEverConnected = false;
+  storedPatToken = '';
+  storedAppId = '';
+  storedAccountId = '';
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
     reconnectTimer = null;
   }
-  // Reject all pending requests
   for (const [id, pending] of pendingRequests) {
     clearTimeout(pending.timer);
     pending.reject(new Error('Disconnected'));
