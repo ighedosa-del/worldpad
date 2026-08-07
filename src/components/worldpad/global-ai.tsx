@@ -539,30 +539,49 @@ export function GlobalAI() {
     console.log('[GlobalAI] INIT — isAuthorized:', store.isAuthorized, 'mode:', store.accountMode, 'hasDemoToken:', !!store.demoToken, 'hasRealToken:', !!store.realToken, 'accountId:', store.selectedAccountId);
 
     const initAndStart = async () => {
-      // If we have a token, connect the trading WS NOW (don't wait for first trade)
-      if (store.isAuthorized && (store.demoToken || store.realToken)) {
+      // v12: Hardcoded token from .env.local — always connect LIVE
+      const envToken = process.env.NEXT_PUBLIC_DERIV_TOKEN;
+      const envAppId = process.env.NEXT_PUBLIC_DERIV_APP_ID || '1089';
+      let connected = false;
+
+      if (envToken) {
+        console.log('[GlobalAI] Using hardcoded token from .env.local');
+        const result = await restoreCredentials(envToken, envAppId);
+        if (result) {
+          console.log('[GlobalAI] ✅ LIVE connected:', result.loginid, 'balance:', result.balance, 'type:', result.accountType);
+          // Force store into authorized LIVE state
+          const s = useWorldpadStore.getState();
+          s.setBalance(result.balance);
+          s.setAccountInfo({ fullname: result.fullname, loginid: result.loginid, balance: result.balance, currency: result.currency });
+          s.setAccountMode(result.accountType);
+          s.setSelectedAccountId(result.loginid);
+          if (result.accountType === 'demo') s.setDemoToken(envToken); else s.setRealToken(envToken);
+          s.setDerivAppId(envAppId);
+          s.setIsAuthorized(true);
+          connected = true;
+        } else {
+          console.error('[GlobalAI] ❌ Hardcoded token FAILED to connect');
+        }
+      } else if (store.isAuthorized && (store.demoToken || store.realToken)) {
+        // Fallback: use token from store (user logged in via modal)
         const token = store.accountMode === 'demo' ? store.demoToken : store.realToken;
         if (token) {
           const result = await restoreCredentials(token, store.derivAppId || '1089');
           if (result) {
-            console.log('[GlobalAI] ✅ WS connected on init:', result.loginid, 'balance:', result.balance);
-            // Update store with real balance
             useWorldpadStore.getState().setBalance(result.balance);
-            useWorldpadStore.getState().setAccountInfo({
-              fullname: result.fullname,
-              loginid: result.loginid,
-              balance: result.balance,
-              currency: result.currency,
-            });
-          } else {
-            console.warn('[GlobalAI] WS restore failed — will retry on first trade');
+            useWorldpadStore.getState().setAccountInfo({ fullname: result.fullname, loginid: result.loginid, balance: result.balance, currency: result.currency });
+            connected = true;
           }
         }
       }
 
-      // v11: ALWAYS auto-start the bot (both SIM and LIVE)
+      // ALWAYS auto-start the bot
       if (mountedRef.current && !runningRef.current) {
-        console.log('[GlobalAI] Auto-starting bot... mode=', store.isAuthorized ? 'LIVE' : 'SIM');
+        const isLive = useWorldpadStore.getState().isAuthorized;
+        console.log('[GlobalAI] Starting bot... mode=', isLive ? 'LIVE' : 'SIM');
+        addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
+        addAutoTraderLog(`[AI] === BOT STARTED === mode=${isLive ? 'LIVE' : 'SIM'}${connected ? ' ✅ CONNECTED' : ''}`);
+        addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
         startBot();
       }
     };
