@@ -1,15 +1,16 @@
 'use client';
 
-// === DerivBot Engine v3 — Full Analysis Pipeline ===
+// === DerivBot Engine v4 — Full Analysis Pipeline Enhanced ===
 // Plain TypeScript class. NO React. NO stale closures.
 // Pipeline: ticks → AI engine → regime filter → pattern detection → backtest → EV filter → Kelly stake → execute
+// v4: Adaptive minEV, strategy rotation, barrier optimization, balance-aware risk
 
 import { MultiMarketClient, type TickData, type AuthResult } from './deriv-client';
 import {
   SCANNED_MARKETS, createMarketStates, feedTick,
   runAllStrategies, type MarketState, type TradeSignal,
 } from './strategies';
-import { fullAnalysis, type FullAnalysis } from './analysis';
+import { fullAnalysis, findBestBarrier, type FullAnalysis } from './analysis';
 import { AIEngine, type AISignal } from './ai-engine';
 import { calculateOptimalStake, createRiskState, updateRiskAfterTrade, DEFAULT_RISK_CONFIG, type RiskConfig, type RiskState } from './risk';
 import type { BotStoreState } from './store';
@@ -27,6 +28,7 @@ export interface BotConfig {
   martingaleMaxSteps: number;
   useKelly: boolean;
   minEV: number;
+  adaptiveEV: boolean;     // v4: auto-adjust minEV based on recent performance
 }
 
 export const DEFAULT_CONFIG: BotConfig = {
@@ -41,7 +43,8 @@ export const DEFAULT_CONFIG: BotConfig = {
   martingaleMultiplier: 2.0,
   martingaleMaxSteps: 4,
   useKelly: true,
-  minEV: 0.0,
+  minEV: -0.05,          // v4: slightly negative allowed (backtest can catch)
+  adaptiveEV: true,       // v4: auto-adjust EV threshold
 };
 
 export interface TradeRecord {
@@ -77,6 +80,8 @@ export interface BotStats {
   avgEV: number;
   aiStrategiesLearned: number;
   aiWinRate: number;
+  recoveryMode: boolean;     // v4
+  adaptiveMinEV: number;    // v4
 }
 
 export interface BotStatus {
@@ -109,6 +114,7 @@ export class DerivBot {
   private martingaleStep = 0;
   private currentStake: number;
   private sessionProfit = 0;
+  private startBalance = 0;
   private cycles = 0;
   private totalTrades = 0;
   private wins = 0;
@@ -121,6 +127,8 @@ export class DerivBot {
   private appId: string;
   private token: string = '';
   private tradeHistory: TradeRecord[] = [];
+  private adaptiveMinEV = -0.05;  // v4
+  private currentBalance = 0;
 
   constructor(appId: string, storeUpdate: (partial: Partial<BotStoreState>) => void, log: (msg: string) => void) {
     this.appId = appId;
@@ -139,7 +147,7 @@ export class DerivBot {
     if (partial.stake !== undefined && this.martingaleStep === 0) {
       this.currentStake = partial.stake;
     }
-    this.log(`Config updated: stake=$${this.currentStake}, SL=$${this.config.stopLoss}, TP=$${this.config.takeProfit}, Kelly=${this.config.useKelly}`);
+    this.log(`Config: stake=$${this.currentStake} SL=$${this.config.stopLoss} TP=$${this.config.takeProfit} Kelly=${this.config.useKelly} adaptiveEV=${this.config.adaptiveEV}`);
   }
 
   getConfig(): BotConfig { return { ...this.config }; }
@@ -153,8 +161,11 @@ export class DerivBot {
 
     try {
       const auth = await this.client.connect(token);
+      this.startBalance = auth.balance;
+      this.currentBalance = auth.balance;
 
       this.client.onBalance((data) => {
+        this.currentBalance = data.balance;
         this.storeUpdate({ balance: data.balance });
       });
 
@@ -179,7 +190,7 @@ export class DerivBot {
 
       this.setPhase('idle');
       this.storeUpdate({ connected: true, auth, balance: auth.balance, isVirtual: auth.isVirtual });
-      this.log(`Ready. Subscribed to ${symbols.length} markets.`);
+      this.log(`Ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Subscribed to ${symbols.length} markets.`);
 
       return auth;
     } catch (err) {
@@ -198,9 +209,7 @@ export class DerivBot {
     const state = this.markets.get(tick.symbol);
     if (!state) return;
     feedTick(state, tick);
-    // Feed tick to AI engine for Markov/Bayesian learning
     this.ai.feedTick(tick.symbol, state);
-    // Throttled store update
     if (this.totalTicksReceived % 3 === 0) this.pushMarketDataToStore();
   }
 
@@ -212,20 +221,24 @@ export class DerivBot {
 
     this.running = true;
     this.sessionProfit = 0;
-    this.consecutiveLosses = 0;
-    this.evSum = 0;
     this.martingaleStep = 0;
     this.currentStake = this.config.stake;
     this.tradeHistory = [];
     this.lossCooldowns.clear();
-    this.riskState = createRiskState();
+    this.riskState = createRiskState(this.currentBalance);
+    this.adaptiveMinEV = this.config.minEV;
 
-    this.log('Bot v3 STARTED. Pipeline: AI → Regime → Patterns → Backtest → EV → Kelly → Trade');
+    this.log('Bot v4 STARTED. Pipeline: Strategy → AI → Regime → Patterns → Backtest → Barrier Opt → EV → Kelly → Execute');
     this.storeUpdate({ running: true });
 
     this.markets = createMarketStates();
     this.ai = new AIEngine();
     this.totalTicksReceived = 0;
+    this.cycles = 0;
+    this.totalTrades = 0;
+    this.wins = 0;
+    this.losses = 0;
+    this.evSum = 0;
     this.setPhase('collecting');
 
     this.cycleTimer = setInterval(() => { this.runCycle(); }, this.config.cycleIntervalMs);
@@ -237,6 +250,32 @@ export class DerivBot {
     this.setPhase('stopped');
     this.storeUpdate({ running: false });
     this.log(`Bot STOPPED. ${this.totalTrades} trades, P/L: $${this.sessionProfit.toFixed(2)}, avg EV: ${this.totalTrades > 0 ? (this.evSum / this.totalTrades).toFixed(3) : 'N/A'}`);
+  }
+
+  // --- Adaptive EV Threshold ---
+  // If we're winning, be more selective (raise minEV)
+  // If we're losing, be more permissive (lower minEV) to find any edge
+  private updateAdaptiveEV(): void {
+    if (!this.config.adaptiveEV) return;
+
+    if (this.totalTrades < 5) {
+      this.adaptiveMinEV = this.config.minEV;
+      return;
+    }
+
+    const recentWR = this.wins / this.totalTrades;
+
+    if (recentWR >= 0.85 && this.totalTrades >= 10) {
+      // Winning well — raise bar to only take high-EV trades
+      this.adaptiveMinEV = 0.05;
+    } else if (recentWR >= 0.75) {
+      this.adaptiveMinEV = 0.0;
+    } else if (recentWR >= 0.60) {
+      this.adaptiveMinEV = -0.05;
+    } else if (recentWR < 0.50) {
+      // Losing — be more permissive but not reckless
+      this.adaptiveMinEV = -0.10;
+    }
   }
 
   // --- Main Cycle ---
@@ -263,6 +302,9 @@ export class DerivBot {
     // Phase 2: Full analysis pipeline
     this.setPhase('scanning');
 
+    // Update adaptive EV
+    this.updateAdaptiveEV();
+
     // Stop-loss / take-profit check
     if (this.config.stopLoss > 0 && this.sessionProfit <= -this.config.stopLoss) {
       this.log(`STOP LOSS: -$${Math.abs(this.sessionProfit).toFixed(2)}`);
@@ -286,20 +328,41 @@ export class DerivBot {
       // 2. AI signal (Markov + Bayesian + learning)
       const aiSignal = this.ai.analyze(state);
 
-      // 3. Pick best signal or null
+      // 3. Pick best signal
       const bestSignal = this.pickBestSignal(strategySignal, aiSignal);
 
-      // 4. Full analysis: regime + patterns + backtest + EV
+      // 4. Full analysis: regime + patterns + backtest + EV + barrier optimization
       const analysis = fullAnalysis(state, bestSignal ? { contractType: bestSignal.contractType, barrier: bestSignal.barrier } : null);
 
-      // 5. Combined score
+      // 5. If analysis found a better barrier, use it
+      let effectiveSignal = bestSignal;
+      if (analysis.bestBarrier && analysis.bestBarrierWinRate >= 0.90 && (!bestSignal || analysis.bestBarrierWinRate > (analysis.backtest?.winRate ?? 0))) {
+        effectiveSignal = {
+          contractType: 'DIGITDIFF',
+          barrier: analysis.bestBarrier,
+          confidence: 0.75,
+          reason: `BarrierOpt: d${analysis.bestBarrier} wr=${(analysis.bestBarrierWinRate * 100).toFixed(0)}%`,
+        };
+      }
+
+      // 6. Combined score
       let score = 0;
-      if (analysis.shouldTrade && bestSignal) {
-        const sigConf = bestSignal ? bestSignal.confidence : 0;
-        score = analysis.ev * 100 + analysis.regime.confidence * 30 + sigConf * 20;
-        const bt2 = analysis.backtest;
-        if (bt2 && bt2.grade === 'A') score += 15;
-        else if (bt2 && bt2.grade === 'B') score += 10;
+      if (analysis.shouldTrade && effectiveSignal) {
+        const sigConf = effectiveSignal.confidence;
+        // EV is the primary driver
+        score = Math.max(analysis.ev * 100, 0) * 2; // EV heavily weighted
+        score += analysis.regime.confidence * 25;
+        score += sigConf * 20;
+        const bt = analysis.backtest;
+        if (bt) {
+          if (bt.grade === 'A') score += 20;
+          else if (bt.grade === 'B') score += 15;
+          else if (bt.grade === 'C') score += 8;
+        }
+        // v4: Consensus bonus
+        if (strategySignal && aiSignal) {
+          if (strategySignal.barrier === aiSignal.barrier) score += 15; // both agree on barrier
+        }
       }
 
       scored.push({ state, strategySignal, aiSignal, analysis, ev: analysis.ev, combinedScore: score });
@@ -313,7 +376,7 @@ export class DerivBot {
       const bt = m.analysis.backtest;
       const btGrade = bt ? bt.grade : '-';
       const sig = m.analysis.shouldTrade
-        ? (m.analysis.regime.regime + ' | EV:' + m.ev.toFixed(3) + ' | ' + btGrade + ' | ' + (m.strategySignal ? m.strategySignal.reason : (m.aiSignal ? m.aiSignal.reason : '-')))
+        ? (m.analysis.regime.regime + ' | EV:' + m.ev.toFixed(3) + ' | ' + btGrade + ' | ' + (m.strategySignal ? m.strategySignal.reason.slice(0, 40) : (m.aiSignal ? m.aiSignal.reason.slice(0, 40) : '-')))
         : (m.analysis.regime.regime + ' | no signal');
       const ld = m.state.lastTick;
       return {
@@ -335,7 +398,7 @@ export class DerivBot {
 
     const best = this.pickBestMarket(scored);
     if (!best) {
-      if (this.cycles % 10 === 0) this.log('No +EV trade signal. Waiting...');
+      if (this.cycles % 10 === 0) this.log(`No +EV trade. adaptiveMinEV=${this.adaptiveMinEV.toFixed(3)} WR=${this.totalTrades > 0 ? ((this.wins/this.totalTrades)*100).toFixed(0) : 0}%`);
       this.pushStatsToStore();
       return;
     }
@@ -348,9 +411,9 @@ export class DerivBot {
     if (!strategy && !ai) return null;
     if (!strategy) return ai;
     if (!ai) return strategy;
-    // Prefer AI signal (learned) over pure strategy signal
-    if (ai.confidence > 0.5) return ai;
-    return strategy.confidence > ai.confidence ? strategy : ai;
+    // v4: Prefer whichever has higher confidence, but boost AI slightly
+    const aiBoosted = { ...ai, confidence: ai.confidence * 1.05 };
+    return strategy.confidence > aiBoosted.confidence ? strategy : aiBoosted;
   }
 
   private pickBestMarket(scored: ScoredMarketExt[]): ScoredMarketExt | null {
@@ -359,14 +422,14 @@ export class DerivBot {
 
     for (const m of scored) {
       if (!m.analysis.shouldTrade) continue;
-      if (m.ev < this.config.minEV) continue;
+      // v4: Use adaptive EV threshold
+      if (m.ev < this.adaptiveMinEV) continue;
 
       const lastLossCycle = this.lossCooldowns.get(m.state.symbol) ?? 0;
       if (now - lastLossCycle < 3) continue;
 
       if (activeCount >= this.config.maxConcurrentTrades) continue;
 
-      // Prefer markets with higher EV
       activeCount++;
       return m;
     }
@@ -376,6 +439,12 @@ export class DerivBot {
   private async executeTrade(market: ScoredMarketExt): Promise<void> {
     const signal = this.pickBestSignal(market.strategySignal, market.aiSignal);
     if (!signal) return;
+
+    // v4: Check if analysis found a better barrier
+    let effectiveBarrier = signal.barrier;
+    if (market.analysis.bestBarrier && market.analysis.bestBarrierWinRate >= 0.90) {
+      effectiveBarrier = market.analysis.bestBarrier;
+    }
 
     // Calculate optimal stake
     let stake = this.currentStake;
@@ -388,6 +457,7 @@ export class DerivBot {
         signal.contractType,
         riskConfig,
         this.riskState,
+        this.currentBalance,
       );
       if (result.stake > 0) {
         stake = result.stake;
@@ -395,17 +465,19 @@ export class DerivBot {
       }
     }
 
-    const barrierStr = signal.barrier !== undefined ? String(signal.barrier) : '-';
-    const bt3 = market.analysis.backtest;
-    const btGradeStr = bt3 ? bt3.grade : '?';
-    this.log(`TRADE: ${signal.contractType} ${market.state.symbol} d${barrierStr} $${stake.toFixed(2)} | EV=${market.ev.toFixed(3)} ${market.analysis.regime.regime} BT:${btGradeStr} | ${signal.reason}`);
+    // Override barrier with optimized one
+    const tradeBarrier = effectiveBarrier;
+    const barrierStr = tradeBarrier !== undefined ? String(tradeBarrier) : '-';
+    const bt = market.analysis.backtest;
+    const btGradeStr = bt ? bt.grade : '?';
+    this.log(`TRADE: ${signal.contractType} ${market.state.symbol} d${barrierStr} $${stake.toFixed(2)} | EV=${market.ev.toFixed(3)} ${market.analysis.regime.regime} BT:${btGradeStr} | ${signal.reason.slice(0, 50)}`);
 
     try {
       const proposal = await this.client.getProposal({
         contractType: signal.contractType,
         symbol: market.state.symbol,
         stake,
-        barrier: signal.barrier,
+        barrier: tradeBarrier,
         duration: 1,
         durationUnit: 't',
       });
@@ -426,7 +498,7 @@ export class DerivBot {
         stake,
         payout: buyResult.payout,
         profit: buyResult.profit,
-        barrier: signal.barrier,
+        barrier: tradeBarrier,
         won,
         timestamp: Date.now(),
         simulated: false,
@@ -458,7 +530,6 @@ export class DerivBot {
 
     if (record.won) {
       this.wins++;
-      this.riskState.consecutiveLosses = 0;
       this.martingaleStep = 0;
       this.currentStake = this.config.stake;
       this.lossCooldowns.delete(symbol);
@@ -505,13 +576,15 @@ export class DerivBot {
         avgEV: this.totalTrades > 0 ? this.evSum / this.totalTrades : 0,
         aiStrategiesLearned: aiStats.strategiesLearned,
         aiWinRate: aiStats.winRate * 100,
+        recoveryMode: this.riskState.recoveryMode,
+        adaptiveMinEV: this.adaptiveMinEV,
       },
       ticks: this.totalTicksReceived,
     });
   }
 
   private pushMarketDataToStore(): void {
-    const marketData = [] as Array<{ symbol: string; name: string; digit: number; price: number; distribution: number[]; totalTicks: number }>;
+    const marketData: { symbol: string; name: string; digit: number; price: number; distribution: number[]; totalTicks: number }[] = [];
     for (const [, state] of this.markets) {
       const lt = state.lastTick;
       marketData.push({
@@ -540,6 +613,8 @@ export class DerivBot {
       avgEV: this.totalTrades > 0 ? this.evSum / this.totalTrades : 0,
       aiStrategiesLearned: aiStats.strategiesLearned,
       aiWinRate: aiStats.winRate * 100,
+      recoveryMode: this.riskState.recoveryMode,
+      adaptiveMinEV: this.adaptiveMinEV,
     };
   }
 

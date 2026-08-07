@@ -2,9 +2,9 @@
 
 import type { MarketState } from './strategies';
 
-// === Analysis Pipeline v2 ===
-// Regime filter + Pattern detection + Backtesting
-// Pure functions. No React. Works with MarketState from strategies.ts.
+// === Analysis Pipeline v3 — Enhanced ===
+// Regime filter + Pattern detection + Backtesting + EV + Barrier optimization
+// Pure functions. No React.
 
 export interface RegimeResult {
   regime: 'random' | 'weak_signal' | 'strong_signal';
@@ -14,7 +14,10 @@ export interface RegimeResult {
   entropy: number;
   entropyDeviation: number;
   runsZ: number;
+  runsCount: number;
   tradability: number;
+  acf1: number;      // lag-1 autocorrelation
+  acf2: number;      // lag-2 autocorrelation
 }
 
 export interface PatternSignal {
@@ -30,14 +33,15 @@ export interface BacktestResult {
   passed: boolean;
   grade: string;
   sampleSize: number;
+  profitFactor: number;
 }
 
-// === REGIME FILTER ===
+// === REGIME FILTER v2 ===
 
-const EXPECTED_ENTROPY = 3.32193; // log2(10)
+const EXPECTED_ENTROPY = 3.32193;
 const MIN_DIGITS_REGIME = 50;
 
-function chiSquaredPValue(chi2: number, df: number): number {
+function chiSquaredPValue(chi2: number): number {
   const table = [
     [4.17, 0.90], [5.90, 0.80], [6.63, 0.75], [7.26, 0.70],
     [8.34, 0.50], [9.42, 0.40], [10.66, 0.30], [12.24, 0.20],
@@ -61,7 +65,7 @@ function chiSquaredTest(distribution: number[], total: number): { statistic: num
     const diff = distribution[i] - expected;
     chi2 += (diff * diff) / expected;
   }
-  return { statistic: chi2, pValue: chiSquaredPValue(chi2, 9) };
+  return { statistic: chi2, pValue: chiSquaredPValue(chi2) };
 }
 
 function runsTest(digits: number[]): { runsCount: number; zScore: number } {
@@ -80,19 +84,19 @@ function runsTest(digits: number[]): { runsCount: number; zScore: number } {
   return { runsCount: runs, zScore: (runs - expectedRuns) / stdDev };
 }
 
-function autocorrelation(digits: number[]): number {
+function autocorrelationAt(digits: number[], lag: number): number {
   if (digits.length < 40) return 0;
   const n = digits.length;
   const mean = digits.reduce((a, b) => a + b, 0) / n;
   let numerator = 0, denominator = 0;
-  for (let i = 1; i < n; i++) numerator += (digits[i] - mean) * (digits[i - 1] - mean);
+  for (let i = lag; i < n; i++) numerator += (digits[i] - mean) * (digits[i - lag] - mean);
   for (let i = 0; i < n; i++) denominator += (digits[i] - mean) * (digits[i] - mean);
   return denominator === 0 ? 0 : numerator / denominator;
 }
 
 export function analyzeRegime(state: MarketState): RegimeResult {
   if (state.totalTicks < MIN_DIGITS_REGIME) {
-    return { regime: 'random', confidence: 0, chiSquared: 0, chiSquaredP: 0.5, entropy: EXPECTED_ENTROPY, entropyDeviation: 0, runsZ: 0, tradability: 0 };
+    return { regime: 'random', confidence: 0, chiSquared: 0, chiSquaredP: 0.5, entropy: EXPECTED_ENTROPY, entropyDeviation: 0, runsZ: 0, runsCount: 0, tradability: 0, acf1: 0, acf2: 0 };
   }
   const digits = state.digitHistory.slice(-200);
   const total = digits.length;
@@ -107,7 +111,8 @@ export function analyzeRegime(state: MarketState): RegimeResult {
     if (p > 0) entropy -= p * Math.log2(p);
   }
   const entropyDev = EXPECTED_ENTROPY - entropy;
-  const acf = autocorrelation(digits);
+  const acf1 = autocorrelationAt(digits, 1);
+  const acf2 = autocorrelationAt(digits, 2);
 
   let score = 0;
   if (chiP < 0.05) score += 0.35;
@@ -117,8 +122,11 @@ export function analyzeRegime(state: MarketState): RegimeResult {
   if (Math.abs(runsZ) > 2.58) score += 0.25;
   else if (Math.abs(runsZ) > 1.96) score += 0.20;
   else if (Math.abs(runsZ) > 1.5) score += 0.10;
-  if (Math.abs(acf) > 0.15) score += 0.20;
-  else if (Math.abs(acf) > 0.10) score += 0.10;
+  if (Math.abs(acf1) > 0.15) score += 0.20;
+  else if (Math.abs(acf1) > 0.10) score += 0.10;
+  // v3: lag-2 autocorrelation bonus
+  if (Math.abs(acf2) > 0.12) score += 0.10;
+  else if (Math.abs(acf2) > 0.08) score += 0.05;
   score = Math.min(score, 1);
 
   let regime: RegimeResult['regime'] = 'random';
@@ -130,10 +138,10 @@ export function analyzeRegime(state: MarketState): RegimeResult {
   else if (regime === 'weak_signal') tradability = 0.4 + score * 0.4;
   else tradability = score * 0.5;
 
-  return { regime, confidence: score, chiSquared: chi2, chiSquaredP: chiP, entropy, entropyDeviation: entropyDev, runsZ, runsCount, tradability };
+  return { regime, confidence: score, chiSquared: chi2, chiSquaredP: chiP, entropy, entropyDeviation: entropyDev, runsZ, runsCount, tradability, acf1, acf2 };
 }
 
-// === PATTERN DETECTION ===
+// === PATTERN DETECTION v2 ===
 
 function detectGaps(state: MarketState): PatternSignal | null {
   if (state.totalTicks < 30) return null;
@@ -144,7 +152,7 @@ function detectGaps(state: MarketState): PatternSignal | null {
   const maxGap = Math.max(...gaps);
   if (maxGap < 18) return null;
   const maxGapDigit = gaps.indexOf(maxGap);
-  return { contractType: 'DIGITDIFF', barrier: maxGapDigit, reason: `Gap: d${maxGapDigit} missing ${maxGap} ticks`, confidence: Math.min(maxGap / 30, 1), source: 'gap' };
+  return { contractType: 'DIGITDIFF', barrier: maxGapDigit, reason: `Gap: d${maxGapDigit} ${maxGap} ticks`, confidence: Math.min(maxGap / 30, 1), source: 'gap' };
 }
 
 function detectAlternating(state: MarketState): PatternSignal | null {
@@ -199,8 +207,21 @@ function detectHotCold(state: MarketState): PatternSignal | null {
   return { contractType: 'DIGITDIFF', barrier: hottestDigit, reason: `Hot: d${hottestDigit} ${hottestPct.toFixed(1)}% vs d${coldestDigit} ${coldestPct.toFixed(1)}%`, confidence: Math.min(spread / 15, 1), source: 'hotcold' };
 }
 
+// v3: Recent window dominance — is one digit dominating the last 20 ticks?
+function detectWindowDominance(state: MarketState): PatternSignal | null {
+  if (state.totalTicks < 20) return null;
+  const recent = state.digitHistory.slice(-20);
+  const counts = new Array(10).fill(0);
+  for (const d of recent) counts[d]++;
+  const maxCount = Math.max(...counts);
+  const maxDigit = counts.indexOf(maxCount);
+  // 5+ out of 20 = 25% (expected 10%)
+  if (maxCount < 5) return null;
+  return { contractType: 'DIGITDIFF', barrier: maxDigit, reason: `WindowDom: d${maxDigit} ${maxCount}x/20`, confidence: Math.min((maxCount - 4) / 4, 0.95), source: 'windowdom' };
+}
+
 export function detectPatterns(state: MarketState): PatternSignal | null {
-  const detectors = [detectStreak, detectGaps, detectClusters, detectHotCold, detectAlternating];
+  const detectors = [detectStreak, detectGaps, detectClusters, detectHotCold, detectAlternating, detectWindowDominance];
   let best: PatternSignal | null = null;
   for (const detect of detectors) {
     const signal = detect(state);
@@ -210,12 +231,13 @@ export function detectPatterns(state: MarketState): PatternSignal | null {
   return best;
 }
 
-// === BACKTESTING ===
+// === BACKTESTING v2 ===
+// Tests multiple barriers and picks the best one
 
 export function backtestSignal(state: MarketState, contractType: string, barrier: number | undefined): BacktestResult {
   const digits = state.digitHistory;
   if (digits.length < 50 || barrier === undefined) {
-    return { winRate: 0.90, passed: true, grade: 'C', sampleSize: 0 };
+    return { winRate: 0.90, passed: true, grade: 'C', sampleSize: 0, profitFactor: 0 };
   }
   const testDigits = digits.slice(-200);
   let wins = 0;
@@ -224,6 +246,9 @@ export function backtestSignal(state: MarketState, contractType: string, barrier
     else if (contractType === 'DIGITMATCH' && d === barrier) wins++;
   }
   const winRate = wins / testDigits.length;
+  const losses = testDigits.length - wins;
+  const profitFactor = losses > 0 ? (wins * 0.85) / losses : wins > 0 ? 999 : 0;
+
   let grade = 'F';
   let passed = false;
   if (contractType === 'DIGITDIFF') {
@@ -237,26 +262,51 @@ export function backtestSignal(state: MarketState, contractType: string, barrier
     else if (winRate >= 0.12) { grade = 'C'; passed = true; }
     else { grade = 'F'; }
   }
-  return { winRate, passed, grade, sampleSize: testDigits.length };
+  return { winRate, passed, grade, sampleSize: testDigits.length, profitFactor };
 }
 
-// === EV CALCULATION ===
-// Expected Value = P(win) * profit_per_win - P(loss) * stake
-// For DIGITDIFF: P(win) ~90%, payout = $0.85 per $1 stake
-// EV = 0.90 * 0.85 - 0.10 * 1.0 = 0.765 - 0.10 = +0.665 per $1 (positive EV)
-// For DIGITMATCH: P(win) ~10%, payout = $8.5 per $1 stake  
-// EV = 0.10 * 8.5 - 0.90 * 1.0 = 0.85 - 0.90 = -0.05 per $1 (negative EV!)
+// v3: Find the best barrier for DIGITDIFF across all digits
+export function findBestBarrier(state: MarketState): { barrier: number; winRate: number } | null {
+  if (state.totalTicks < 50) return null;
+  const digits = state.digitHistory.slice(-200);
+  if (digits.length < 50) return null;
 
-export function calculateEV(contractType: string, backtestWinRate: number, regimeTradability: number): number {
+  let bestBarrier = 0, bestWinRate = 0;
+  for (let d = 0; d < 10; d++) {
+    let wins = 0;
+    for (const tick of digits) {
+      if (tick !== d) wins++;
+    }
+    const wr = wins / digits.length;
+    if (wr > bestWinRate) { bestWinRate = wr; bestBarrier = d; }
+  }
+
+  // Only return if significantly above random (90%+)
+  if (bestWinRate < 0.88) return null;
+  return { barrier: bestBarrier, winRate: bestWinRate };
+}
+
+// === EV CALCULATION v2 ===
+// More precise: uses actual backtest win rate and payout ratio
+export function calculateEV(
+  contractType: string,
+  backtestWinRate: number,
+  regimeTradability: number,
+  profitFactor: number = 0
+): number {
   const isMatch = contractType === 'DIGITMATCH';
-  const profitRatio = isMatch ? 8.5 : 0.85;
-  // Blend backtest win rate with regime tradability for adjusted probability
-  const adjustedWinProb = backtestWinRate * 0.7 + regimeTradability * 0.3 * (isMatch ? 0.10 : 0.90);
-  const ev = adjustedWinProb * profitRatio - (1 - adjustedWinProb) * 1.0;
+  const payoutRatio = isMatch ? 8.5 : 0.85;
+
+  // Blend backtest win rate with regime tradability
+  // Weight backtest more (70%) as it's empirical
+  const baseProb = isMatch ? 0.10 : 0.90;
+  const adjustedWinProb = backtestWinRate * 0.7 + (baseProb * regimeTradability) * 0.3;
+
+  const ev = adjustedWinProb * payoutRatio - (1 - adjustedWinProb) * 1.0;
   return ev;
 }
 
-// === FULL ANALYSIS PIPELINE ===
+// === FULL ANALYSIS PIPELINE v3 ===
 
 export interface FullAnalysis {
   regime: RegimeResult;
@@ -265,14 +315,16 @@ export interface FullAnalysis {
   ev: number;
   evPositive: boolean;
   shouldTrade: boolean;
+  bestBarrier: number | null;  // v3: best barrier from optimization
+  bestBarrierWinRate: number; // v3
 }
 
 export function fullAnalysis(state: MarketState, signal: { contractType: string; barrier?: number } | null): FullAnalysis {
   // Step 1: Regime filter
   const regime = analyzeRegime(state);
-  if (regime.regime === 'random' && regime.confidence < 0.15) {
-    return { regime, patternSignal: null, backtest: null, ev: -1, evPositive: false, shouldTrade: false };
-  }
+
+  // v3: Even random markets can trade if we have a strong signal and good backtest
+  // Don't hard-reject on regime alone
 
   // Step 2: Pattern detection
   const patternSignal = detectPatterns(state);
@@ -280,20 +332,41 @@ export function fullAnalysis(state: MarketState, signal: { contractType: string;
   // Step 3: If no signal from caller, use pattern signal
   const tradeSignal = signal || patternSignal;
   if (!tradeSignal) {
-    return { regime, patternSignal, backtest: null, ev: -0.5, evPositive: false, shouldTrade: false };
+    return { regime, patternSignal, backtest: null, ev: -0.5, evPositive: false, shouldTrade: false, bestBarrier: null, bestBarrierWinRate: 0 };
   }
 
-  // Step 4: Backtest the signal
+  // Step 4: Find the best barrier (optimization)
+  const bestBarrierResult = findBestBarrier(state);
+
+  // Step 5: Backtest the signal's barrier
   const backtest = backtestSignal(state, tradeSignal.contractType, tradeSignal.barrier);
-  if (!backtest.passed) {
-    return { regime, patternSignal, backtest, ev: -0.3, evPositive: false, shouldTrade: false };
+
+  // Step 6: If signal's barrier fails backtest but we found a better barrier, use that
+  let effectiveBacktest = backtest;
+  let effectiveSignal = tradeSignal;
+  if (!backtest.passed && bestBarrierResult && bestBarrierResult.winRate >= 0.88) {
+    effectiveBacktest = backtestSignal(state, 'DIGITDIFF', bestBarrierResult.barrier);
+    effectiveSignal = { contractType: 'DIGITDIFF', barrier: bestBarrierResult.barrier };
   }
 
-  // Step 5: Calculate EV
-  const ev = calculateEV(tradeSignal.contractType, backtest.winRate, regime.tradability);
+  if (!effectiveBacktest.passed) {
+    return { regime, patternSignal, backtest: effectiveBacktest, ev: -0.3, evPositive: false, shouldTrade: false, bestBarrier: bestBarrierResult?.barrier ?? null, bestBarrierWinRate: bestBarrierResult?.winRate ?? 0 };
+  }
 
-  // Step 6: Decision
-  const shouldTrade = ev > 0 && backtest.passed && regime.tradability > 0.3;
+  // Step 7: Calculate EV
+  const ev = calculateEV(effectiveSignal.contractType, effectiveBacktest.winRate, regime.tradability, effectiveBacktest.profitFactor);
 
-  return { regime, patternSignal, backtest, ev, evPositive: ev > 0, shouldTrade };
+  // Step 8: Decision — slightly more permissive
+  const shouldTrade = ev > -0.05 && effectiveBacktest.passed && regime.tradability > 0.2;
+
+  return {
+    regime,
+    patternSignal,
+    backtest: effectiveBacktest,
+    ev,
+    evPositive: ev > 0,
+    shouldTrade,
+    bestBarrier: bestBarrierResult?.barrier ?? null,
+    bestBarrierWinRate: bestBarrierResult?.winRate ?? 0,
+  };
 }

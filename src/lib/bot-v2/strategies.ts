@@ -1,8 +1,10 @@
 'use client';
 
-// === Trading Strategies v2 ===
+// === Trading Strategies v3 — Enhanced ===
 // Pure functions. No React. No closures.
 // Each strategy analyzes digit history and returns a signal or null.
+// v3: Added consensus scoring, Markov-transition strategy, pair analysis,
+//     and improved signal confidence calibration.
 
 import type { TickData } from './deriv-client';
 
@@ -71,15 +73,11 @@ export function feedTick(state: MarketState, tick: TickData): void {
 }
 
 // === Strategy 1: Digit Frequency Analysis (DIGITDIFF) ===
-// Find the digit that has appeared MOST frequently and bet DIFF against it.
-// Rationale: over time, digits should converge to uniform 10%. 
-// If a digit is overrepresented, it should regress.
 export function strategyFrequencyDiff(state: MarketState): TradeSignal | null {
   const minTicks = 30;
   if (state.totalTicks < minTicks) return null;
 
   const total = state.totalTicks;
-  const expected = total / 10;
   let maxDigit = 0;
   let maxCount = 0;
 
@@ -90,47 +88,43 @@ export function strategyFrequencyDiff(state: MarketState): TradeSignal | null {
     }
   }
 
-  // Only signal if the digit is significantly overrepresented
-  const overPct = ((maxCount / total) - 0.1) * 100; // how many % above expected
-  if (overPct < 3) return null; // need at least 3% above 10% to trigger
+  const overPct = ((maxCount / total) - 0.1) * 100;
+  if (overPct < 2.5) return null; // slightly more sensitive
 
-  const confidence = Math.min(0.95, 0.5 + overPct / 20);
+  const confidence = Math.min(0.95, 0.5 + overPct / 18);
 
   return {
     contractType: 'DIGITDIFF',
     barrier: maxDigit,
     confidence,
-    reason: `FreqDiff: digit ${maxDigit} at ${(maxCount/total*100).toFixed(1)}% (expected 10%), over by ${overPct.toFixed(1)}pp`,
+    reason: `FreqDiff: d${maxDigit} at ${(maxCount/total*100).toFixed(1)}% (over ${overPct.toFixed(1)}pp)`,
   };
 }
 
 // === Strategy 2: Last-N Repeating Pattern (DIGITMATCH) ===
-// If the same digit appeared 2+ times in last 3 ticks, bet MATCH on it.
 export function strategyRepeatMatch(state: MarketState): TradeSignal | null {
   const h = state.digitHistory;
   if (h.length < 5) return null;
 
   const last3 = h.slice(-3);
-  // Check if 2 out of last 3 are the same
   if (last3[1] === last3[2] && last3[0] !== last3[1]) {
     return {
       contractType: 'DIGITMATCH',
       barrier: last3[1],
       confidence: 0.65,
-      reason: `RepeatMatch: ${last3[1]} appeared 2x in last 3 ticks`,
+      reason: `RepeatMatch: d${last3[1]} 2x in last 3`,
     };
   }
   return null;
 }
 
 // === Strategy 3: Alternating Pattern (DIGITDIFF) ===
-// If last 4+ digits alternate even-odd, bet DIFF against the expected next.
 export function strategyAlternating(state: MarketState): TradeSignal | null {
   const h = state.digitHistory;
   if (h.length < 6) return null;
 
-  let alternating = true;
   const last4 = h.slice(-4);
+  let alternating = true;
   for (let i = 1; i < last4.length; i++) {
     if ((last4[i] % 2) === (last4[i - 1] % 2)) {
       alternating = false;
@@ -141,8 +135,7 @@ export function strategyAlternating(state: MarketState): TradeSignal | null {
   if (!alternating) return null;
 
   const lastDigit = h[h.length - 1];
- const nextExpected = lastDigit % 2 === 0 ? 1 : 0; // opposite parity
-  // Find the least common digit of that parity as barrier
+  const nextExpected = lastDigit % 2 === 0 ? 1 : 0;
   let bestDigit = nextExpected;
   let bestCount = Infinity;
   for (let d = nextExpected; d < 10; d += 2) {
@@ -155,13 +148,12 @@ export function strategyAlternating(state: MarketState): TradeSignal | null {
   return {
     contractType: 'DIGITDIFF',
     barrier: bestDigit,
-    confidence: 0.6,
-    reason: `Alternating: last 4 alternate E/O, diff against ${bestDigit} (rarest ${nextExpected === 0 ? 'even' : 'odd'})`,
+    confidence: 0.65,
+    reason: `Alternating: 4 E/O, diff d${bestDigit}`,
   };
 }
 
 // === Strategy 4: Streak Break (DIGITDIFF) ===
-// If a digit appeared 3+ consecutive times, bet DIFF against it.
 export function strategyStreakBreak(state: MarketState): TradeSignal | null {
   const h = state.digitHistory;
   if (h.length < 4) return null;
@@ -173,79 +165,186 @@ export function strategyStreakBreak(state: MarketState): TradeSignal | null {
     else break;
   }
 
-  if (streak < 3) return null;
+  if (streak < 2) return null; // lowered from 3 — catch streaks earlier
 
-  const confidence = Math.min(0.92, 0.6 + streak * 0.08);
+  const confidence = Math.min(0.95, 0.55 + streak * 0.10);
 
   return {
     contractType: 'DIGITDIFF',
     barrier: last,
     confidence,
-    reason: `StreakBreak: digit ${last} streak of ${streak}, betting against continuation`,
+    reason: `StreakBreak: d${last} x${streak}`,
   };
 }
 
-// === Strategy 5: Underrepresented Digit (DIGITMATCH) ===
-// If a digit is severely underrepresented, bet it will appear.
+// === Strategy 5: Underrepresented Digit (DIGITDIFF, not MATCH) ===
+// v3: Changed to DIGITDIFF against the OVER-represented digit
+// (more profitable — 90% win rate vs 10% for MATCH)
 export function strategyUnderrepresented(state: MarketState): TradeSignal | null {
   const minTicks = 50;
   if (state.totalTicks < minTicks) return null;
 
   const total = state.totalTicks;
-  const expected = total / 10;
-  let minDigit = 0;
-  let minCount = Infinity;
+  let minDigit = 0, minCount = Infinity;
+  let maxDigit = 0, maxCount = 0;
 
   for (let d = 0; d < 10; d++) {
-    if (state.distribution[d] < minCount) {
-      minCount = state.distribution[d];
-      minDigit = d;
-    }
+    if (state.distribution[d] < minCount) { minCount = state.distribution[d]; minDigit = d; }
+    if (state.distribution[d] > maxCount) { maxCount = state.distribution[d]; maxDigit = d; }
   }
 
-  const underPct = (0.1 - minCount / total) * 100;
-  if (underPct < 4) return null; // need at least 4% below expected
+  const spread = ((maxCount - minCount) / total) * 100;
+  if (spread < 5) return null;
 
-  const confidence = Math.min(0.85, 0.45 + underPct / 15);
+  // DIFF against the over-represented digit (profitable)
+  const confidence = Math.min(0.90, 0.45 + spread / 15);
 
   return {
-    contractType: 'DIGITMATCH',
-    barrier: minDigit,
+    contractType: 'DIGITDIFF',
+    barrier: maxDigit,
     confidence,
-    reason: `UnderRep: digit ${minDigit} at ${(minCount/total*100).toFixed(1)}%, under by ${underPct.toFixed(1)}pp`,
+    reason: `Spread: d${maxDigit} ${(maxCount/total*100).toFixed(1)}% vs d${minDigit} ${(minCount/total*100).toFixed(1)}%`,
   };
 }
 
-// === Run all strategies on a market, return best signal ===
+// === Strategy 6: Pair Transition Analysis (NEW) ===
+// Looks at the most common digit pairs and predicts based on last digit
+export function strategyPairTransition(state: MarketState): TradeSignal | null {
+  const h = state.digitHistory;
+  if (h.length < 60) return null;
+
+  const recent = h.slice(-150);
+  // Count transitions: prevDigit -> nextDigit
+  const transitions = Array.from({ length: 10 }, () => new Array(10).fill(0));
+  for (let i = 1; i < recent.length; i++) {
+    transitions[recent[i - 1]][recent[i]]++;
+  }
+
+  const lastDigit = h[h.length - 1];
+  const row = transitions[lastDigit];
+  const rowTotal = row.reduce((a, b) => a + b, 0);
+  if (rowTotal < 5) return null;
+
+  // Find least likely next digit (best for DIFF)
+  let minP = Infinity, minD = 0;
+  for (let d = 0; d < 10; d++) {
+    const p = row[d] / rowTotal;
+    if (p < minP) { minP = p; minD = d; }
+  }
+
+  // Only signal if the least likely digit is significantly underrepresented
+  if (minP > 0.06) return null; // need to be below 6% (expected 10%)
+
+  return {
+    contractType: 'DIGITDIFF',
+    barrier: minD,
+    confidence: Math.min((0.10 - minP) / 0.08, 0.90),
+    reason: `PairTrans: d${lastDigit}->d${minD} only ${(minP*100).toFixed(1)}%`,
+  };
+}
+
+// === Strategy 7: Gap Exploitation (NEW) ===
+// If a digit hasn't appeared for a long time, it's "overdue"
+// But for DIFF, we exploit the MOST FREQUENT recent digit
+export function strategyGapExploit(state: MarketState): TradeSignal | null {
+  const h = state.digitHistory;
+  if (h.length < 30) return null;
+
+  const lastSeen = new Array(10).fill(-1);
+  for (let i = 0; i < h.length; i++) lastSeen[h[i]] = i;
+
+  // Find the digit with the longest gap
+  const gaps = lastSeen.map(pos => h.length - 1 - pos);
+  const maxGap = Math.max(...gaps);
+  if (maxGap < 20) return null;
+
+  // Also find the digit that appeared most in the LAST 10 ticks
+  const recent10 = h.slice(-10);
+  const recentCounts = new Array(10).fill(0);
+  for (const d of recent10) recentCounts[d]++;
+  const hotDigit = recentCounts.indexOf(Math.max(...recentCounts));
+
+  if (recentCounts[hotDigit] < 3) return null;
+
+  return {
+    contractType: 'DIGITDIFF',
+    barrier: hotDigit,
+    confidence: Math.min(0.85, 0.5 + recentCounts[hotDigit] * 0.1),
+    reason: `GapExploit: d${gaps.indexOf(maxGap)} gap=${maxGap}, hot d${hotDigit}=${recentCounts[hotDigit]}x/10`,
+  };
+}
+
+// === Run all strategies with consensus ===
 const ALL_STRATEGIES = [
   strategyStreakBreak,
   strategyFrequencyDiff,
-  strategyRepeatMatch,
+  strategyGapExploit,
+  strategyPairTransition,
   strategyAlternating,
   strategyUnderrepresented,
+  strategyRepeatMatch, // lowest priority (DIGITMATCH is risky)
 ];
 
 export function runAllStrategies(state: MarketState): TradeSignal | null {
-  let bestSignal: TradeSignal | null = null;
+  const signals: TradeSignal[] = [];
 
   for (const strategy of ALL_STRATEGIES) {
     const signal = strategy(state);
-    if (!signal) continue;
-
-    // Prefer DIGITDIFF over DIGITMATCH (higher win rate ~90% vs ~10%)
-    if (!bestSignal) {
-      bestSignal = signal;
-    } else {
-      // DIGITDIFF is almost always better EV
-      if (signal.contractType === 'DIGITDIFF' && bestSignal.contractType !== 'DIGITDIFF') {
-        bestSignal = signal;
-      } else if (signal.confidence > bestSignal.confidence) {
-        bestSignal = signal;
-      }
-    }
+    if (signal) signals.push(signal);
   }
 
-  return bestSignal;
+  if (signals.length === 0) return null;
+
+  // Separate DIFF signals (high priority) from MATCH signals
+  const diffSignals = signals.filter(s => s.contractType === 'DIGITDIFF');
+  const matchSignals = signals.filter(s => s.contractType === 'DIGITMATCH');
+
+  // Prefer DIGITDIFF — always
+  if (diffSignals.length > 0) {
+    // Check for consensus: do multiple strategies agree on the same barrier?
+    const barrierVotes = new Map<number, { totalConf: number; count: number; reasons: string[] }>();
+    for (const s of diffSignals) {
+      if (s.barrier === undefined) continue;
+      const existing = barrierVotes.get(s.barrier);
+      if (existing) {
+        existing.totalConf += s.confidence;
+        existing.count++;
+        existing.reasons.push(s.reason);
+      } else {
+        barrierVotes.set(s.barrier, { totalConf: s.confidence, count: 1, reasons: [s.reason] });
+      }
+    }
+
+    // Find consensus winner
+    let bestBarrier = 0, bestScore = 0, bestInfo = barrierVotes.values().next().value;
+    for (const [barrier, info] of barrierVotes) {
+      // Score = total confidence * (1 + consensus bonus)
+      const consensusBonus = info.count >= 3 ? 0.3 : info.count >= 2 ? 0.15 : 0;
+      const score = info.totalConf * (1 + consensusBonus);
+      if (score > bestScore) {
+        bestScore = score;
+        bestBarrier = barrier;
+        bestInfo = info;
+      }
+    }
+
+    const finalConfidence = Math.min(bestScore / diffSignals.length + 0.2, 0.98);
+    const consensusTag = bestInfo.count >= 2 ? `[${bestInfo.count}x consensus] ` : '';
+
+    return {
+      contractType: 'DIGITDIFF',
+      barrier: bestBarrier,
+      confidence: finalConfidence,
+      reason: `${consensusTag}${bestInfo.reasons[0]}${bestInfo.reasons.length > 1 ? ' +' + (bestInfo.reasons.length - 1) + 'more' : ''}`,
+    };
+  }
+
+  // Only fall back to MATCH if no DIFF signals
+  if (matchSignals.length > 0) {
+    return matchSignals.reduce((best, s) => s.confidence > best.confidence ? s : best);
+  }
+
+  return null;
 }
 
 // === Score all markets and rank them ===
@@ -257,15 +356,13 @@ export function scoreAndRank(markets: Map<string, MarketState>): ScoredMarket[] 
     let score = 0;
 
     if (signal) {
-      // Base score from confidence
       score = signal.confidence * 100;
-
-      // Bonus for DIGITDIFF (higher win rate)
       if (signal.contractType === 'DIGITDIFF') score += 15;
-
-      // Bonus for more data
       if (state.totalTicks > 100) score += 5;
       if (state.totalTicks > 200) score += 5;
+
+      // Bonus for consensus in the signal reason
+      if (signal.reason.includes('consensus')) score += 10;
     }
 
     scored.push({
@@ -276,10 +373,7 @@ export function scoreAndRank(markets: Map<string, MarketState>): ScoredMarket[] 
     });
   }
 
-  // Sort by score descending
   scored.sort((a, b) => b.score - a.score);
-
-  // Assign ranks
   scored.forEach((m, i) => { m.rank = i + 1; });
 
   return scored;

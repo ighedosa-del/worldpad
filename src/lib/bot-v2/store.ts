@@ -107,9 +107,6 @@ export const useBotStore = create<BotStoreState>((set) => ({
 }));
 
 // === Singleton bot instance ===
-// Created outside React. The engine runs its own loop.
-// The store is the only bridge between the engine and the UI.
-
 import { DerivBot, DEFAULT_CONFIG, type BotConfig } from './engine';
 
 let botInstance: DerivBot | null = null;
@@ -123,11 +120,9 @@ export function getBot(): DerivBot {
     botInstance = new DerivBot(
       appId,
       (partial) => {
-        // Engine calls this to push state to the store
         useBotStore.getState().updateState(partial);
       },
       (msg) => {
-        // Engine calls this to log
         useBotStore.getState().addLog(msg);
       }
     );

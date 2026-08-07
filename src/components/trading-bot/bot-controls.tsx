@@ -12,6 +12,8 @@ export function BotControls() {
   const { connected, running, phase, stats, stake, stopLoss, takeProfit, maxConsecutiveLosses, cycleIntervalMs, isVirtual, ticks } = useBotStore();
   const avgEV = stats?.avgEV ?? 0;
   const aiStrategies = stats?.aiStrategiesLearned ?? 0;
+  const recoveryMode = stats?.recoveryMode ?? false;
+  const adaptiveMinEV = stats?.adaptiveMinEV ?? 0;
 
   const handleStart = () => {
     const bot = getBot();
@@ -77,6 +79,7 @@ export function BotControls() {
 
         {/* Stats summary */}
         {stats && (
+          <>
           <div className="grid grid-cols-4 gap-2">
             <StatBox label="Trades" value={stats.totalTrades.toString()} />
             <StatBox label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={stats.winRate >= 60 ? 'text-emerald-500' : stats.winRate >= 40 ? 'text-yellow-500' : 'text-red-500'} />
@@ -86,7 +89,15 @@ export function BotControls() {
             <StatBox label="Stake" value={`$${stats.currentStake.toFixed(2)}`} />
             <StatBox label="Avg EV" value={`${avgEV > 0 ? '+' : ''}${avgEV.toFixed(3)}`} color={avgEV > 0 ? 'text-emerald-500' : 'text-red-500'} />
             <StatBox label="AI Strat" value={aiStrategies.toString()} />
+            <StatBox label="Min EV" value={`${adaptiveMinEV > 0 ? '+' : ''}${adaptiveMinEV.toFixed(3)}`} color={recoveryMode ? 'text-yellow-500' : 'text-muted-foreground'} />
           </div>
+          {recoveryMode && (
+            <div className="flex items-center gap-2 rounded-md bg-yellow-500/10 border border-yellow-500/20 p-2 text-xs text-yellow-500">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+              <span><strong>Recovery Mode</strong> — reduced stakes after consecutive losses</span>
+            </div>
+          )}
+          </>
         )}
 
         {/* Config */}
