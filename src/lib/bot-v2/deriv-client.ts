@@ -121,16 +121,17 @@ export class DerivClient {
         this.ws = null;
         this.rejectAllPending('WebSocket closed');
         if (!wasAuthed) {
-          reject(new Error(`WebSocket closed before auth (code ${event.code})`));
+          const reason = event.reason || `code ${event.code}`;
+          reject(new Error(`Connection closed: ${reason}`));
         } else {
           this.closeHandlers.forEach(h => h());
         }
       };
 
-      ws.onerror = () => {
-        clearTimeout(timer);
-        this.openPromise = null;
-        reject(new Error('WebSocket connection error'));
+      ws.onerror = (ev: Event) => {
+        console.error('[DerivClient] WS error', ev);
+        // Don't reject here — onclose will fire next with more detail
+        // If onclose doesn't fire, the timeout will reject
       };
 
       // The actual auth result comes via handleMessage -> authorize
