@@ -1,0 +1,706 @@
+     1→     1→'use client';
+     2→     2→
+     3→     3→import { useEffect, useRef, useCallback } from 'react';
+     4→     4→import { useWorldpadStore } from '@/lib/store';
+     5→     5→import {
+     6→     6→  startMultiMarketScan, stopMultiMarketScan, getAllMarketData,
+     7→     7→  isScannerConnected, addTickCallback, getScannerHealth,
+     8→     8→  SCANNED_MARKETS, addTickCallback as addTickListener,
+     9→     9→} from '@/lib/multi-market-ws';
+    10→    10→import { aiEngine } from '@/lib/ai-engine';
+    11→    11→import { scoreAllMarkets, selectTrades, feedTickToAI, type RankedMarket } from '@/lib/market-scorer';
+    12→    12→import { calculateStake, recordRiskResult, resetRiskStates, getSessionPL } from '@/lib/risk-manager';
+    13→    13→import { checkLiveTrade, recordLiveTrade, resetLiveSession, getLiveStats, preFlightCheck } from '@/lib/real-money-guard';
+    14→    14→import { getProposalWS, buyContractWS, restoreCredentials, getTradeWSStatus } from '@/lib/deriv-ws';
+    15→    15→import type { TradeResult } from '@/hooks/use-trade-execution';
+    16→    16→import { clearPendingSimTrades } from '@/hooks/use-trade-execution';
+    17→    17→
+    18→    18→// === Pending simulation trades awaiting next tick (for GlobalAI direct trades) ===
+    19→    19→const pendingSimTradesGlobal: Map<string, {
+    20→    20→  contractType: string;
+    21→    21→  barrier: number | undefined;
+    22→    22→  stake: number;
+    23→    23→  symbol: string;
+    24→    24→  resolve: (result: TradeResult | null) => void;
+    25→    25→}> = new Map();
+    26→    26→
+    27→    27→let globalTickListenerRegistered = false;
+    28→    28→
+    29→    29→function registerGlobalTickListener() {
+    30→    30→  if (globalTickListenerRegistered) return;
+    31→    31→  globalTickListenerRegistered = true;
+    32→    32→
+    33→    33→  addTickListener((symbol, data) => {
+    34→    34→    const pending = pendingSimTradesGlobal.get(symbol);
+    35→    35→    if (!pending || !data.lastTick) return;
+    36→    36→
+    37→    37→    const nextDigit = data.lastTick.digit;
+    38→    38→    pendingSimTradesGlobal.delete(symbol);
+    39→    39→
+    40→    40→    const { contractType, barrier, stake, symbol: tradeSymbol } = pending;
+    41→    41→    let won = false;
+    42→    42→    switch (contractType) {
+    43→    43→      case 'DIGITMATCH': won = nextDigit === barrier; break;
+    44→    44→      case 'DIGITDIFF': won = nextDigit !== barrier; break;
+    45→    45→      case 'DIGITOVER': won = nextDigit > (barrier ?? 4); break;
+    46→    46→      case 'DIGITUNDER': won = nextDigit < (barrier ?? 5); break;
+    47→    47→      case 'DIGITEVEN': won = nextDigit % 2 === 0; break;
+    48→    48→      case 'DIGITODD': won = nextDigit % 2 === 1; break;
+    49→    49→      default: won = Math.random() > 0.5;
+    50→    50→    }
+    51→    51→
+    52→    52→    // Payout: Deriv pays net profit multiplier on win, 0 on loss
+    53→    53→    const isMatch = contractType === 'DIGITMATCH';
+    54→    54→    const profitMultiplier = isMatch ? 8.5 : 0.85;
+    55→    55→    const profit = won ? stake * profitMultiplier : -stake;
+    56→    56→    const payout = won ? stake + profit : 0;
+    57→    57→
+    58→    58→    const result: TradeResult = {
+    59→    59→      id: `SIM-${Date.now()}`,
+    60→    60→      type: contractType,
+    61→    61→      symbol: tradeSymbol,
+    62→    62→      stake,
+    63→    63→      payout,
+    64→    64→      profit,
+    65→    65→      digit: barrier ?? -1,
+    66→    66→      won,
+    67→    67→      timestamp: Date.now(),
+    68→    68→      simulated: true,
+    69→    69→    };
+    70→    70→
+    71→    71→    pending.resolve(result);
+    72→    72→  });
+    73→    73→}
+    74→    74→
+    75→    75→async function placeTradeDirect(params: {
+    76→    76→  contractType: string;
+    77→    77→  barrier?: number;
+    78→    78→  stake: number;
+    79→    79→  symbol: string;
+    80→    80→}): Promise<TradeResult | null> {
+    81→    81→  // v5 FIX: Only check isAuthorized. isSimulating() refers to the single-market WS
+    82→    82→  // which is irrelevant — GlobalAI uses multi-market-ws for ticks (always real data).
+    83→    83→  const authorized = useWorldpadStore.getState().isAuthorized;
+    84→    84→  const simMode = !authorized;
+    85→    85→  const wsStatus = getTradeWSStatus();
+    86→    86→  console.log('[GlobalAI] placeTradeDirect: isAuthorized=', authorized, 'simMode=', simMode, 'ws=', wsStatus);
+    87→    87→  addAutoTraderLog(`[TRADE-MODE] authorized=${authorized} simMode=${simMode} wsReady=${wsStatus.wsReady} token=${wsStatus.tokenPreview}`);
+    88→    88→
+    89→    89→  if (simMode) {
+    90→    90→    console.warn('[GlobalAI] SIMULATION TRADE — NOT sending to Deriv. isAuthorized=', authorized);
+    91→    91→    addAutoTraderLog(`⚠️ SIM TRADE: ${params.contractType} ${params.symbol} $${params.stake} — NOT on Deriv`);
+    92→    92→    if (pendingSimTradesGlobal.has(params.symbol)) return null;
+    93→    93→
+    94→    94→    return new Promise<TradeResult | null>((resolve) => {
+    95→    95→      const timeout = setTimeout(() => {
+    96→    96→        pendingSimTradesGlobal.delete(params.symbol);
+    97→    97→        resolve(null);
+    98→    98→      }, 15000);
+    99→    99→
+   100→   100→      registerGlobalTickListener();
+   101→   101→      pendingSimTradesGlobal.set(params.symbol, {
+   102→   102→        ...params,
+   103→   103→        resolve: (r) => { clearTimeout(timeout); resolve(r); },
+   104→   104→      });
+   105→   105→    });
+   106→   106→  }
+   107→   107→
+   108→   108→  // LIVE mode — sending real trade to Deriv
+   109→   109→  try {
+   110→   110→    const wsBefore = getTradeWSStatus();
+   111→   111→    useWorldpadStore.getState().addAutoTraderLog(`[AI] 🔄 LIVE TRADE — connecting to Deriv... (ws ready: ${wsBefore.wsReady})`);
+   112→   112→    console.log('[GlobalAI] LIVE TRADE — sending to Deriv WS. Status:', wsBefore);
+   113→   113→
+   114→   114→    const proposal = await getProposalWS({
+   115→   115→      contractType: params.contractType,
+   116→   116→      symbol: params.symbol,
+   117→   117→      stake: params.stake,
+   118→   118→      barrier: params.barrier,
+   119→   119→      duration: 1,
+   120→   120→      durationUnit: 't',
+   121→   121→    });
+   122→   122→    useWorldpadStore.getState().addAutoTraderLog(`[AI] ✅ Proposal OK — $${proposal.payout.toFixed(2)} payout, buying...`);
+   123→   123→
+   124→   124→    const buyResult = await buyContractWS(proposal.id, proposal.ask_price);
+   125→   125→    const won = buyResult.profit > 0;
+   126→   126→    useWorldpadStore.getState().addAutoTraderLog(`[AI] ✅ BUY FILLED — contract ${buyResult.contract_id} | ${won ? '+$' : '-$'}${Math.abs(buyResult.profit).toFixed(2)} ${won ? 'WIN' : 'LOSS'} [LIVE ON DERIV]`);
+   127→   127→    return {
+   128→   128→      id: buyResult.contract_id,
+   129→   129→      type: params.contractType,
+   130→   130→      symbol: params.symbol,
+   131→   131→      stake: params.stake,
+   132→   132→      payout: buyResult.payout,
+   133→   133→      profit: buyResult.profit,
+   134→   134→      digit: params.barrier ?? -1,
+   135→   135→      won,
+   136→   136→      timestamp: Date.now(),
+   137→   137→      simulated: false,
+   138→   138→    };
+   139→   139→  } catch (err) {
+   140→   140→    const errMsg = (err as Error).message || String(err);
+   141→   141→    const wsAfter = getTradeWSStatus();
+   142→   142→    console.error('[GlobalAI] Live trade error:', errMsg, 'ws after:', wsAfter);
+   143→   143→    useWorldpadStore.getState().addAutoTraderLog(`[AI] ❌ TRADE FAILED: ${errMsg}`);
+   144→   144→    if (errMsg.includes('timed out')) {
+   145→   145→      useWorldpadStore.getState().addAutoTraderLog(`[AI] ❌ Trade timed out — check PAT token has TRADE scope in Deriv Settings`);
+   146→   146→    }
+   147→   147→    if (errMsg.includes('Not authenticated')) {
+   148→   148→      useWorldpadStore.getState().addAutoTraderLog(`[AI] ❌ Not connected — click Connect Account`);
+   149→   149→    }
+   150→   150→    return null;
+   151→   151→  }
+   152→   152→}
+   153→   153→
+   154→   154→/**
+   155→   155→ * GlobalAI v2 — invisible background component that runs the AI brain globally.
+   156→   156→ * Mounted once in page.tsx. Scans all 10 markets, scores them, auto-trades,
+   157→   157→ * and learns — regardless of which tab the user is on.
+   158→   158→ * v4: Full system — Pattern Library + Regime Filter + Backtesting +
+   159→   159→ * Strategy Rotation + Kelly Staking + EV filtering + stop-loss + cooldowns
+   160→   160→ */
+   161→   161→
+   162→   162→// v2: Per-market loss cooldown tracker (shared with use-ai-bot)
+   163→   163→const lossCooldownsGlobal: Map<string, number> = new Map();
+   164→   164→const LOSS_COOLDOWN_TICKS = 4;
+   165→   165→const marketTickCountsGlobal: Map<string, number> = new Map();
+   166→   166→
+   167→   167→export function GlobalAI() {
+   168→   168→  const {
+   169→   169→    isAuthorized, botConfig, addAutoTraderLog, addTradeResult,
+   170→   170→    setGlobalAIRunning, setGlobalAIRankedMarkets, setGlobalAIStatus,
+   171→   171→    setGlobalAICycleCount, setGlobalAITotalTrades, setGlobalAITotalProfit,
+   172→   172→    setGlobalAILearningStats, setGlobalAIHealth,
+   173→   173→  } = useWorldpadStore();
+   174→   174→
+   175→   175→  const runningRef = useRef(false);
+   176→   176→  const cycleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+   177→   177→  const activeTradesRef = useRef<Map<string, { signal: any; startedAt: number }>>(new Map());
+   178→   178→  const tradeLocksRef = useRef<Set<string>>(new Set());
+   179→   179→  const totalProfitRef = useRef(0);
+   180→   180→  const totalTradesRef = useRef(0);
+   181→   181→  const cycleCountRef = useRef(0);
+   182→   182→  const lastRankingRef = useRef<RankedMarket[]>([]);
+   183→   183→  const mountedRef = useRef(true);
+   184→   184→  const sessionWinsRef = useRef(0);
+   185→   185→  const sessionLossesRef = useRef(0);
+   186→   186→
+   187→   187→  // Init tick counters
+   188→   188→  for (const m of SCANNED_MARKETS) {
+   189→   189→    if (!marketTickCountsGlobal.has(m.symbol)) marketTickCountsGlobal.set(m.symbol, 0);
+   190→   190→  }
+   191→   191→
+   192→   192→  // === Scoring ===
+   193→   193→  const rankingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+   194→   194→
+   195→   195→  const doUpdateRanking = useCallback(() => {
+   196→   196→    try {
+   197→   197→      const allData = Object.values(getAllMarketData());
+   198→   198→      const ranked = scoreAllMarkets(allData);
+   199→   199→      lastRankingRef.current = ranked;
+   200→   200→      if (mountedRef.current) {
+   201→   201→        setGlobalAIRankedMarkets(ranked);
+   202→   202→      }
+   203→   203→    } catch (err) {
+   204→   204→      console.error('[GlobalAI] Ranking error:', err);
+   205→   205→    }
+   206→   206→  }, [setGlobalAIRankedMarkets]);
+   207→   207→
+   208→   208→  const updateRankingThrottled = useCallback(() => {
+   209→   209→    if (rankingTimerRef.current) return;
+   210→   210→    rankingTimerRef.current = setTimeout(() => {
+   211→   211→      rankingTimerRef.current = null;
+   212→   212→      doUpdateRanking();
+   213→   213→    }, 500);
+   214→   214→  }, [doUpdateRanking]);
+   215→   215→
+   216→   216→  // Tick callback — feeds AI + triggers ranking + manages cooldowns
+   217→   217→  useEffect(() => {
+   218→   218→    const unsubscribe = addTickCallback((symbol, data) => {
+   219→   219→      feedTickToAI(symbol, data);
+   220→   220→      updateRankingThrottled();
+   221→   221→
+   222→   222→      // v2: Decrement cooldowns
+   223→   223→      const currentTicks = (marketTickCountsGlobal.get(symbol) || 0) + 1;
+   224→   224→      marketTickCountsGlobal.set(symbol, currentTicks);
+   225→   225→      const cdRemaining = lossCooldownsGlobal.get(symbol);
+   226→   226→      if (cdRemaining !== undefined && currentTicks >= cdRemaining) {
+   227→   227→        lossCooldownsGlobal.delete(symbol);
+   228→   228→      }
+   229→   229→    });
+   230→   230→    return unsubscribe;
+   231→   231→  }, [updateRankingThrottled]);
+   232→   232→
+   233→   233→  // v2: Build cooldown set
+   234→   234→  const getCooldownSet = useCallback((): Set<string> => {
+   235→   235→    const set = new Set<string>();
+   236→   236→    for (const [symbol, untilTick] of lossCooldownsGlobal) {
+   237→   237→      if ((marketTickCountsGlobal.get(symbol) || 0) < untilTick) set.add(symbol);
+   238→   238→    }
+   239→   239→    return set;
+   240→   240→  }, []);
+   241→   241→
+   242→   242→  // v2: Stop-loss check
+   243→   243→  const isStopLossHit = useCallback((): boolean => {
+   244→   244→    if (botConfig.stopLoss <= 0) return false;
+   245→   245→    return totalProfitRef.current <= -botConfig.stopLoss;
+   246→   246→  }, [botConfig.stopLoss]);
+   247→   247→
+   248→   248→  // === Trade execution ===
+   249→   249→  const executeTradeOnMarket = useCallback(async (market: RankedMarket, stake: number) => {
+   250→   250→    if (!market.selectedSignal) return;
+   251→   251→    if (tradeLocksRef.current.has(market.symbol)) return;
+   252→   252→
+   253→   253→    // v5: Real Money Guard — check safety rules
+   254→   254→    // v5 FIX: Read isAuthorized from store directly (not closure) to avoid stale values
+   255→   255→    const authorized = useWorldpadStore.getState().isAuthorized;
+   256→   256→    const simMode = !authorized;
+   257→   257→    console.log('[GlobalAI] executeTradeOnMarket: authorized=', authorized, 'simMode=', simMode, 'symbol=', market.symbol);
+   258→   258→    const guardResult = checkLiveTrade(stake, !simMode);
+   259→   259→    if (!guardResult.allowed) {
+   260→   260→      addAutoTraderLog(`[AI] BLOCKED: ${guardResult.reason}`);
+   261→   261→      if (guardResult.warnings.length > 0) {
+   262→   262→        for (const w of guardResult.warnings) addAutoTraderLog(`[AI] WARNING: ${w}`);
+   263→   263→      }
+   264→   264→      return;
+   265→   265→    }
+   266→   266→    if (guardResult.warnings.length > 0) {
+   267→   267→      for (const w of guardResult.warnings) addAutoTraderLog(`[AI] WARNING: ${w}`);
+   268→   268→    }
+   269→   269→
+   270→   270→    tradeLocksRef.current.add(market.symbol);
+   271→   271→
+   272→   272→    try {
+   273→   273→      const signal = market.selectedSignal;
+   274→   274→      // v4: Dynamic stake via Kelly criterion
+   275→   275→      const { stake: kellyStake, reason: stakeReason } = calculateStake(
+   276→   276→        market.symbol, signal.contractType, 0.90, { baseStake: guardResult.cappedStake }
+   277→   277→      );
+   278→   278→      let finalStake = kellyStake > 0 ? kellyStake : guardResult.cappedStake;
+   279→   279→
+   280→   280→      // v5: Re-apply live stake caps after Kelly adjustment
+   281→   281→      if (!simMode) {
+   282→   282→        finalStake = Math.max(0.35, Math.min(5.0, finalStake));
+   283→   283→      }
+   284→   284→
+   285→   285→      const logMsg = `[AI] ${market.name}: ${signal.contractType} d${signal.barrier ?? '-'} @ $${finalStake.toFixed(2)}${simMode ? ' ⚠️SIM' : ' LIVE'} | ${signal.reason} | score ${market.combinedScore.toFixed(0)} | ${stakeReason}`;
+   286→   286→      addAutoTraderLog(logMsg);
+   287→   287→
+   288→   288→      activeTradesRef.current.set(market.symbol, { signal, startedAt: Date.now() });
+   289→   289→
+   290→   290→      const result = await placeTradeDirect({
+   291→   291→        contractType: signal.contractType,
+   292→   292→        barrier: signal.barrier,
+   293→   293→        stake: finalStake,
+   294→   294→        symbol: market.symbol,
+   295→   295→      });
+   296→   296→
+   297→   297→      if (result) {
+   298→   298→        const won = result.profit > 0;
+   299→   299→
+   300→   300→        // v5: Record live trade for safety tracking
+   301→   301→        if (!simMode) {
+   302→   302→          const liveResult = recordLiveTrade(result.profit);
+   303→   303→          if (liveResult.shouldPause) {
+   304→   304→            addAutoTraderLog(`[AI] PAUSED: ${liveResult.message}`);
+   305→   305→          }
+   306→   306→          if (liveResult.shouldStop) {
+   307→   307→            addAutoTraderLog(`[AI] HARD STOP: ${liveResult.message}`);
+   308→   308→            runningRef.current = false;
+   309→   309→            setGlobalAIRunning(false);
+   310→   310→            setGlobalAIStatus('idle');
+   311→   311→            aiEngine.saveLearningData();
+   312→   312→            return;
+   313→   313→          }
+   314→   314→        }
+   315→   315→
+   316→   316→        // v2: Per-market loss cooldown
+   317→   317→        if (!won) {
+   318→   318→          const ct = marketTickCountsGlobal.get(market.symbol) || 0;
+   319→   319→          lossCooldownsGlobal.set(market.symbol, ct + LOSS_COOLDOWN_TICKS);
+   320→   320→          sessionLossesRef.current++;
+   321→   321→          sessionWinsRef.current = 0;
+   322→   322→        } else {
+   323→   323→          sessionWinsRef.current++;
+   324→   324→          sessionLossesRef.current = 0;
+   325→   325→        }
+   326→   326→
+   327→   327→        addAutoTraderLog(won
+   328→   328→          ? `[AI] WIN  ${market.name}: +$${result.profit.toFixed(2)} | W:${sessionWinsRef.current} L:${sessionLossesRef.current}${!simMode ? ' [LIVE]' : ''}`
+   329→   329→          : `[AI] LOSS ${market.name}: $${result.profit.toFixed(2)} | W:${sessionWinsRef.current} L:${sessionLossesRef.current} | cooldown ${LOSS_COOLDOWN_TICKS} ticks${!simMode ? ' [LIVE]' : ''}`);
+   330→   330→
+   331→   331→        aiEngine.recordTradeResult(
+   332→   332→          market.symbol, signal.contractType, signal.barrier,
+   333→   333→          result.profit, market.combinedScore
+   334→   334→        );
+   335→   335→
+   336→   336→        // v4: Record to risk manager
+   337→   337→        recordRiskResult(market.symbol, result.profit);
+   338→   338→
+   339→   339→        addTradeResult({
+   340→   340→          id: `ai-${Date.now()}-${market.symbol}`,
+   341→   341→          type: signal.contractType,
+   342→   342→          symbol: market.symbol,
+   343→   343→          stake: finalStake,
+   344→   344→          payout: result.payout || finalStake * 0.85,
+   345→   345→          profit: result.profit,
+   346→   346→          digit: signal.barrier ?? -1,
+   347→   347→          won,
+   348→   348→          timestamp: Date.now(),
+   349→   349→        });
+   350→   350→
+   351→   351→        totalProfitRef.current += result.profit;
+   352→   352→        totalTradesRef.current += 1;
+   353→   353→        if (mountedRef.current) {
+   354→   354→          setGlobalAITotalTrades(totalTradesRef.current);
+   355→   355→          setGlobalAITotalProfit(totalProfitRef.current);
+   356→   356→          setGlobalAILearningStats(aiEngine.getLearningStats());
+   357→   357→        }
+   358→   358→      } else if (!simMode) {
+   359→   359→        // Trade returned null in LIVE mode — error already logged in placeTradeDirect
+   360→   360→        addAutoTraderLog(`[AI] ⚠️ Trade on ${market.name} returned no result (live path failed — see error above)`);
+   361→   361→      }
+   362→   362→    } catch (err) {
+   363→   363→      addAutoTraderLog(`[AI] Error on ${market.name}: ${(err as Error).message}`);
+   364→   364→    } finally {
+   365→   365→      activeTradesRef.current.delete(market.symbol);
+   366→   366→      tradeLocksRef.current.delete(market.symbol);
+   367→   367→    }
+   368→   368→  }, [isAuthorized, addAutoTraderLog, addTradeResult, setGlobalAITotalTrades, setGlobalAITotalProfit, setGlobalAILearningStats]);
+   369→   369→
+   370→   370→  // === Main AI cycle ===
+   371→   371→  const runCycle = useCallback(async () => {
+   372→   372→    if (!runningRef.current) return;
+   373→   373→
+   374→   374→    // v2: STOP-LOSS ENFORCEMENT
+   375→   375→    if (isStopLossHit()) {
+   376→   376→      runningRef.current = false;
+   377→   377→      if (mountedRef.current) setGlobalAIRunning(false);
+   378→   378→      setGlobalAIStatus('idle');
+   379→   379→      addAutoTraderLog(`[AI] ⛔ STOP LOSS HIT: -$${Math.abs(totalProfitRef.current).toFixed(2)} exceeded $${botConfig.stopLoss} limit. Bot stopped.`);
+   380→   380→      addAutoTraderLog(`[AI] Session: ${totalTradesRef.current} trades | W:${sessionWinsRef.current} L:${sessionLossesRef.current}`);
+   381→   381→      aiEngine.saveLearningData();
+   382→   382→      return;
+   383→   383→    }
+   384→   384→
+   385→   385→    setGlobalAIStatus('scanning');
+   386→   386→
+   387→   387→    const ranked = lastRankingRef.current;
+   388→   388→    if (ranked.length === 0) {
+   389→   389→      setGlobalAIStatus('waiting');
+   390→   390→      return;
+   391→   391→    }
+   392→   392→
+   393→   393→    // v6: Debug — log top 3 markets and why they might not trade
+   394→   394→    const top3 = ranked.slice(0, 3);
+   395→   395→    for (const m of top3) {
+   396→   396→      const hasSignal = !!m.selectedSignal;
+   397→   397→      const hasEv = m.expectedValue > 0;
+   398→   398→      const evStr = `score=${m.combinedScore.toFixed(0)} signal=${hasSignal} ev=${m.expectedValue.toFixed(3)}`;
+   399→   399→      if (!hasSignal) {
+   400→   400→        console.log(`[AI Cycle] SKIP ${m.name}: no signal (${evStr})`);
+   401→   401→      } else {
+   402→   402→        console.log(`[AI Cycle] OK ${m.name}: ${m.selectedSignal?.contractType} d${m.selectedSignal?.barrier} (${evStr})`);
+   403→   403→      }
+   404→   404→    }
+   405→   405→
+   406→   406→    // v2: Pass cooldown set
+   407→   407→    const cooldownSet = getCooldownSet();
+   408→   408→    const trades = selectTrades(ranked, {}, new Set(activeTradesRef.current.keys()), cooldownSet);
+   409→   409→    if (trades.length === 0) {
+   410→   410→      // v6: Log WHY no trades selected
+   411→   411→      const signalsExist = ranked.filter(m => m.selectedSignal).length;
+   412→   412→      const cooldownCount = cooldownSet.size;
+   413→   413→      const activeCount = activeTradesRef.current.size;
+   414→   414→      console.log(`[AI Cycle] NO TRADES — ranked=${ranked.length} withSignal=${signalsExist} cooldowns=${cooldownCount} active=${activeCount}`);
+   415→   415→      setGlobalAIStatus('waiting');
+   416→   416→      return;
+   417→   417→    }
+   418→   418→
+   419→   419→    setGlobalAIStatus('trading');
+   420→   420→    cycleCountRef.current += 1;
+   421→   421→    if (mountedRef.current) setGlobalAICycleCount(cycleCountRef.current);
+   422→   422→
+   423→   423→    // v2: Log EV summary for each trade
+   424→   424→    for (const t of trades) {
+   425→   425→      if (t.selectedSignal) {
+   426→   426→        addAutoTraderLog(`[AI] → ${t.name}: ${t.selectedSignal.contractType} d${t.selectedSignal.barrier ?? '-'} | EV=${t.expectedValue.toFixed(3)} | score=${t.combinedScore.toFixed(0)} | conf=${Math.round((t.selectedSignal.confidence || 0) * 100)}%`);
+   427→   427→      }
+   428→   428→    }
+   429→   429→
+   430→   430→    // Fire all trades in parallel (per-market locks prevent duplicates)
+   431→   431→    const promises = trades.map(trade => executeTradeOnMarket(trade, botConfig.stake));
+   432→   432→    await Promise.all(promises);
+   433→   433→
+   434→   434→    setGlobalAIStatus('waiting');
+   435→   435→  }, [executeTradeOnMarket, botConfig.stake, botConfig.stopLoss, setGlobalAIStatus, setGlobalAICycleCount, isStopLossHit, getCooldownSet]);
+   436→   436→
+   437→   437→  // === Start / Stop ===
+   438→   438→  const startBot = useCallback(() => {
+   439→   439→    // v2: Reset everything on fresh start
+   440→   440→    lossCooldownsGlobal.clear();
+   441→   441→    sessionWinsRef.current = 0;
+   442→   442→    sessionLossesRef.current = 0;
+   443→   443→    resetRiskStates(); // v4: reset Kelly staking
+   444→   444→
+   445→   445→    aiEngine.loadLearningData();
+   446→   446→    setGlobalAILearningStats(aiEngine.getLearningStats());
+   447→   447→    runningRef.current = true;
+   448→   448→    totalProfitRef.current = 0;
+   449→   449→    totalTradesRef.current = 0;
+   450→   450→    cycleCountRef.current = 0;
+   451→   451→    activeTradesRef.current.clear();
+   452→   452→    tradeLocksRef.current.clear();
+   453→   453→    setGlobalAIRunning(true);
+   454→   454→    setGlobalAICycleCount(0);
+   455→   455→    setGlobalAITotalTrades(0);
+   456→   456→    setGlobalAITotalProfit(0);
+   457→   457→
+   458→   458→    // v6 FIX: Read isAuthorized from store directly (not closure) to avoid stale values
+   459→   459→    const authorized = useWorldpadStore.getState().isAuthorized;
+   460→   460→    const simMode = !authorized;
+   461→   461→
+   462→   462→    // v5: Pre-flight safety check for live trading
+   463→   463→    if (!simMode) {
+   464→   464→      const preflight = preFlightCheck(true);
+   465→   465→      addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
+   466→   466→      addAutoTraderLog(`[AI] === GLOBAL AI v5 STARTED === (LIVE MODE)`);
+   467→   467→      addAutoTraderLog(`[AI] REAL MONEY GUARD ACTIVE`);
+   468→   468→      addAutoTraderLog(`[AI] Min stake: $0.35 | Max stake: $5.00`);
+   469→   469→      addAutoTraderLog(`[AI] Session stop-loss: $10 | Daily stop-loss: $25`);
+   470→   470→      addAutoTraderLog(`[AI] Auto-pause after 5 consecutive losses (30s cooldown)`);
+   471→   471→      addAutoTraderLog(`[AI] Auto-evaluate every 50 live trades`);
+   472→   472→      if (!preflight.allowed) {
+   473→   473→        addAutoTraderLog(`[AI] BLOCKED: ${preflight.reason}`);
+   474→   474→        runningRef.current = false;
+   475→   475→        setGlobalAIRunning(false);
+   476→   476→        addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
+   477→   477→        return;
+   478→   478→      }
+   479→   479→      addAutoTraderLog(`[AI] Preflight: ${preflight.reason}`);
+   480→   480→      const stats = getLiveStats();
+   481→   481→      addAutoTraderLog(`[AI] Live session: ${stats.totalLiveTrades} trades | P/L: ${stats.totalLiveProfit >= 0 ? '+' : ''}$${stats.totalLiveProfit.toFixed(2)}`);
+   482→   482→      addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
+   483→   483→    } else {
+   484→   484→      addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
+   485→   485→      addAutoTraderLog(`[AI] ⚠️  SIMULATION MODE — NOT connected to Deriv`);
+   486→   486→      addAutoTraderLog(`[AI] ⚠️  Trades are FAKE — no real money used`);
+   487→   487→      addAutoTraderLog(`[AI] ⚠️  Click CONNECT ACCOUNT to trade for real`);
+   488→   488→      addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
+   489→   489→      addAutoTraderLog(`[AI] Scanning ${SCANNED_MARKETS.length} markets | Stake: $${botConfig.stake} | Stop Loss: $${botConfig.stopLoss}`);
+   490→   490→    }
+   491→   491→
+   492→   492→    const runLoop = async () => {
+   493→   493→      if (!runningRef.current) return;
+   494→   494→      await runCycle();
+   495→   495→      if (runningRef.current) {
+   496→   496→        // v2: 4s cycle (was 3s) — more selective
+   497→   497→        cycleTimerRef.current = setTimeout(runLoop, 4000);
+   498→   498→      }
+   499→   499→    };
+   500→   500→    runLoop();
+   501→   501→  }, [isAuthorized, botConfig, addAutoTraderLog, runCycle, setGlobalAIRunning, setGlobalAICycleCount, setGlobalAITotalTrades, setGlobalAITotalProfit, setGlobalAILearningStats]);
+   502→   502→
+   503→   503→  const stopBot = useCallback(() => {
+   504→   504→    runningRef.current = false;
+   505→   505→    setGlobalAIRunning(false);
+   506→   506→    setGlobalAIStatus('idle');
+   507→   507→    if (cycleTimerRef.current) { clearTimeout(cycleTimerRef.current); cycleTimerRef.current = null; }
+   508→   508→    activeTradesRef.current.clear();
+   509→   509→    tradeLocksRef.current.clear();
+   510→   510→    pendingSimTradesGlobal.clear();
+   511→   511→    addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
+   512→   512→    addAutoTraderLog(`[AI] === GLOBAL AI v5 STOPPED ===`);
+   513→   513→    addAutoTraderLog(`[AI] Cycles: ${cycleCountRef.current} | Trades: ${totalTradesRef.current} | P/L: ${totalProfitRef.current >= 0 ? '+' : ''}$${totalProfitRef.current.toFixed(2)}`);
+   514→   514→    addAutoTraderLog(`[AI] Session W/L: ${sessionWinsRef.current}/${sessionLossesRef.current}`);
+   515→   515→    addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
+   516→   516→    aiEngine.saveLearningData();
+   517→   517→  }, [addAutoTraderLog, setGlobalAIRunning, setGlobalAIStatus]);
+   518→   518→
+   519→   519→  // Expose start/stop for AI Scanner buttons
+   520→   520→  useEffect(() => {
+   521→   521→    (window as any).__globalAI = { startBot, stopBot };
+   522→   522→    return () => { delete (window as any).__globalAI; };
+   523→   523→  }, [startBot, stopBot]);
+   524→   524→
+   525→   525→  // === Init: start scanning + auto-start bot ===
+   526→   526→  useEffect(() => {
+   527→   527→    mountedRef.current = true;
+   528→   528→    aiEngine.loadLearningData();
+   529→   529→    setGlobalAILearningStats(aiEngine.getLearningStats());
+   530→   530→    startMultiMarketScan();
+   531→   531→
+   532→   532→    // v5: Restore Deriv credentials from persisted store so trades work after reload
+   533→   533→    const store = useWorldpadStore.getState();
+   534→   534→    console.log('[GlobalAI] INIT — isAuthorized:', store.isAuthorized, 'mode:', store.accountMode, 'hasDemoToken:', !!store.demoToken, 'hasRealToken:', !!store.realToken, 'accountId:', store.selectedAccountId);
+   535→   535→    if (store.isAuthorized && store.selectedAccountId) {
+   536→   536→      const token = store.accountMode === 'demo' ? store.demoToken : store.realToken;
+   537→   537→      if (token && store.derivAppId) {
+   538→   538→        restoreCredentials(token, store.derivAppId, store.selectedAccountId);
+   539→   539→        const wsCheck = getTradeWSStatus();
+   540→   540→        console.log('[GlobalAI] Restored Deriv credentials for', store.accountMode, 'trading. WS status:', wsCheck);
+   541→   541→      } else {
+   542→   542→        console.warn('[GlobalAI] isAuthorized=true but MISSING token or appId! token=', !!token, 'appId=', !!store.derivAppId);
+   543→   543→      }
+   544→   544→    } else {
+   545→   545→      console.warn('[GlobalAI] NOT authorized. isAuthorized=', store.isAuthorized, 'accountId=', store.selectedAccountId);
+   546→   546→    }
+   547→   547→
+   548→   548→    const autoStartTimer = setTimeout(() => {
+   549→   549→      if (mountedRef.current && !runningRef.current) {
+   550→   550→        startBot();
+   551→   551→      }
+   552→   552→    }, 5000);
+   553→   553→
+   554→   554→    return () => {
+   555→   555→      mountedRef.current = false;
+   556→   556→      runningRef.current = false;
+   557→   557→      if (cycleTimerRef.current) clearTimeout(cycleTimerRef.current);
+   558→   558→      if (rankingTimerRef.current) clearTimeout(rankingTimerRef.current);
+   559→   559→      clearTimeout(autoStartTimer);
+   560→   560→      stopMultiMarketScan();
+   561→   561→    };
+   562→   562→  }, []);
+   563→   563→
+   564→   564→  // Health monitoring
+   565→   565→  useEffect(() => {
+   566→   566→    const interval = setInterval(() => {
+   567→   567→      if (!mountedRef.current) return;
+   568→   568→      const connected = isScannerConnected();
+   569→   569→      const health = getScannerHealth();
+   570→   570→      if (mountedRef.current) {
+   571→   571→        setGlobalAIHealth({
+   572→   572→          isConnected: connected,
+   573→   573→          totalTicksReceived: health.totalTicksReceived,
+   574→   574→          lastTickTime: health.lastTickTime,
+   575→   575→          connectTime: health.connectTime,
+   576→   576→          ticksPerMarket: health.ticksPerMarket,
+   577→   577→          wsError: health.wsError,
+   578→   578→          callbackCount: health.callbackCount,
+   579→   579→        });
+   580→   580→      }
+   581→   581→    }, 1000);
+   582→   582→    return () => clearInterval(interval);
+   583→   583→  }, [setGlobalAIHealth]);
+   584→   584→
+   585→   585→  // v5: Auto-restart bot when user connects mid-session
+   586→   586→  // CRITICAL FIX: If bot is already running in SIM mode, we MUST stop + restart it
+   587→   587→  // so it picks up the new isAuthorized=true closure for LIVE trades.
+   588→   588→  useEffect(() => {
+   589→   589→    if (!isAuthorized) return;
+   590→   590→
+   591→   591→    const store = useWorldpadStore.getState();
+   592→   592→    const token = store.accountMode === 'demo' ? store.demoToken : store.realToken;
+   593→   593→    if (token && store.derivAppId && store.selectedAccountId) {
+   594→   594→      restoreCredentials(token, store.derivAppId, store.selectedAccountId);
+   595→   595→    }
+   596→   596→
+   597→   597→    // RUN A LIVE CONNECTION TEST — $0.35 trade to verify everything works
+   598→   598→    addAutoTraderLog(`[TEST] ═══════════════════════════════════════`);
+   599→   599→    addAutoTraderLog(`[TEST] 🔍 Running live connection test...`);
+   600→   600→    addAutoTraderLog(`[TEST] Account: ${store.selectedAccountId} (${store.accountMode})`);
+   601→   601→    addAutoTraderLog(`[TEST] App ID: ${store.derivAppId}`);
+   602→   602→
+   603→   603→    (async () => {
+   604→   604→      try {
+   605→   605→        // Step 1: Check WS status BEFORE
+   606→   606→        const before = getTradeWSStatus();
+   607→   607→        addAutoTraderLog(`[TEST] Step 1 — WS: ready=${before.wsReady} auth=${before.authorized} login=${before.loginId} scopes=${before.scopes} virtual=${before.isVirtual}`);
+   608→   608→        addAutoTraderLog(`[TEST] Account: ${store.selectedAccountId} (${store.accountMode}) | App ID: ${store.derivAppId}`);
+   609→   609→
+   610→   610→        // Step 2: Get a proposal (this triggers WS connection + authorize)
+   611→   611→        addAutoTraderLog(`[TEST] Step 2 — Requesting proposal for R_10 DIGITODD $0.35...`);
+   612→   612→        const proposal = await getProposalWS({
+   613→   613→          contractType: 'DIGITODD',
+   614→   614→          symbol: 'R_10',
+   615→   615→          stake: 0.35,
+   616→   616→          duration: 1,
+   617→   617→          durationUnit: 't',
+   618→   618→        });
+   619→   619→
+   620→   620→        // After proposal, WS should be connected + authorized. Log the REAL account info.
+   621→   621→        const afterAuth = getTradeWSStatus();
+   622→   622→        addAutoTraderLog(`[TEST] ✅ Step 2 OK — Proposal id=${proposal.id.slice(0,12)} ask=$${proposal.ask_price} payout=$${proposal.payout.toFixed(2)}`);
+   623→   623→        addAutoTraderLog(`[TEST] WS Auth: login=${afterAuth.loginId} scopes=[${afterAuth.scopes}] virtual=${afterAuth.isVirtual}`);
+   624→   624→
+   625→   625→        // CRITICAL: Check if TRADE scope exists
+   626→   626→        if (afterAuth.scopes && !afterAuth.scopes.includes('TRADE')) {
+   627→   627→          addAutoTraderLog(`[TEST] ❌❌❌ TOKEN MISSING TRADE SCOPE! Scopes: [${afterAuth.scopes}]`);
+   628→   628→          addAutoTraderLog(`[TEST] ❌ Your PAT token can READ but NOT TRADE`);
+   629→   629→          addAutoTraderLog(`[TEST] ❌ Fix: Deriv Settings > API Token > Edit > Check TRADE scope`);
+   630→   630→        } else if (afterAuth.scopes.includes('TRADE')) {
+   631→   631→          addAutoTraderLog(`[TEST] ✅ TRADE scope confirmed`);
+   632→   632→        }
+   633→   633→
+   634→   634→        // Check if WS authorized account matches selected account
+   635→   635→        if (afterAuth.loginId && store.selectedAccountId && afterAuth.loginId !== store.selectedAccountId) {
+   636→   636→          addAutoTraderLog(`[TEST] ⚠️ MISMATCH: WS auth'd as ${afterAuth.loginId} but you selected ${store.selectedAccountId}`);
+   637→   637→        }
+   638→   638→
+   639→   639→        // Step 3: Buy the contract
+   640→   640→        addAutoTraderLog(`[TEST] Step 3 — Buying contract on account ${afterAuth.loginId}...`);
+   641→   641→        const buy = await buyContractWS(proposal.id, proposal.ask_price);
+   642→   642→        const won = buy.profit > 0;
+   643→   643→        addAutoTraderLog(`[TEST] ✅ BUY FILLED on ${afterAuth.loginId}! contract=${buy.contract_id}`);
+   644→   644→        addAutoTraderLog(`[TEST] ✅ RESULT: ${won ? '+$' : '-$'}${Math.abs(buy.profit).toFixed(2)} (${won ? 'WIN' : 'LOSS'}) [REAL MONEY ON DERIV]`);
+   645→   645→        addAutoTraderLog(`[TEST] ═══════════════════════════════════════`);
+   646→   646→        addAutoTraderLog(`[TEST] ✅ Connection test PASSED — live trading is working!`);
+   647→   647→        addAutoTraderLog(`[TEST] ═══════════════════════════════════════`);
+   648→   648→      } catch (err) {
+   649→   649→        const msg = (err as Error).message || String(err);
+   650→   650→        const after = getTradeWSStatus();
+   651→   651→        addAutoTraderLog(`[TEST] ❌ FAILED: ${msg}`);
+   652→   652→        addAutoTraderLog(`[TEST] WS after: ready=${after.wsReady} auth=${after.authorized} login=${after.loginId} scopes=[${after.scopes}]`);
+   653→   653→        if (msg.includes('timed out')) {
+   654→   654→          addAutoTraderLog(`[TEST] ❌ Timed out — PAT token likely missing TRADE scope`);
+   655→   655→          addAutoTraderLog(`[TEST] ❌ Fix: Deriv Settings > API Token > Edit > Check TRADE`);
+   656→   656→        } else if (msg.includes('Not authenticated')) {
+   657→   657→          addAutoTraderLog(`[TEST] ❌ No credentials — click Connect Account`);
+   658→   658→        } else if (msg.includes('Authorization required')) {
+   659→   659→          addAutoTraderLog(`[TEST] ❌ Token rejected — recreate token with TRADE scope`);
+   660→   660→        }
+   661→   661→        addAutoTraderLog(`[TEST] ═══════════════════════════════════════`);
+   662→   662→      }
+   663→   663→    })();
+   664→   664→
+   665→   665→    // Then start the bot
+   666→   666→    if (runningRef.current) {
+   667→   667→      addAutoTraderLog(`[AI] 🔗 Account connected — STOPPING sim bot, restarting in LIVE mode...`);
+   668→   668→      runningRef.current = false;
+   669→   669→      if (cycleTimerRef.current) { clearTimeout(cycleTimerRef.current); cycleTimerRef.current = null; }
+   670→   670→      activeTradesRef.current.clear();
+   671→   671→      tradeLocksRef.current.clear();
+   672→   672→      pendingSimTradesGlobal.clear();
+   673→   673→      setGlobalAIRunning(false);
+   674→   674→      setTimeout(() => {
+   675→   675→        addAutoTraderLog(`[AI] ✅ Credentials restored for ${store.accountMode} account ${store.selectedAccountId}`);
+   676→   676→        addAutoTraderLog(`[AI] 🚀 Starting LIVE bot...`);
+   677→   677→        startBot();
+   678→   678→      }, 3000);
+   679→   679→    } else {
+   680→   680→      addAutoTraderLog(`[AI] 🔗 Deriv account connected — starting bot in LIVE mode...`);
+   681→   681→      if (token && store.derivAppId && store.selectedAccountId) {
+   682→   682→        addAutoTraderLog(`[AI] ✅ Credentials restored for ${store.accountMode} account ${store.selectedAccountId}`);
+   683→   683→      }
+   684→   684→      setTimeout(() => { startBot(); }, 3000);
+   685→   685→    }
+   686→   686→  }, [isAuthorized, startBot, addAutoTraderLog, setGlobalAIRunning]);
+   687→   687→
+   688→   688→  // Listen for trades from ANY tab and feed AI learning
+   689→   689→  useEffect(() => {
+   690→   690→    const unsub = useWorldpadStore.subscribe(
+   691→   691→      (state) => state.tradeHistory,
+   692→   692→      (history) => {
+   693→   693→        if (history.length === 0) return;
+   694→   694→        const last = history[history.length - 1];
+   695→   695→        if (last.id.startsWith('ai-')) return;
+   696→   696→        aiEngine.recordTradeResult(
+   697→   697→          last.symbol, last.type, last.digit >= 0 ? last.digit : undefined,
+   698→   698→          last.profit, 50
+   699→   699→        );
+   700→   700→      }
+   701→   701→    );
+   702→   702→    return unsub;
+   703→   703→  }, []);
+   704→   704→
+   705→   705→  return null;
+   706→   706→}
