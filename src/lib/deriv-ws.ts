@@ -321,7 +321,7 @@ export async function getProposalWS(params: {
     payload.barrier = params.barrier.toString();
   }
 
-  const data = await sendWSRequest(payload, 10000);
+  const data = await sendWSRequest(payload, 5000);
 
   if (!data.proposal) {
     throw new Error(data.error?.message || 'No proposal in response');

@@ -113,52 +113,56 @@ async function placeTradeDirect(params: {
       };
     } catch (err) {
       const errMsg = (err as Error).message || String(err);
-      logFn(`[LIVE FAILED] ${errMsg} → instant SIM fallback`);
+      logFn(`[LIVE FAILED] ${errMsg} → SIM fallback`);
       // Fall through to SIM below
     }
   }
 
   // === SIM MODE (or LIVE fallback) ===
-  // v10: Instant resolution — no waiting for ticks
-  const md = getMarketData(params.symbol);
-  let nextDigit: number;
-  if (md?.lastTick) {
-    nextDigit = md.lastTick.digit;
-  } else {
-    nextDigit = Math.floor(Math.random() * 10);
+  try {
+    const md = getMarketData(params.symbol);
+    let nextDigit: number;
+    if (md?.lastTick) {
+      nextDigit = md.lastTick.digit;
+    } else {
+      nextDigit = Math.floor(Math.random() * 10);
+    }
+
+    const { contractType, barrier, stake } = params;
+    let won = false;
+    switch (contractType) {
+      case 'DIGITMATCH': won = nextDigit === barrier; break;
+      case 'DIGITDIFF': won = nextDigit !== barrier; break;
+      case 'DIGITOVER': won = nextDigit > (barrier ?? 4); break;
+      case 'DIGITUNDER': won = nextDigit < (barrier ?? 5); break;
+      case 'DIGITEVEN': won = nextDigit % 2 === 0; break;
+      case 'DIGITODD': won = nextDigit % 2 === 1; break;
+      default: won = Math.random() > 0.5;
+    }
+
+    const isMatch = contractType === 'DIGITMATCH';
+    const profitMultiplier = isMatch ? 8.5 : 0.85;
+    const profit = won ? stake * profitMultiplier : -stake;
+    const payout = won ? stake + profit : 0;
+
+    logFn(`[SIM] ${contractType} ${params.symbol} d${barrier ?? '-'} $${stake} → ${won ? 'WIN +$' + profit.toFixed(2) : 'LOSS -$' + stake.toFixed(2)} (digit=${nextDigit})`);
+
+    return {
+      id: `SIM-${Date.now()}`,
+      type: contractType,
+      symbol: params.symbol,
+      stake,
+      payout,
+      profit,
+      digit: barrier ?? -1,
+      won,
+      timestamp: Date.now(),
+      simulated: true,
+    };
+  } catch (simErr) {
+    logFn(`[ERROR] SIM also failed: ${(simErr as Error).message}`);
+    return null;
   }
-
-  const { contractType, barrier, stake } = params;
-  let won = false;
-  switch (contractType) {
-    case 'DIGITMATCH': won = nextDigit === barrier; break;
-    case 'DIGITDIFF': won = nextDigit !== barrier; break;
-    case 'DIGITOVER': won = nextDigit > (barrier ?? 4); break;
-    case 'DIGITUNDER': won = nextDigit < (barrier ?? 5); break;
-    case 'DIGITEVEN': won = nextDigit % 2 === 0; break;
-    case 'DIGITODD': won = nextDigit % 2 === 1; break;
-    default: won = Math.random() > 0.5;
-  }
-
-  const isMatch = contractType === 'DIGITMATCH';
-  const profitMultiplier = isMatch ? 8.5 : 0.85;
-  const profit = won ? stake * profitMultiplier : -stake;
-  const payout = won ? stake + profit : 0;
-
-  logFn(`[SIM] ${contractType} ${params.symbol} d${barrier ?? '-'} $${stake} → ${won ? 'WIN +$' + profit.toFixed(2) : 'LOSS -$' + stake.toFixed(2)} (digit=${nextDigit})`);
-
-  return {
-    id: `SIM-${Date.now()}`,
-    type: contractType,
-    symbol: params.symbol,
-    stake,
-    payout,
-    profit,
-    digit: barrier ?? -1,
-    won,
-    timestamp: Date.now(),
-    simulated: true,
-  };
 }
 
 /**
