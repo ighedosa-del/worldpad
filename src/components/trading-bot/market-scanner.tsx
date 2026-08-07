@@ -28,69 +28,58 @@ export function MarketScanner() {
           </p>
         ) : (
           <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
-            {/* Ranked markets (when bot is running) */}
             {rankedMarkets.length > 0 && rankedMarkets.map((m) => (
-              <MarketRankRow key={m.symbol} market={m} />
+              <div key={m.symbol} className={`rounded-lg border p-2.5 transition-colors ${m.score > 30 ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-border'}`}>
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold">{m.symbol}</span>
+                    <span className="text-xs text-muted-foreground hidden sm:inline">{m.name}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {m.regime && (
+                      <Badge variant="outline" className={`text-[9px] px-1 py-0 ${m.regime === 'strong_signal' ? 'border-emerald-500/50 text-emerald-400' : m.regime === 'weak_signal' ? 'border-yellow-500/50 text-yellow-400' : 'text-gray-500'}`}>
+                        {m.regime === 'strong_signal' ? 'STRONG' : m.regime === 'weak_signal' ? 'WEAK' : 'RAND'}
+                      </Badge>
+                    )}
+                    {m.backtestGrade && (
+                      <span className={`text-[10px] font-mono font-bold ${m.backtestGrade === 'A' ? 'text-emerald-400' : m.backtestGrade === 'B' ? 'text-green-300' : m.backtestGrade === 'C' ? 'text-yellow-400' : 'text-gray-500'}`}>
+                        {m.backtestGrade}
+                      </span>
+                    )}
+                    {m.ev !== undefined && (
+                      <span className={`text-[10px] font-mono ${m.ev > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        EV:{m.ev > 0 ? '+' : ''}{m.ev.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-tight line-clamp-2">{m.signal}</p>
+              </div>
             ))}
-
-            {/* Raw market data (always shown when connected) */}
             {marketData.length > 0 && rankedMarkets.length === 0 && marketData.map((m) => (
-              <MarketDataRow key={m.symbol} market={m} />
+              <div key={m.symbol} className="rounded-lg border border-border p-2.5">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-mono text-xs font-bold">{m.symbol}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{m.totalTicks} ticks</span>
+                    {m.digit >= 0 && <span className="font-mono text-lg font-bold">{m.digit}</span>}
+                  </div>
+                </div>
+                <div className="flex gap-0.5 h-3 items-end">
+                  {m.distribution.map((count, d) => (
+                    <div
+                      key={d}
+                      className={`flex-1 rounded-sm transition-all ${d === m.digit ? 'bg-primary' : 'bg-primary/20'}`}
+                      style={{ minHeight: '3px', height: `${Math.max(10, (count / (Math.max(...m.distribution, 1))) * 100)}%` }}
+                      title={`Digit ${d}: ${count}`}
+                    />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         )}
       </CardContent>
     </Card>
-  );
-}
-
-function MarketRankRow({ market }: { market: { symbol: string; name: string; score: number; signal: string; totalTicks: number; lastDigit: number } }) {
-  const hasSignal = score > 0;
-  return (
-    <div className={`rounded-lg border p-2.5 transition-colors ${hasSignal ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-border'}`}>
-      <div className="flex items-center justify-between mb-1">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xs font-bold">{market.symbol}</span>
-          <span className="text-xs text-muted-foreground hidden sm:inline">{market.name}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{market.totalTicks} ticks</span>
-          <Badge variant={hasSignal ? 'default' : 'secondary'} className={`text-[10px] px-1.5 ${hasSignal ? 'bg-emerald-600' : ''}`}>
-            {market.score.toFixed(0)}
-          </Badge>
-        </div>
-      </div>
-      {market.signal && (
-        <p className="text-[11px] text-muted-foreground leading-tight line-clamp-2">{market.signal}</p>
-      )}
-    </div>
-  );
-}
-
-function MarketDataRow({ market }: { market: { symbol: string; name: string; digit: number; price: number; distribution: number[]; totalTicks: number } }) {
-  const maxDist = Math.max(...distribution, 1);
-  return (
-    <div className="rounded-lg border border-border p-2.5">
-      <div className="flex items-center justify-between mb-2">
-        <span className="font-mono text-xs font-bold">{market.symbol}</span>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{market.totalTicks} ticks</span>
-          {market.digit >= 0 && (
-            <span className="font-mono text-lg font-bold">{market.digit}</span>
-          )}
-        </div>
-      </div>
-      {/* Mini distribution bar */}
-      <div className="flex gap-0.5 h-3 items-end">
-        {distribution.map((count, d) => (
-          <div
-            key={d}
-            className={`flex-1 rounded-sm transition-all ${d === market.digit ? 'bg-primary' : 'bg-primary/20'}`}
-            style={{ minHeight: '3px', height: `${Math.max(10, (count / maxDist) * 100)}%` }}
-            title={`Digit ${d}: ${count}`}
-          />
-        ))}
-      </div>
-    </div>
   );
 }

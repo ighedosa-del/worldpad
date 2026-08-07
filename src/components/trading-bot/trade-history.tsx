@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { useBotStore } from '@/lib/bot-v2/store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -45,6 +46,7 @@ function TradeRow({ trade }: { trade: {
   id: string; contractType: string; symbol: string; name: string;
   stake: number; payout: number; profit: number; won: boolean;
   timestamp: number; simulated: boolean; barrier: number | undefined;
+  ev?: number; regime?: string; backtestGrade?: string;
 } }) {
   const time = new Date(trade.timestamp).toLocaleTimeString();
 
@@ -56,14 +58,15 @@ function TradeRow({ trade }: { trade: {
         {trade.won ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 flex-wrap">
           <span className="font-mono font-bold">{trade.contractType}</span>
           <span className="text-muted-foreground">{trade.symbol}</span>
-          {trade.barrier !== undefined && (
-            <span className="text-muted-foreground">d{trade.barrier}</span>
+          {trade.barrier !== undefined && <span className="text-muted-foreground">d{trade.barrier}</span>}
+          {trade.backtestGrade && (
+            <span className={`font-mono text-[10px] ${trade.backtestGrade === 'A' ? 'text-emerald-400' : 'text-muted-foreground'}`}>{trade.backtestGrade}</span>
           )}
-          {trade.simulated && (
-            <Badge variant="outline" className="text-[9px] px-1 py-0 text-orange-500 border-orange-500/30">SIM</Badge>
+          {trade.ev !== undefined && (
+            <span className={`text-[10px] font-mono ${trade.ev > 0 ? 'text-emerald-400' : 'text-red-400'}`}>EV:{trade.ev > 0 ? '+' : ''}{trade.ev.toFixed(2)}</span>
           )}
         </div>
         <div className="text-muted-foreground">{time}</div>

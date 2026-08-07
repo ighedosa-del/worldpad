@@ -10,6 +10,8 @@ import { Play, Square, RotateCcw, Settings2, Zap, AlertTriangle } from 'lucide-r
 
 export function BotControls() {
   const { connected, running, phase, stats, stake, stopLoss, takeProfit, maxConsecutiveLosses, cycleIntervalMs, isVirtual, ticks } = useBotStore();
+  const avgEV = stats?.avgEV ?? 0;
+  const aiStrategies = stats?.aiStrategiesLearned ?? 0;
 
   const handleStart = () => {
     const bot = getBot();
@@ -75,13 +77,15 @@ export function BotControls() {
 
         {/* Stats summary */}
         {stats && (
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             <StatBox label="Trades" value={stats.totalTrades.toString()} />
             <StatBox label="Win Rate" value={`${stats.winRate.toFixed(1)}%`} color={stats.winRate >= 60 ? 'text-emerald-500' : stats.winRate >= 40 ? 'text-yellow-500' : 'text-red-500'} />
             <StatBox label="P/L" value={`$${stats.sessionProfit.toFixed(2)}`} color={stats.sessionProfit >= 0 ? 'text-emerald-500' : 'text-red-500'} />
             <StatBox label="Cycles" value={stats.cycles.toString()} />
             <StatBox label="Ticks" value={ticks.toString()} />
             <StatBox label="Stake" value={`$${stats.currentStake.toFixed(2)}`} />
+            <StatBox label="Avg EV" value={`${avgEV > 0 ? '+' : ''}${avgEV.toFixed(3)}`} color={avgEV > 0 ? 'text-emerald-500' : 'text-red-500'} />
+            <StatBox label="AI Strat" value={aiStrategies.toString()} />
           </div>
         )}
 

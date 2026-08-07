@@ -11,6 +11,9 @@ export interface RankedMarketDisplay {
   signal: string;
   totalTicks: number;
   lastDigit: number;
+  ev?: number;
+  regime?: string;
+  backtestGrade?: string;
 }
 
 export interface MarketDataDisplay {
@@ -99,7 +102,6 @@ export const useBotStore = create<BotStoreState>((set) => ({
     stats: null,
     ticks: 0,
     rankedMarkets: [],
-    tradeHistory: [],
     tradeHistory: [],
   }),
 }));
