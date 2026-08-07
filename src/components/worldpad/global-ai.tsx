@@ -200,6 +200,9 @@ export function GlobalAI() {
   const sessionWinsRef = useRef(0);
   const sessionLossesRef = useRef(0);
 
+  // v14: Refs to avoid stale closures — the bot loop always calls the latest version
+  const runCycleRef = useRef<() => Promise<void>>();
+
   // Init tick counters
   for (const m of SCANNED_MARKETS) {
     if (!marketTickCountsGlobal.has(m.symbol)) marketTickCountsGlobal.set(m.symbol, 0);
@@ -473,13 +476,16 @@ export function GlobalAI() {
     }
 
     // Fire all trades in parallel (per-market locks prevent duplicates)
-    addAutoTraderLog(`[AI:EXEC] 🎯 Executing ${trades.length} trade(s) — markets: ${trades.map(t => t.symbol).join(', ')}`);
-    const promises = trades.map(trade => executeTradeOnMarket(trade, botConfig.stake));
+    // v14: Read stake from store directly to avoid stale closure
+    const currentStake = useWorldpadStore.getState().botConfig.stake;
+    addAutoTraderLog(`[AI:EXEC] 🎯 Executing ${trades.length} trade(s) — markets: ${trades.map(t => t.symbol).join(', ')} stake=$${currentStake}`);
+    const promises = trades.map(trade => executeTradeOnMarket(trade, currentStake));
     await Promise.all(promises);
     addAutoTraderLog(`[AI:EXEC] ✅ All ${trades.length} trade(s) completed`);
 
     setGlobalAIStatus('waiting');
-  }, [executeTradeOnMarket, botConfig.stake, botConfig.stopLoss, setGlobalAIStatus, setGlobalAICycleCount, isStopLossHit, getCooldownSet]);
+  }, [executeTradeOnMarket, setGlobalAIStatus, setGlobalAICycleCount, isStopLossHit, getCooldownSet]);
+  runCycleRef.current = runCycle; // v14: keep ref in sync
 
   // === Start / Stop ===
   const startBot = useCallback(() => {
@@ -509,19 +515,26 @@ export function GlobalAI() {
 
     // v5: Pre-flight safety check for live trading
     addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
-    addAutoTraderLog(`[AI] === BOT v10 STARTED === mode=${simMode ? 'SIM' : 'LIVE'} authorized=${authorized}`);
-    addAutoTraderLog(`[AI] ═══════════════════════════════════════`);
+    addAutoTraderLog(`[AI] === BOT v14 STARTED === mode=${simMode ? 'SIM' : 'LIVE'} authorized=${authorized}`);
+    addAutoTraderLog(`[AI] ═════════════════════════════════════`);
 
+    // v14: Use refs so the loop ALWAYS calls the latest function versions.
+    // This fixes the stale closure bug where the loop ran the first-render's
+    // runCycle forever, missing all subsequent code updates and store changes.
     const runLoop = async () => {
       if (!runningRef.current) return;
-      await runCycle();
+      try {
+        await runCycleRef.current!();
+      } catch (err) {
+        console.error('[GlobalAI] runCycle error:', err);
+        addAutoTraderLog(`[AI] ❌ runCycle error: ${(err as Error).message}`);
+      }
       if (runningRef.current) {
-        // v8: 2s cycle — faster trading
         cycleTimerRef.current = setTimeout(runLoop, 2000);
       }
     };
     runLoop();
-  }, [isAuthorized, botConfig, addAutoTraderLog, runCycle, setGlobalAIRunning, setGlobalAICycleCount, setGlobalAITotalTrades, setGlobalAITotalProfit, setGlobalAILearningStats]);
+  }, [addAutoTraderLog, setGlobalAIRunning, setGlobalAICycleCount, setGlobalAITotalTrades, setGlobalAITotalProfit, setGlobalAILearningStats]);
 
   const stopBot = useCallback(() => {
     runningRef.current = false;
