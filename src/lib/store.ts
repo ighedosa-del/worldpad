@@ -184,7 +184,10 @@ function loadAuthFromStorage(): Partial<WorldpadState> {
         derivAppId: data.derivAppId || '',
         accountMode: data.accountMode || 'demo',
         selectedAccountId: data.selectedAccountId || '',
-        isAuthorized: !!(data.demoToken || data.realToken),
+        // v13 FIX: Do NOT set isAuthorized=true just because a token string exists.
+        // The token may be expired/invalid. Only initAndStart can set isAuthorized
+        // after a successful WebSocket authorize response.
+        isAuthorized: false,
       };
     }
   } catch { /* ignore */ }

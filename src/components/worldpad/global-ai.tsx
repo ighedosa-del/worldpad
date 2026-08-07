@@ -302,7 +302,8 @@ export function GlobalAI() {
         const won = result.profit > 0;
 
         // v5: Record live trade for safety tracking
-        if (!simMode) {
+        // v13 FIX: Use result.simulated (actual outcome) not simMode (store state)
+        if (!result.simulated) {
           const liveResult = recordLiveTrade(result.profit);
           if (liveResult.shouldPause) {
             addAutoTraderLog(`[AI] PAUSED: ${liveResult.message}`);
@@ -390,6 +391,9 @@ export function GlobalAI() {
 
     const ranked = lastRankingRef.current;
     if (ranked.length === 0) {
+      // v13: Log why we're waiting instead of silent return
+      const tickCount = Object.values(getAllMarketData()).reduce((sum, md) => sum + (md.tickCount || 0), 0);
+      addAutoTraderLog(`[AI] No market data yet — scanner collecting ticks (${tickCount} total so far)...`);
       setGlobalAIStatus('waiting');
       return;
     }
@@ -576,6 +580,8 @@ export function GlobalAI() {
           console.error('[GlobalAI] ❌ Hardcoded token FAILED to connect');
           addAutoTraderLog(`[AUTH] ❌ TOKEN REJECTED by Deriv — running in SIM mode`);
           addAutoTraderLog(`[AUTH] Check: 1) Token has Trade scope 2) Account is verified 3) Token not expired`);
+          // v13 FIX: Explicitly set isAuthorized=false so bot doesn't think it's LIVE
+          useWorldpadStore.getState().setIsAuthorized(false);
         }
       } else if (store.isAuthorized && (store.demoToken || store.realToken)) {
         // Fallback: use token from store (user logged in via modal)
@@ -636,30 +642,14 @@ export function GlobalAI() {
     return () => clearInterval(interval);
   }, [setGlobalAIHealth]);
 
-  // v5: Auto-restart bot when user connects mid-session
-  // CRITICAL FIX: If bot is already running in SIM mode, we MUST stop + restart it
-  // so it picks up the new isAuthorized=true closure for LIVE trades.
-  useEffect(() => {
-    if (!isAuthorized) return;
-
-    const store = useWorldpadStore.getState();
-    const token = store.accountMode === 'demo' ? store.demoToken : store.realToken;
-    if (token) {
-      restoreCredentials(token, '1089');
-    }
-
-    // Start the bot (with credentials restored above)
-    if (runningRef.current) {
-      runningRef.current = false;
-      if (cycleTimerRef.current) { clearTimeout(cycleTimerRef.current); cycleTimerRef.current = null; }
-      activeTradesRef.current.clear();
-      tradeLocksRef.current.clear();
-      pendingSimTradesGlobal.clear();
-      setGlobalAIRunning(false);
-    }
-    addAutoTraderLog(`[AI] 🔗 Account connected — starting bot (${store.accountMode})...`);
-    setTimeout(() => { startBot(); }, 1000);
-  }, [isAuthorized, startBot, addAutoTraderLog, setGlobalAIRunning]);
+  // v13: REMOVED the isAuthorized restart effect.
+  // This was causing a CRITICAL race condition:
+  //   1) initAndStart (t=5s) connects WS + sets isAuthorized=true + starts bot
+  //   2) This effect fires because isAuthorized changed
+  //   3) It calls restoreCredentials AGAIN → kills the WS initAndStart just connected
+  //   4) It stops the running bot and restarts it → bot loop of death
+  // initAndStart now handles EVERYTHING: auth, store update, and bot start.
+  // No secondary effect needed.
 
   // Listen for trades from ANY tab and feed AI learning
   useEffect(() => {

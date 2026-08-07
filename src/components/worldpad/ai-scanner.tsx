@@ -279,8 +279,10 @@ function ConnectionDiagnostic() {
   }, []);
   
   const hasToken = !!envToken;
-  const isLive = isAuthorized && accountMode === 'real';
-  const isDemo = isAuthorized && accountMode === 'demo';
+  // v13: Use actual WS auth state, not store's isAuthorized (which can be phantom)
+  const actuallyAuthorized = wsStatus?.authorized === true;
+  const isLive = actuallyAuthorized && accountMode === 'real';
+  const isDemo = actuallyAuthorized && accountMode === 'demo';
   const tradingMode = isLive ? 'LIVE' : isDemo ? 'DEMO' : 'SIM';
   const modeColor = isLive ? '#ef4444' : isDemo ? '#00d4aa' : '#f59e0b';
   
