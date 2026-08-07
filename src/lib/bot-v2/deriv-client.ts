@@ -80,8 +80,11 @@ export class DerivClient {
     this.destroyed = false;
 
     this.openPromise = new Promise((resolve, reject) => {
-      const url = `${WS_URL}?app_id=${this.appId}`;
-      console.log('[DerivClient] Connecting to', url);
+      // Always use 1089 for WS connection (alphanumeric app_ids break the WS handshake)
+      // Real auth is done via the authorize message with the PAT token
+      const wsAppId = /^\d+$/.test(this.appId) ? this.appId : '1089';
+      const url = `${WS_URL}?app_id=${wsAppId}`;
+      console.log('[DerivClient] Connecting to', url, '(configured app_id:', this.appId, ')');
 
       let ws: WebSocket;
       try {
@@ -100,7 +103,12 @@ export class DerivClient {
 
       ws.onopen = () => {
         console.log('[DerivClient] WebSocket opened, sending authorize...');
-        ws.send(JSON.stringify({ authorize: token }));
+        // For PAT tokens, include the app_id in the authorize call
+        const authMsg: Record<string, unknown> = { authorize: token };
+        if (this.appId && this.appId !== '1089') {
+          authMsg.add_account = 0; // Use the token's own account
+        }
+        ws.send(JSON.stringify(authMsg));
       };
 
       ws.onmessage = (event) => {

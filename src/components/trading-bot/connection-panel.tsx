@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Wifi, WifiOff, Plug, Unplug, ShieldCheck, ArrowLeftRight, KeyRound } from 'lucide-react';
+import { Wifi, WifiOff, Plug, Unplug, ShieldCheck, ArrowLeftRight } from 'lucide-react';
 
 // Token storage keyed by account loginid
 const ACCOUNT_TOKENS_KEY = 'deriv-account-tokens';
@@ -25,9 +25,8 @@ function setStoredAccountTokens(tokens: Record<string, string>) {
 }
 
 export function ConnectionPanel() {
-  const { connected, auth, isVirtual, balance, connectionError, phase, running, accountList, switchingAccount, appId } = useBotStore();
+  const { connected, auth, isVirtual, balance, connectionError, running, accountList, switchingAccount } = useBotStore();
   const [token, setToken] = useState('');
-  const [localAppId, setLocalAppId] = useState('');
   const [connecting, setConnecting] = useState(false);
   const [switchTokenInput, setSwitchTokenInput] = useState('');
   const [showTokenDialog, setShowTokenDialog] = useState(false);
@@ -35,12 +34,6 @@ export function ConnectionPanel() {
 
   const handleConnect = async () => {
     if (!token.trim()) return;
-    const effectiveAppId = localAppId.trim() || appId || '1089';
-    // If user changed app_id, destroy old bot so it recreates with new one
-    if (localAppId.trim() && localAppId.trim() !== appId) {
-      useBotStore.getState().updateState({ appId: effectiveAppId });
-      destroyBot();
-    }
     setConnecting(true);
     useBotStore.getState().updateState({ connectionError: null });
     try {
@@ -133,8 +126,6 @@ export function ConnectionPanel() {
   const envToken = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_DERIV_TOKEN || '') : '';
   const sessionToken = typeof window !== 'undefined' ? (sessionStorage.getItem('deriv-token') || '') : '';
   const displayToken = token || sessionToken || envToken;
-
-  const effectiveAppId = localAppId.trim() || appId || '1089';
 
   return (
     <Card className="border-border">
@@ -241,30 +232,16 @@ export function ConnectionPanel() {
           <div className="space-y-2">
             <Input
               type="password"
-              placeholder="Paste PAT_ or API token..."
+              placeholder="Paste your PAT or API token..."
               value={token}
               onChange={(e) => setToken(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleConnect()}
               disabled={connecting}
               className="font-mono text-xs"
             />
-            <div className="flex items-center gap-2">
-              <KeyRound className="h-3 w-3 text-muted-foreground shrink-0" />
-              <Input
-                type="text"
-                placeholder={`App ID (default: ${effectiveAppId})`}
-                value={localAppId}
-                onChange={(e) => setLocalAppId(e.target.value)}
-                disabled={connecting}
-                className="font-mono text-xs h-8"
-              />
-            </div>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              PAT_ tokens need your <strong>registered app_id</strong> from{' '}
-              <a href="https://app.deriv.com/account/api-token" target="_blank" rel="noreferrer" className="underline text-primary">
-                Deriv Developer Portal
-              </a>.
-              Regular API tokens work with the default 1089.
+              Paste your Deriv API token (regular or PAT_ format).<br/>
+              Token needs <strong>Trade</strong> scope enabled.
             </p>
             {envToken && !token && !sessionToken && (
               <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -304,8 +281,8 @@ export function ConnectionPanel() {
             <p className="font-medium">{connectionError}</p>
             <p className="text-red-400/70">
               {connectionError.includes('InvalidToken')
-                ? 'If using a PAT_ token, enter your registered app_id above. Regular API tokens need Trade scope.'
-                : 'Check your token and try again.'}
+                ? 'Make sure your token has Trade scope and hasn\'t expired.'
+                : 'Check your connection and try again.'}
             </p>
           </div>
         )}
