@@ -47,6 +47,7 @@ export interface BotStoreState {
   takeProfit: number;
   maxConsecutiveLosses: number;
   cycleIntervalMs: number;
+  appId: string;
 
   // Data
   rankedMarkets: RankedMarketDisplay[];
@@ -83,6 +84,7 @@ export const useBotStore = create<BotStoreState>((set) => ({
   takeProfit: 20,
   maxConsecutiveLosses: 5,
   cycleIntervalMs: 2000,
+  appId: '1089',
 
   rankedMarkets: [],
   marketData: [],
@@ -116,11 +118,8 @@ import { DerivBot, DEFAULT_CONFIG, type BotConfig } from './engine';
 let botInstance: DerivBot | null = null;
 
 export function getBot(): DerivBot {
+  const appId = useBotStore.getState().appId || process.env.NEXT_PUBLIC_DERIV_APP_ID || '1089';
   if (!botInstance) {
-    const appId = typeof window !== 'undefined'
-      ? (process.env.NEXT_PUBLIC_DERIV_APP_ID || '1089')
-      : '1089';
-
     botInstance = new DerivBot(
       appId,
       (partial) => {
