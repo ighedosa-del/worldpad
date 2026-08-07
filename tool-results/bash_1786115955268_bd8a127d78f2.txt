@@ -1,0 +1,2121 @@
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=84 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 263ms
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[warning] [DerivWS] WS closed: code= 1006 reason= none
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=85 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=86 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=87 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=88 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 528ms
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=89 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [Fast Refresh] rebuilding
+[error] ./src/components/trading-dashboard.tsx:296:18
+Parsing ecmascript source code failed
+  294 |           min={0.35}
+  295 |           step={0.05}
+> 296 |           color="#a78bfa"
+      |                  ^
+  297 |         />
+  298 |         <ConfigInput label="Stop Loss ($)" value={stopLoss} onChange={(v) => setStopLoss(v)} min={0} step={1} color="#ef4444" />
+  299 |         <ConfigInput label="Take Profit ($)" value={takeProfit} onChange={(v) => setTakeProfit(v)} min={0} step={1} color="#22c55e" />
+
+Expected '</', got '#'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[error] ./src/components/trading-dashboard.tsx:296:18
+Parsing ecmascript source code failed
+  294 |           min={0.35}
+  295 |           step={0.05}
+> 296 |           color="#a78bfa"
+      |                  ^
+  297 |         />
+  298 |         <ConfigInput label="Stop Loss ($)" value={stopLoss} onChange={(v) => setStopLoss(v)} min={0} step={1} color="#ef4444" />
+  299 |         <ConfigInput label="Take Profit ($)" value={takeProfit} onChange={(v) => setTakeProfit(v)} min={0} step={1} color="#22c55e" />
+
+Expected '</', got '#'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [AI Cycle] OK Volatility 100 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 25 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [AI Cycle] OK Volatility 50 (1s): DIGITDIFF d1 (score=90 signal=true ev=0.850)
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ100V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ25V
+[log] [GlobalAI] executeTradeOnMarket: authorized= false simMode= true symbol= 1HZ50V
+[log] [Fast Refresh] rebuilding
+[warning] [Fast Refresh] performing full reload
+
+Fast Refresh will perform a full reload when you edit a file that's imported by modules outside of the React rendering tree.
+You might have a file which exports a React component but also exports a value that is imported by a non-React component file.
+Consider migrating the non-React component export to a separate file and importing it into both files.
+
+It is also possible the parent component of the component you edited is a class component, which disables Fast Refresh.
+Fast Refresh requires at least one parent function component in your React tree.
+[log] [Fast Refresh] done in 688ms
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [HMR] connected
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [HMR] connected
+[log] [DerivClient] Connected, authorizing...
+[log] [DerivClient] Auth FAILED: The token is invalid.
+[error] Connect failed: {stack: "Error: The token is invalid.
+    at DerivClient.ha…st:3000/_next/static/chunks/_536f57a6._.js:72:26)", message: "The token is invalid.", Symbol(next.console.error.digest): "NEXT_CONSOLE_ERROR"}
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 178ms
+[log] [DerivClient] Disconnected (code=1006)
+[log] [DerivClient] Reconnecting in 3s...
+[log] [DerivClient] Connected, authorizing...
+[log] [DerivClient] Auth FAILED: The token is invalid.
+[log] [DerivClient] Reconnect failed: The token is invalid.
+[log] [DerivClient] Disconnected (code=1006)
+[log] [DerivClient] Reconnecting in 3s...
+[log] [DerivClient] Connected, authorizing...
+[log] [DerivClient] Auth FAILED: The token is invalid.
+[log] [DerivClient] Reconnect failed: The token is invalid.
+[log] [DerivClient] Disconnected (code=1006)
+[log] [DerivClient] Reconnecting in 3s...
+[log] [DerivClient] Connected, authorizing...
+[log] [DerivClient] Auth FAILED: The token is invalid.
+[log] [DerivClient] Reconnect failed: The token is invalid.
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 165ms
+[log] [DerivClient] Disconnected (code=1006)
+[log] [DerivClient] Reconnecting in 3s...
+[log] [DerivClient] Connected, authorizing...
+[log] [DerivClient] Auth FAILED: The token is invalid.
+[log] [DerivClient] Reconnect failed: The token is invalid.
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 173ms
+[log] [Fast Refresh] rebuilding
+[error] A component is changing a controlled input to be uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://react.dev/link/controlled-components
+[log] [Fast Refresh] done in 166ms
+[log] [DerivClient] Disconnected (code=1006)
+[log] [DerivClient] Reconnecting in 3s...
+[log] [DerivClient] Connected, authorizing...
+[log] [DerivClient] Auth FAILED: The token is invalid.
+[log] [DerivClient] Reconnect failed: The token is invalid.
+[log] [Fast Refresh] rebuilding
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [HMR] connected
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData && (
+      |                ^^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:224:16
+Parsing ecmascript source code failed
+  222 |       </div>
+  223 |       {/* Distribution bars */
+> 224 |       {hasData ? (
+      |                ^
+  225 |         <div className="flex gap-px h-5">
+  226 |           {dist.map((pct, i) => (
+  227 |             <div key={i} className="flex-1 rounded-sm relative" title={`d${i}: ${pct.toFixed(1)}%`} style={{ background: i === minD ? 'rgba(167,139,250,0.3)' : 'rgba(255,255,255,0.04)' }}>
+
+An object member cannot be declared optional
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:133:23
+Parsing ecmascript source code failed
+  131 |           </button>
+  132 |           {/* Balance */
+> 133 |           {activeAuth && (
+      |                       ^^
+  134 |             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
+  135 |               <DollarSign className="w-3.5 h-3.5 text-green-400" />
+  136 |               <span className="text-sm font-bold text-white font-mono">${activeAuth.balance.toFixed(2)}</span>
+
+Expected a semicolon
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[error] ./src/components/trading-dashboard.tsx:133:23
+Parsing ecmascript source code failed
+  131 |           </button>
+  132 |           {/* Balance */
+> 133 |           {activeAuth && (
+      |                       ^^
+  134 |             <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
+  135 |               <DollarSign className="w-3.5 h-3.5 text-green-400" />
+  136 |               <span className="text-sm font-bold text-white font-mono">${activeAuth.balance.toFixed(2)}</span>
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/app/page.tsx:3:1
+Module not found: Can't resolve '@/components/trading-dashboard'
+  1 | 'use client';
+  2 |
+> 3 | import { TradingDashboard } from '@/components/trading-dashboard';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  4 |
+  5 | export default function Page() {
+  6 |   return <TradingDashboard />;
+
+Import map: aliased to relative './src/components/trading-dashboard' inside of [project]/
+
+Import traces:
+  Client Component Browser:
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-dashboard.tsx:273:8
+Parsing ecmascript source code failed
+  271 |         </div>
+  272 |         {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />
+> 273 |       </button>
+      |        ^^^^^^^^
+  274 |       {open && (
+  275 |         <div className="border-t border-white/[0.06] max-h-72 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#333 transparent' }}>
+  276 |           {trades.length === 0 ? (
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-dashboard.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-dashboard.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[log] [HMR] connected
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[log] [HMR] connected
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [HMR] connected
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[log] [HMR] connected
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [HMR] connected
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[error] ./src/components/trading-bot/bot-controls.tsx:121:34
+Parsing ecmascript source code failed
+  119 |           <div className="grid grid-cols-2 gap-3">
+  120 |             <ConfigInput label="Stake ($)
+> 121 |               <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateConfig('stake', parseFloat(e.target.value) || 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+      |                                  ^^^^^^^^
+  122 |             </ConfigInput>
+  123 |             <ConfigInput label="Stop Loss ($)
+  124 |               <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateConfig('stopLoss', parseFloat(e.target.value) || 0)} className="h-8 text-xs font-mono" />
+
+Expected '</', got 'string literal (" step=", " step=")'
+
+Import traces:
+  Client Component Browser:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component Browser]
+    ./src/app/page.tsx [Client Component Browser]
+    ./src/app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/components/trading-bot/bot-controls.tsx [Client Component SSR]
+    ./src/app/page.tsx [Client Component SSR]
+    ./src/app/page.tsx [Server Component]
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] rebuilding
+[clear] console.clear
+[log] [Fast Refresh] done in 989ms
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 344ms
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [HMR] connected
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 134ms
+[log] [DerivClient] Connecting to wss://ws.derivws.com/websockets/v3?app_id=1089
+[log] [DerivClient] WebSocket opened, sending authorize...
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 174ms
+[log] [HMR] connected
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [HMR] connected
+[log] [DerivClient] Connecting to wss://ws.derivws.com/websockets/v3?app_id=1089
+[log] [DerivClient] WebSocket opened, sending authorize...
+[info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[log] [HMR] connected
+[log] [DerivClient] Connecting to wss://ws.derivws.com/websockets/v3?app_id=1089
+[log] [DerivClient] WebSocket opened, sending authorize...
+[log] [Fast Refresh] rebuilding
+[log] [Fast Refresh] done in 194ms
