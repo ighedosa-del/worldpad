@@ -544,11 +544,20 @@ export function GlobalAI() {
       const envAppId = process.env.NEXT_PUBLIC_DERIV_APP_ID || '1089';
       let connected = false;
 
+      // ALWAYS log token status for diagnostics
       if (envToken) {
+        addAutoTraderLog(`[AUTH] Token found: ${envToken.slice(0, 12)}... (${envToken.length} chars)`);
+      } else {
+        addAutoTraderLog(`[AUTH] NO TOKEN FOUND in env — will run in SIM mode`);
+      }
+
+      if (envToken) {
+        addAutoTraderLog(`[AUTH] Connecting to Deriv WebSocket...`);
         console.log('[GlobalAI] Using hardcoded token from .env.local');
         const result = await restoreCredentials(envToken, envAppId);
         if (result) {
           console.log('[GlobalAI] ✅ LIVE connected:', result.loginid, 'balance:', result.balance, 'type:', result.accountType);
+          addAutoTraderLog(`[AUTH] ✅ CONNECTED — Account: ${result.loginid} | Balance: $${result.balance.toFixed(2)} ${result.currency} | Mode: ${result.accountType.toUpperCase()}`);
           // Force store into authorized LIVE state
           const s = useWorldpadStore.getState();
           s.setBalance(result.balance);
@@ -561,6 +570,8 @@ export function GlobalAI() {
           connected = true;
         } else {
           console.error('[GlobalAI] ❌ Hardcoded token FAILED to connect');
+          addAutoTraderLog(`[AUTH] ❌ TOKEN REJECTED by Deriv — running in SIM mode`);
+          addAutoTraderLog(`[AUTH] Check: 1) Token has Trade scope 2) Account is verified 3) Token not expired`);
         }
       } else if (store.isAuthorized && (store.demoToken || store.realToken)) {
         // Fallback: use token from store (user logged in via modal)

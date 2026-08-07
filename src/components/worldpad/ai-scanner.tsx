@@ -328,7 +328,7 @@ function ConnectionDiagnostic() {
 
 function BotLogPanel() {
   const { autoTraderLogs } = useWorldpadStore();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true); // auto-expand
   const scrollRef = useRef<HTMLDivElement>(null);
   const recentLogs = autoTraderLogs.slice(-50);
   
