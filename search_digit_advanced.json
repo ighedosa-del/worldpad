@@ -1,0 +1,65 @@
+[
+  {
+    "url": "https://www.reddit.com/r/quant/comments/18m038j/neural_networks_in_financetrading",
+    "name": "Neural Networks in finance/trading : r/quant",
+    "snippet": "So my question is, who here is using neural networks in finance/ trading and for what applications? Price/return prediction ? Up/Down ...",
+    "host_name": "www.reddit.com",
+    "rank": 0,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=B0Jw0B61ANU&vl=en",
+    "name": "Creating a Day Trading AI with a Deep Neural Network in",
+    "snippet": "Creating a Day Trading AI with a Deep Neural Network in Python. Predict Stock Prices? Trading Bot in Python | Train an AI Agent on Forex ( ...",
+    "host_name": "www.youtube.com",
+    "rank": 1,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://imbuedeskpicasso.medium.com/66941-5-returns-in-testing-and-900-live-trades-in-action-a-journey-through-time-series-ensemble-7ad4b833ae9f",
+    "name": "66941.5% Returns in Testing and 900+ Live Trades in Action",
+    "snippet": "In this stage, the ensemble method combining TCN and LSTM neural network models has demonstrated exceptional performance across various datasets ...",
+    "host_name": "imbuedeskpicasso.medium.com",
+    "rank": 2,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://wiserpub.com/uploads/1/20221205/f3c8fa871419c7b6c14065fa26253a2a.pdf",
+    "name": "Multi-Timeframe Algorithmic Trading Bots Using Thick Data",
+    "snippet": "by G Roy · 2022 · Cited by 10 — compared with the original LSTM , this model is greatly improved with high prediction accuracy and small regression error. 53 pages",
+    "host_name": "wiserpub.com",
+    "rank": 3,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.ida.liu.se/~TDDE19/info/reports/2019/4.pdf",
+    "name": "Stock prediction using LSTM and Hidden Markov Models",
+    "snippet": "The evaluations are done by measuring accuracy as well as by simulation. The purpose of this article is to evaluate the per- formance of two different models, ... 10 pages",
+    "host_name": "www.ida.liu.se",
+    "rank": 4,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.scribd.com/document/863576138/A-Safe-Strategy-for-Differs-Market-Copy",
+    "name": "Safe Strategy for Deriv Trading | PDF",
+    "snippet": "1. Predict a digit with a percentage less than 9 % · 2. Avoid predicting a digit with a green bar or red bar. · 3. Make sure the predicted digit does not increase ...",
+    "host_name": "www.scribd.com",
+    "rank": 5,
+    "date": "",
+    "favicon": ""
+  },
+  {
+    "url": "https://www.researchgate.net/publication/395841128_Design_and_Implementation_of_a_Multi-Strategy_Algorithmic_Trading_Bot",
+    "name": "Design and Implementation of a Multi-Strategy Algorithmic",
+    "snippet": "This study presents a hybrid trading bot based on machine learning algorithms ... trading performance, predictive accuracy , and portfolio optimization. ...",
+    "host_name": "www.researchgate.net",
+    "rank": 6,
+    "date": "",
+    "favicon": ""
+  }
+]
