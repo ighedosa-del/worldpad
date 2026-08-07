@@ -1,10 +1,11 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Play, Square, Brain, Wifi, WifiOff, ChevronDown, ChevronUp, Trophy, TrendingUp, BarChart3, GraduationCap, Activity, AlertTriangle, Radio, ScrollText, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { useMemo, useState, useEffect, useRef } from 'react';
+import { Play, Square, Brain, Wifi, WifiOff, ChevronDown, ChevronUp, Trophy, TrendingUp, BarChart3, GraduationCap, Activity, AlertTriangle, Radio, ScrollText, CheckCircle2, XCircle, Clock, Zap, ShieldAlert, Terminal } from 'lucide-react';
 import { SCANNED_MARKETS, getMarketData } from '@/lib/multi-market-ws';
 import { useWorldpadStore, type ScannerHealth } from '@/lib/store';
 import type { RankedMarket } from '@/lib/market-scorer';
+import { getTradeWSStatus } from '@/lib/deriv-ws';
 
 type StatusBadgeColor = 'scanning' | 'trading' | 'waiting' | 'idle';
 
@@ -258,6 +259,119 @@ function LearningPanel({ learningStats }: { learningStats: { strategiesLearned: 
   );
 }
 
+function ConnectionDiagnostic() {
+  const { isAuthorized, accountMode, accountInfo, autoTraderLogs } = useWorldpadStore();
+  const [wsStatus, setWsStatus] = useState<ReturnType<typeof getTradeWSStatus> | null>(null);
+  const [envToken, setEnvToken] = useState<string>('');
+  
+  useEffect(() => {
+    // Check if env token exists
+    if (typeof window !== 'undefined') {
+      setEnvToken(process.env.NEXT_PUBLIC_DERIV_TOKEN || '');
+    }
+  }, []);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try { setWsStatus(getTradeWSStatus()); } catch {}
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  const hasToken = !!envToken;
+  const isLive = isAuthorized && accountMode === 'real';
+  const isDemo = isAuthorized && accountMode === 'demo';
+  const tradingMode = isLive ? 'LIVE' : isDemo ? 'DEMO' : 'SIM';
+  const modeColor = isLive ? '#ef4444' : isDemo ? '#00d4aa' : '#f59e0b';
+  
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ background: '#161b22', border: `1px solid ${isLive ? 'rgba(239,68,68,0.3)' : isDemo ? 'rgba(0,212,170,0.3)' : 'rgba(245,158,11,0.3)'}` }}>
+      <div className="px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {isLive ? <ShieldAlert className="w-4 h-4" style={{ color: '#ef4444' }} /> : isDemo ? <ShieldAlert className="w-4 h-4" style={{ color: '#00d4aa' }} /> : <AlertTriangle className="w-4 h-4" style={{ color: '#f59e0b' }} />}
+          <span className="text-sm font-semibold text-white">Connection Status</span>
+          <span className="text-[10px] px-2.5 py-1 rounded-full font-black uppercase tracking-wider" style={{ 
+            background: isLive ? 'rgba(239,68,68,0.2)' : isDemo ? 'rgba(0,212,170,0.2)' : 'rgba(245,158,11,0.2)', 
+            color: modeColor, 
+            border: `1px solid ${modeColor}40`,
+            boxShadow: `0 0 12px ${modeColor}30`
+          }}>{tradingMode}</span>
+        </div>
+        {wsStatus && (
+          <div className="flex items-center gap-1.5">
+            <div className={`w-2 h-2 rounded-full ${wsStatus.authorized ? 'bg-green-500' : wsStatus.hasToken ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ boxShadow: `0 0 8px ${wsStatus.authorized ? 'rgba(34,197,94,0.8)' : wsStatus.hasToken ? 'rgba(234,179,8,0.8)' : 'rgba(239,68,68,0.8)'}` }} />
+            <span className="text-[10px] font-mono" style={{ color: wsStatus.authorized ? '#22c55e' : '#f87171' }}>{wsStatus.authorized ? 'AUTH OK' : wsStatus.hasToken ? 'AUTH FAIL' : 'NO TOKEN'}</span>
+          </div>
+        )}
+      </div>
+      <div className="px-4 pb-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-lg p-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="text-[9px] text-gray-500 uppercase">Token</div>
+          <div className="text-xs font-bold font-mono mt-0.5" style={{ color: hasToken ? '#22c55e' : '#ef4444' }}>{hasToken ? envToken.slice(0, 12) + '...' : 'MISSING'}</div>
+        </div>
+        <div className="rounded-lg p-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="text-[9px] text-gray-500 uppercase">Account</div>
+          <div className="text-xs font-bold font-mono mt-0.5" style={{ color: accountInfo ? '#e2e8f0' : '#6b7280' }}>{accountInfo ? accountInfo.loginid : '---'}</div>
+        </div>
+        <div className="rounded-lg p-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="text-[9px] text-gray-500 uppercase">Balance</div>
+          <div className="text-xs font-bold font-mono mt-0.5" style={{ color: accountInfo ? '#22c55e' : '#6b7280' }}>{accountInfo ? `$${accountInfo.balance.toFixed(2)} ${accountInfo.currency}` : '---'}</div>
+        </div>
+        <div className="rounded-lg p-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="text-[9px] text-gray-500 uppercase">WebSocket</div>
+          <div className="text-xs font-bold font-mono mt-0.5" style={{ color: wsStatus?.wsReady ? '#22c55e' : '#ef4444' }}>{wsStatus?.wsReady ? 'OPEN' : wsStatus?.hasToken ? 'CLOSED' : 'N/A'}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BotLogPanel() {
+  const { autoTraderLogs } = useWorldpadStore();
+  const [open, setOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const recentLogs = autoTraderLogs.slice(-50);
+  
+  useEffect(() => {
+    if (scrollRef.current && open) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [recentLogs.length, open]);
+  
+  return (
+    <div className="rounded-xl overflow-hidden" style={{ background: '#161b22', border: '1px solid #30363d' }}>
+      <button onClick={() => setOpen(!open)} className="w-full flex items-center justify-between px-4 py-3 transition-colors hover:bg-[rgba(255,255,255,0.02)]">
+        <div className="flex items-center gap-2">
+          <Terminal className="w-4 h-4 text-green-400" />
+          <span className="text-sm font-semibold text-white">Bot Logs</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold" style={{ background: 'rgba(34,197,94,0.12)', color: '#22c55e', border: '1px solid rgba(34,197,94,0.25)' }}>{autoTraderLogs.length}</span>
+        </div>
+        {open ? <ChevronUp className="w-4 h-4 text-gray-500" /> : <ChevronDown className="w-4 h-4 text-gray-500" />}
+      </button>
+      {open && (
+        <div ref={scrollRef} className="max-h-64 overflow-y-auto wp-scroll px-4 pb-4 font-mono text-[10px] leading-relaxed" style={{ background: 'rgba(0,0,0,0.3)' }}>
+          {recentLogs.length === 0 ? (
+            <div className="text-gray-600 py-2">No logs yet...</div>
+          ) : (
+            recentLogs.map((log, i) => {
+              let color = '#9ca3af';
+              if (log.includes('LIVE')) color = '#ef4444';
+              else if (log.includes('SIM')) color = '#f59e0b';
+              else if (log.includes('WIN')) color = '#22c55e';
+              else if (log.includes('LOSS')) color = '#f87171';
+              else if (log.includes('STARTED') || log.includes('CONNECTED')) color = '#60a5fa';
+              else if (log.includes('FAILED') || log.includes('ERROR') || log.includes('FAIL')) color = '#ef4444';
+              else if (log.includes('FORCE')) color = '#a855f7';
+              else if (log.includes('FORCED')) color = '#c084fc';
+              return <div key={i} style={{ color }} className="py-0.5 whitespace-pre-wrap break-all">{log}</div>;
+            })
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TradingDraftPanel() {
   const { tradeHistory, totalWins, totalLosses, totalProfit } = useWorldpadStore();
   const [open, setOpen] = useState(false);
@@ -418,6 +532,8 @@ export function AIScanner() {
 
       {/* Market Grid + Bottom Panels */}
       <div className="flex-1 overflow-y-auto wp-scroll">
+        <ConnectionDiagnostic />
+        <div className="h-3" />
         <HealthBanner health={scannerHealth} isRunning={isRunning || scannerConnected} />
         {scannerConnected && totalTicksAll > 0 && totalTicksAll < 300 && (
           <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg" style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
@@ -431,6 +547,7 @@ export function AIScanner() {
           ))}
         </div>
         <div className="mt-4 space-y-3">
+          <BotLogPanel />
           <TradingDraftPanel />
           <LearningPanel learningStats={learningStats} />
         </div>
