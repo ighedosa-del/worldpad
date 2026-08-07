@@ -312,7 +312,7 @@ export async function getProposalWS(params: {
     amount: params.stake,
     basis: 'stake',
     contract_type: params.contractType,
-    underlying_symbol: params.symbol,
+    symbol: params.symbol,
     duration: params.duration || 1,
     duration_unit: params.durationUnit || 't',
     currency: 'USD',
