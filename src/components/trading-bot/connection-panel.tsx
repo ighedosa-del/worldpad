@@ -48,7 +48,8 @@ export function ConnectionPanel() {
         setStoredAccountTokens(stored);
       }
     } catch (err) {
-      // Error already logged by bot
+      const errMsg = (err as Error).message || 'Connection failed';
+      useBotStore.getState().updateState({ connectionError: errMsg });
     } finally {
       setConnecting(false);
     }

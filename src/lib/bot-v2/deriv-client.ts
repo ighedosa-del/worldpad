@@ -159,7 +159,10 @@ export class DerivClient {
     // Auth response
     if (data.msg_type === 'authorize') {
       if (data.error) {
-        this._authReject?.(new Error(data.error.message || 'Auth failed'));
+        const errCode = data.error.code || '';
+        const errMsg = data.error.message || 'Auth failed';
+        const details = data.error.details || '';
+        this._authReject?.(new Error(`[${errCode}] ${errMsg}${details ? ': ' + details : ''}`));
         return;
       }
       const a = data.authorize;
