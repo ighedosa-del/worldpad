@@ -95,6 +95,7 @@ async function placeTradeDirect(params: {
         duration: 1,
         durationUnit: 't',
       });
+      logFn(`[LIVE] Proposal OK: id=${proposal.id} ask=$${proposal.ask_price} payout=$${proposal.payout}`);
 
       const buyResult = await buyContractWS(proposal.id, proposal.ask_price);
       const won = buyResult.profit > 0;
@@ -119,6 +120,7 @@ async function placeTradeDirect(params: {
   }
 
   // === SIM MODE (or LIVE fallback) ===
+  logFn(`[SIM] Entering SIM path for ${params.symbol}...`);
   try {
     const md = getMarketData(params.symbol);
     let nextDigit: number;
@@ -261,12 +263,16 @@ export function GlobalAI() {
 
   // === Trade execution ===
   const executeTradeOnMarket = useCallback(async (market: RankedMarket, stake: number) => {
+    addAutoTraderLog(`[AI:EXEC] enter executeTradeOnMarket: ${market.symbol} signal=${!!market.selectedSignal} locked=${tradeLocksRef.current.has(market.symbol)}`);
+    
     if (!market.selectedSignal) {
       console.warn('[GlobalAI] executeTradeOnMarket SKIP: no signal for', market.symbol);
+      addAutoTraderLog(`[AI:EXEC] SKIP ${market.symbol}: no signal`);
       return;
     }
     if (tradeLocksRef.current.has(market.symbol)) {
       console.warn('[GlobalAI] executeTradeOnMarket SKIP: trade locked for', market.symbol);
+      addAutoTraderLog(`[AI:EXEC] SKIP ${market.symbol}: trade locked`);
       return;
     }
 
@@ -291,12 +297,14 @@ export function GlobalAI() {
 
       activeTradesRef.current.set(market.symbol, { signal, startedAt: Date.now() });
 
+      addAutoTraderLog(`[AI:EXEC] Calling placeTradeDirect for ${market.symbol}...`);
       const result = await placeTradeDirect({
         contractType: signal.contractType,
         barrier: signal.barrier,
         stake: finalStake,
         symbol: market.symbol,
       });
+      addAutoTraderLog(`[AI:EXEC] placeTradeDirect returned: ${result ? `profit=$${result.profit.toFixed(2)} sim=${result.simulated}` : 'NULL'}`);
 
       if (result) {
         const won = result.profit > 0;
@@ -465,8 +473,10 @@ export function GlobalAI() {
     }
 
     // Fire all trades in parallel (per-market locks prevent duplicates)
+    addAutoTraderLog(`[AI:EXEC] 🎯 Executing ${trades.length} trade(s) — markets: ${trades.map(t => t.symbol).join(', ')}`);
     const promises = trades.map(trade => executeTradeOnMarket(trade, botConfig.stake));
     await Promise.all(promises);
+    addAutoTraderLog(`[AI:EXEC] ✅ All ${trades.length} trade(s) completed`);
 
     setGlobalAIStatus('waiting');
   }, [executeTradeOnMarket, botConfig.stake, botConfig.stopLoss, setGlobalAIStatus, setGlobalAICycleCount, isStopLossHit, getCooldownSet]);
