@@ -281,8 +281,14 @@ export function ConnectionPanel() {
             <p className="font-medium">{connectionError}</p>
             <p className="text-red-400/70">
               {connectionError.includes('InvalidToken')
-                ? 'Make sure your token has Trade scope and hasn\'t expired.'
-                : 'Check your connection and try again.'}
+                ? 'Token is invalid or expired. Generate a new one at Deriv Settings > API Token with Trade scope.'
+                : connectionError.includes('timeout')
+                ? 'Connection timed out. Check your internet connection or try again.'
+                : connectionError.includes('Cannot create WebSocket')
+                ? 'Your browser may not support WebSocket connections.'
+                : connectionError.includes('Authorization failed')
+                ? 'Authorization failed. Verify your token and account permissions.'
+                : 'Make sure your token is correct and has Trade scope enabled.'}
             </p>
           </div>
         )}

@@ -1,12 +1,11 @@
 'use client';
 
-// === DerivClient v3 — REST API for auth/trading, WebSocket for ticks ===
-// PAT tokens don't work with WebSocket authorize.
-// Use REST API (Bearer token) for auth, proposals, buys.
-// Use WebSocket (unauthenticated) for tick streaming only.
+// === DerivClient v4 — Pure WebSocket (same approach as deriv-ws.ts) ===
+// REST API caused "Failed to fetch" errors.
+// WebSocket authorize works with BOTH regular tokens AND PAT_ tokens.
+// All operations (auth, proposal, buy, ticks, balance) go through a single WebSocket.
 
-const WS_URL = 'wss://ws.derivws.com/websockets/v3?app_id=1089';
-const REST_URL = 'https://api.derivws.com';
+const WS_BASE = 'wss://ws.derivws.com/websockets/v3';
 
 type MsgHandler = (data: any) => void;
 
@@ -48,23 +47,6 @@ export interface BuyResult {
   profit: number;
 }
 
-// === REST API helper ===
-
-async function restRequest(endpoint: string, token: string, appId: string, options?: RequestInit): Promise<any> {
-  const url = `${REST_URL}${endpoint}`;
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
-  ...(appId ? { 'Deriv-App-ID': appId } : {}),
-  };
-  const res = await fetch(url, { ...options, headers: { ...headers, ...(options?.headers as Record<string, string>) } });
-  const data = await res.json();
-  if (data.error) {
-    throw new Error(`[${data.error.code || 'REST'}] ${data.error.message || 'API error'}${data.error.details ? ': ' + data.error.details : ''}`);
-  }
-  return data;
-}
-
 // === DerivClient ===
 
 export class DerivClient {
@@ -79,11 +61,15 @@ export class DerivClient {
   private destroyed = false;
   private wsReconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // Promise-based request/response (same pattern as deriv-ws.ts)
+  private reqIdCounter = 1;
+  private pendingRequests = new Map<number, { resolve: (data: any) => void; reject: (err: Error) => void; timer: ReturnType<typeof setTimeout> }>();
+
   constructor(appId: string) {
     this.appId = appId;
   }
 
-  // --- Connection & Auth via REST API ---
+  // --- Connection & Auth via WebSocket ---
 
   async connect(token: string): Promise<AuthResult> {
     if (this.authorized && this.token === token) return this.authResult!;
@@ -91,106 +77,156 @@ export class DerivClient {
     this.token = token;
     this.destroyed = false;
 
-    // Authenticate via REST API (supports PAT tokens)
-    this.authResult = await this.restAuthorize(token);
-    this.authorized = true;
+    return new Promise((resolve, reject) => {
+      const url = `${WS_BASE}?app_id=${this.appId}`;
+      console.log('[DerivClient] Connecting to', url);
 
-    // Now open WebSocket for ticks (no auth needed for ticks)
-    this.openTickWebSocket();
-
-    return this.authResult;
-  }
-
-  private async restAuthorize(token: string): Promise<AuthResult> {
-    console.log('[DerivClient] Authenticating via REST API...');
-    try {
-      const data = await restRequest('/trading/v1/options/authorize', token, this.appId);
-      const a = data.authorize;
-      if (!a) throw new Error('No authorize data in response');
-
-      const accountList: AccountInfo[] = (a.account_list || []).map((acc: any) => ({
-        loginid: acc.loginid,
-        isVirtual: !!acc.is_virtual,
-        currency: acc.currency || 'USD',
-        balance: acc.balance ? parseFloat(acc.balance) : undefined,
-      }));
-
-      console.log('[DerivClient] REST auth OK:', a.loginid, 'virtual:', a.is_virtual, 'balance:', a.balance);
-      return {
-        loginid: a.loginid,
-        fullname: a.fullname || '',
-        balance: parseFloat(a.balance) || 0,
-        currency: a.currency || 'USD',
-        isVirtual: !!a.is_virtual,
-        scopes: a.scopes || [],
-        accountList,
-      };
-    } catch (err) {
-      console.error('[DerivClient] REST auth failed:', (err as Error).message);
-      throw err;
-    }
-  }
-
-  // --- Tick WebSocket (unauthenticated) ---
-
-  private openTickWebSocket(): void {
-    if (this.ws) {
-      try { this.ws.close(); } catch {}
-      this.ws = null;
-    }
-
-    console.log('[DerivClient] Opening tick WebSocket...');
-    try {
-      this.ws = new WebSocket(WS_URL);
-    } catch (e) {
-      console.error('[DerivClient] Cannot create tick WebSocket');
-      return;
-    }
-
-    this.ws.onopen = () => {
-      console.log('[DerivClient] Tick WebSocket opened');
-      // Re-subscribe to all tick handlers
-      for (const symbol of this.tickHandlers.keys()) {
-        this.ws!.send(JSON.stringify({ ticks: symbol, subscribe: 1 }));
-      }
-    };
-
-    this.ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-
-        // Tick data
-        if (data.msg_type === 'tick' && data.tick) {
-          const handlers = this.tickHandlers.get(data.tick.symbol);
-          if (handlers) {
-            const priceStr = data.tick.quote.toString();
-            const lastDigit = parseInt(priceStr[priceStr.length - 1], 10);
-            const tick: TickData = {
-              symbol: data.tick.symbol,
-              price: parseFloat(data.tick.quote),
-              digit: lastDigit,
-              epoch: data.tick.epoch,
-              timestamp: Date.now(),
-            };
-            handlers.forEach(h => h(tick));
-          }
-        }
+        this.ws = new WebSocket(url);
       } catch (e) {
-        console.error('[DerivClient] Tick parse error', e);
+        reject(new Error('Cannot create WebSocket'));
+        return;
       }
-    };
 
-    this.ws.onclose = () => {
-      console.log('[DerivClient] Tick WS closed');
-      // Auto-reconnect ticks after 3s
-      if (!this.destroyed && this.authorized) {
-        this.wsReconnectTimer = setTimeout(() => this.openTickWebSocket(), 3000);
-      }
-    };
+      const timer = setTimeout(() => {
+        reject(new Error('Connection timeout (15s)'));
+      }, 15000);
 
-    this.ws.onerror = () => {
-      // onclose will follow
-    };
+      this.ws.onopen = () => {
+        console.log('[DerivClient] WS opened, sending authorize...');
+        // Authorize using the ORIGINAL simple method (works with PAT_ tokens)
+        this.ws!.send(JSON.stringify({ authorize: token }));
+      };
+
+      this.ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          // Handle authorize response
+          if (data.msg_type === 'authorize') {
+            if (data.error) {
+              clearTimeout(timer);
+              console.error('[DerivClient] Auth failed:', data.error);
+              reject(new Error(`[${data.error.code || 'Auth'}] ${data.error.message || 'Authorization failed'}`));
+              return;
+            }
+            clearTimeout(timer);
+            this.authorized = true;
+
+            const a = data.authorize;
+            const accountList: AccountInfo[] = (a.account_list || []).map((acc: any) => ({
+              loginid: acc.loginid,
+              isVirtual: !!acc.is_virtual,
+              currency: acc.currency || 'USD',
+              balance: acc.balance ? parseFloat(acc.balance) : undefined,
+            }));
+
+            this.authResult = {
+              loginid: a.loginid,
+              fullname: a.fullname || '',
+              balance: parseFloat(a.balance) || 0,
+              currency: a.currency || 'USD',
+              isVirtual: !!a.is_virtual,
+              scopes: a.scopes || [],
+              accountList,
+            };
+
+            console.log('[DerivClient] Auth OK:', a.loginid, 'virtual:', a.is_virtual, 'balance:', a.balance);
+
+            // Now subscribe to ticks for any already-registered symbols
+            for (const symbol of this.tickHandlers.keys()) {
+              this.ws!.send(JSON.stringify({ ticks: symbol, subscribe: 1 }));
+            }
+
+            // Subscribe to balance
+            this.ws!.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+
+            resolve(this.authResult);
+            return;
+          }
+
+          // Handle pending request responses (proposal, buy, etc.)
+          if (data.req_id && this.pendingRequests.has(data.req_id)) {
+            const pending = this.pendingRequests.get(data.req_id)!;
+            clearTimeout(pending.timer);
+            this.pendingRequests.delete(data.req_id);
+            if (data.error) {
+              pending.reject(new Error(data.error.message || 'API error'));
+            } else {
+              pending.resolve(data);
+            }
+            return;
+          }
+
+          // Handle tick data
+          if (data.msg_type === 'tick' && data.tick) {
+            const handlers = this.tickHandlers.get(data.tick.symbol);
+            if (handlers) {
+              const priceStr = data.tick.quote.toString();
+              const lastDigit = parseInt(priceStr[priceStr.length - 1], 10);
+              const tick: TickData = {
+                symbol: data.tick.symbol,
+                price: parseFloat(data.tick.quote),
+                digit: lastDigit,
+                epoch: data.tick.epoch,
+                timestamp: Date.now(),
+              };
+              handlers.forEach(h => h(tick));
+            }
+          }
+
+          // Handle balance updates
+          if (data.msg_type === 'balance' && data.balance) {
+            const bal = parseFloat(data.balance.balance) || 0;
+            if (this.authResult) {
+              this.authResult.balance = bal;
+            }
+            this.balanceHandlers.forEach(h => h({ balance: bal, loginid: data.balance.loginid }));
+          }
+
+        } catch (e) {
+          console.error('[DerivClient] Message parse error', e);
+        }
+      };
+
+      this.ws.onclose = (e) => {
+        clearTimeout(timer);
+        console.log('[DerivClient] WS closed: code=', e.code);
+        const wasAuthorized = this.authorized;
+        this.authorized = false;
+
+        // Reject all pending requests
+        for (const [id, pending] of this.pendingRequests) {
+          clearTimeout(pending.timer);
+          pending.reject(new Error('WebSocket closed'));
+          this.pendingRequests.delete(id);
+        }
+
+        // If we never authorized, reject the connect promise
+        if (!wasAuthorized) {
+          reject(new Error(`WebSocket closed (code ${e.code}) before authorization`));
+        }
+
+        // Auto-reconnect if we were authorized
+        if (wasAuthorized && !this.destroyed) {
+          this.wsReconnectTimer = setTimeout(() => {
+            console.log('[DerivClient] Auto-reconnecting...');
+            this.connect(this.token).catch(err => {
+              console.error('[DerivClient] Reconnect failed:', err.message);
+            });
+          }, 3000);
+        }
+
+        if (wasAuthorized || this.destroyed) {
+          this.closeHandlers.forEach(h => h());
+        }
+      };
+
+      this.ws.onerror = () => {
+        // onclose will follow — don't reject here
+        console.error('[DerivClient] WebSocket error');
+      };
+    });
   }
 
   // --- Tick Subscriptions ---
@@ -198,7 +234,7 @@ export class DerivClient {
   onTick(symbol: string, handler: (tick: TickData) => void): () => void {
     if (!this.tickHandlers.has(symbol)) {
       this.tickHandlers.set(symbol, []);
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      if (this.ws && this.ws.readyState === WebSocket.OPEN && this.authorized) {
         this.ws.send(JSON.stringify({ ticks: symbol, subscribe: 1 }));
       }
     }
@@ -211,10 +247,12 @@ export class DerivClient {
     };
   }
 
-  onBalance(_handler: (data: { balance: number; loginid: string }) => void): () => void {
-    // Balance updates via REST polling (WebSocket balance needs auth)
-    // For now, return noop — balance is fetched on connect
-    return () => {};
+  onBalance(handler: (data: { balance: number; loginid: string }) => void): () => void {
+    this.balanceHandlers.push(handler);
+    return () => {
+      const idx = this.balanceHandlers.indexOf(handler);
+      if (idx >= 0) this.balanceHandlers.splice(idx, 1);
+    };
   }
 
   onClose(handler: () => void): () => void {
@@ -225,7 +263,31 @@ export class DerivClient {
     };
   }
 
-  // --- Trading via REST API ---
+  // --- Trading via WebSocket ---
+
+  private sendWSRequest(msg: Record<string, unknown>, timeoutMs = 15000): Promise<any> {
+    return new Promise((resolve, reject) => {
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        reject(new Error('WebSocket not connected'));
+        return;
+      }
+      if (!this.authorized) {
+        reject(new Error('WebSocket not authorized'));
+        return;
+      }
+
+      const reqId = this.reqIdCounter++;
+      const payload = { ...msg, req_id: reqId };
+
+      const timer = setTimeout(() => {
+        this.pendingRequests.delete(reqId);
+        reject(new Error('Request timed out'));
+      }, timeoutMs);
+
+      this.pendingRequests.set(reqId, { resolve, reject, timer });
+      this.ws.send(JSON.stringify(payload));
+    });
+  }
 
   async getProposal(params: {
     contractType: string;
@@ -236,21 +298,20 @@ export class DerivClient {
     durationUnit?: string;
   }): Promise<ProposalResult> {
     const payload: Record<string, unknown> = {
+      proposal: 1,
       amount: params.stake,
       basis: 'stake',
       contract_type: params.contractType,
       symbol: params.symbol,
       duration: params.duration || 1,
       duration_unit: params.durationUnit || 't',
+      currency: 'USD',
     };
     if (params.barrier !== undefined) {
       payload.barrier = params.barrier.toString();
     }
 
-    const data = await restRequest('/trading/v1/options/proposal', this.token, this.appId, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
+    const data = await this.sendWSRequest(payload, 5000);
 
     if (!data.proposal) {
       throw new Error(data.error?.message || 'No proposal in response');
@@ -263,10 +324,7 @@ export class DerivClient {
   }
 
   async buyContract(proposalId: string, askPrice: number): Promise<BuyResult> {
-    const data = await restRequest('/trading/v1/options/buy', this.token, this.appId, {
-      method: 'POST',
-      body: JSON.stringify({ buy: proposalId, price: askPrice }),
-    });
+    const data = await this.sendWSRequest({ buy: proposalId, price: askPrice }, 10000);
 
     if (!data.buy) {
       throw new Error(data.error?.message || 'Buy failed');
@@ -280,7 +338,9 @@ export class DerivClient {
   }
 
   subscribeBalance(): void {
-    // No-op: balance tracked via REST, updated on each trade result
+    if (this.ws && this.ws.readyState === WebSocket.OPEN && this.authorized) {
+      this.ws.send(JSON.stringify({ balance: 1, subscribe: 1 }));
+    }
   }
 
   // --- Status ---
@@ -298,6 +358,12 @@ export class DerivClient {
     this.authorized = false;
     this.authResult = null;
     if (this.wsReconnectTimer) { clearTimeout(this.wsReconnectTimer); this.wsReconnectTimer = null; }
+    // Reject all pending requests
+    for (const [id, pending] of this.pendingRequests) {
+      clearTimeout(pending.timer);
+      pending.reject(new Error('Client destroyed'));
+      this.pendingRequests.delete(id);
+    }
     this.tickHandlers.clear();
     this.balanceHandlers = [];
     this.closeHandlers.forEach(h => h());
