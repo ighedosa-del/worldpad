@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useWorldpadStore } from '@/lib/store';
-import { authorizeViaWS, getDerivAccounts, type DerivAccount } from '@/lib/deriv-ws';
+import { authorizeViaWS } from '@/lib/deriv-ws';
 import { LogIn, X, Key, Loader2, CheckCircle2, Shield, AlertTriangle, Wallet, ChevronRight } from 'lucide-react';
 
 type AccountMode = 'demo' | 'real';
@@ -45,33 +45,32 @@ export function AuthModal({ open, onClose }: { open: boolean; onClose: () => voi
 
   const handleLogin = async () => {
     if (!inputToken.trim()) { setError('Enter your PAT token'); return; }
-    if (!inputAppId.trim()) { setError('Enter your Deriv App ID'); return; }
     setError('');
     setAuthorizing(true);
 
     try {
-      // Step 1: Fetch accounts
-      const accs = await getDerivAccounts(inputToken.trim(), inputAppId.trim());
-      if (!accs.length) {
-        setError('No accounts found. Make sure your token has the right scopes.');
-        setAuthorizing(false);
-        return;
-      }
-      setAccounts(accs);
+      // v11: Connect and authorize directly via WebSocket
+      const result = await authorizeViaWS(inputToken.trim(), inputAppId.trim() || '1089');
 
-      // Step 2: Auto-select matching account type, or show selector
-      const matching = accs.filter(a => a.account_type === mode);
-      if (matching.length === 1) {
-        await connectAccount(inputToken.trim(), inputAppId.trim(), matching[0].account_id);
-      } else if (matching.length > 1) {
-        // Show account selector
-        setStep('select-account');
-        setAuthorizing(false);
+      // Save credentials to store (persists to localStorage)
+      if (isReal) {
+        setRealToken(inputToken.trim());
       } else {
-        // No matching account type — show all accounts and let user pick
-        setStep('select-account');
-        setAuthorizing(false);
+        setDemoToken(inputToken.trim());
       }
+      setDerivAppId(inputAppId.trim() || '1089');
+      setAccountMode(mode);
+      setSelectedAccountId(result.loginid);
+      setIsAuthorized(true);
+      setAccountInfo({
+        fullname: result.fullname,
+        loginid: result.loginid,
+        balance: result.balance,
+        currency: result.currency,
+      });
+      setBalance(result.balance);
+      setStep('connected');
+      onClose();
     } catch (err) {
       const msg = (err as Error).message || '';
       if (msg.includes('fetch') || msg.includes('Failed') || msg.includes('network') || msg.includes('Network')) {
@@ -272,12 +271,12 @@ export function AuthModal({ open, onClose }: { open: boolean; onClose: () => voi
           /* ===== CREDENTIALS FORM ===== */
           <div className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] text-gray-500 uppercase tracking-wider font-medium">App ID</label>
+              <label className="text-[10px] text-gray-500 uppercase tracking-wider font-medium">App ID <span className="text-gray-600">(optional, default: 1089)</span></label>
               <input
                 type="text"
                 value={inputAppId}
                 onChange={(e) => setInputAppId(e.target.value)}
-                placeholder="e.g. 341aJK71v75g15Vud3q6w"
+                placeholder="1089"
                 className="w-full text-white text-xs px-4 py-3 rounded-xl outline-none transition-all"
                 style={{
                   background: '#000000',

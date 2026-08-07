@@ -197,11 +197,19 @@ export async function authorizeViaWS(token: string, appId: string): Promise<Auth
   });
 }
 
-// Store credentials for reconnection after page reload
-export function restoreCredentials(token: string, appId: string, _accountId?: string) {
+// Store credentials AND immediately connect + authorize
+export async function restoreCredentials(token: string, appId: string): Promise<AuthorizeResult | null> {
   storedToken = token;
   storedAppId = appId;
-  console.log('[DerivWS] Credentials stored. Will authorize on next trade.');
+  console.log('[DerivWS] Restoring credentials — connecting NOW...');
+  try {
+    const result = await authorizeViaWS(token, appId);
+    console.log('[DerivWS] ✅ Restored and authorized:', result.loginid, 'balance:', result.balance);
+    return result;
+  } catch (err) {
+    console.error('[DerivWS] Restore failed:', (err as Error).message);
+    return null;
+  }
 }
 
 // Legacy compat — not used in v11 but kept so imports don't break

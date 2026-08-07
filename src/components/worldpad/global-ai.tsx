@@ -534,30 +534,41 @@ export function GlobalAI() {
     setGlobalAILearningStats(aiEngine.getLearningStats());
     startMultiMarketScan();
 
-    // v5: Restore Deriv credentials from persisted store so trades work after reload
+    // v11: Restore Deriv credentials and start bot regardless of mode
     const store = useWorldpadStore.getState();
     console.log('[GlobalAI] INIT — isAuthorized:', store.isAuthorized, 'mode:', store.accountMode, 'hasDemoToken:', !!store.demoToken, 'hasRealToken:', !!store.realToken, 'accountId:', store.selectedAccountId);
-    if (store.isAuthorized && (store.demoToken || store.realToken)) {
-      const token = store.accountMode === 'demo' ? store.demoToken : store.realToken;
-      if (token) {
-        restoreCredentials(token, '1089');
-        const wsCheck = getTradeWSStatus();
-        console.log('[GlobalAI] Restored Deriv credentials for', store.accountMode, 'trading. WS status:', wsCheck);
-      } else {
-        console.warn('[GlobalAI] isAuthorized=true but MISSING token or appId! token=', !!token, 'appId=', !!store.derivAppId);
-      }
-    } else {
-      console.warn('[GlobalAI] NOT authorized. isAuthorized=', store.isAuthorized, 'accountId=', store.selectedAccountId);
-    }
 
-    // v9: Only auto-start in SIM mode. If authorized, the isAuthorized effect handles LIVE start.
-    const autoStartTimer = setTimeout(() => {
-      if (mountedRef.current && !runningRef.current && !store.isAuthorized) {
-        startBot();
-      } else if (store.isAuthorized) {
-        console.log('[GlobalAI] INIT — authorized, waiting for isAuthorized effect to start LIVE bot');
+    const initAndStart = async () => {
+      // If we have a token, connect the trading WS NOW (don't wait for first trade)
+      if (store.isAuthorized && (store.demoToken || store.realToken)) {
+        const token = store.accountMode === 'demo' ? store.demoToken : store.realToken;
+        if (token) {
+          const result = await restoreCredentials(token, store.derivAppId || '1089');
+          if (result) {
+            console.log('[GlobalAI] ✅ WS connected on init:', result.loginid, 'balance:', result.balance);
+            // Update store with real balance
+            useWorldpadStore.getState().setBalance(result.balance);
+            useWorldpadStore.getState().setAccountInfo({
+              fullname: result.fullname,
+              loginid: result.loginid,
+              balance: result.balance,
+              currency: result.currency,
+            });
+          } else {
+            console.warn('[GlobalAI] WS restore failed — will retry on first trade');
+          }
+        }
       }
-    }, 5000);
+
+      // v11: ALWAYS auto-start the bot (both SIM and LIVE)
+      if (mountedRef.current && !runningRef.current) {
+        console.log('[GlobalAI] Auto-starting bot... mode=', store.isAuthorized ? 'LIVE' : 'SIM');
+        startBot();
+      }
+    };
+
+    // Wait 5s for scanner to collect some data, then start
+    const autoStartTimer = setTimeout(initAndStart, 5000);
 
     return () => {
       mountedRef.current = false;
