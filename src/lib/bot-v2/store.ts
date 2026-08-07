@@ -1,7 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
-import type { AuthResult } from './deriv-client';
+import type { AuthResult, AccountInfo } from './deriv-client';
 import type { BotStats, TradeRecord } from './engine';
 
 export interface RankedMarketDisplay {
@@ -32,6 +32,8 @@ export interface BotStoreState {
   connectionError: string | null;
   isVirtual: boolean;
   balance: number;
+  accountList: AccountInfo[];
+  switchingAccount: boolean;
 
   // Bot
   running: boolean;
@@ -68,6 +70,8 @@ export const useBotStore = create<BotStoreState>((set) => ({
   connectionError: null,
   isVirtual: true,
   balance: 0,
+  accountList: [],
+  switchingAccount: false,
 
   running: false,
   phase: 'idle',

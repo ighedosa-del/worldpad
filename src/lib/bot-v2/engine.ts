@@ -189,7 +189,7 @@ export class DerivBot {
       });
 
       this.setPhase('idle');
-      this.storeUpdate({ connected: true, auth, balance: auth.balance, isVirtual: auth.isVirtual });
+      this.storeUpdate({ connected: true, auth, balance: auth.balance, isVirtual: auth.isVirtual, accountList: auth.accountList });
       this.log(`Ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Subscribed to ${symbols.length} markets.`);
 
       return auth;

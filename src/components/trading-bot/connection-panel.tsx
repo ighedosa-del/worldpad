@@ -1,17 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useBotStore, getBot, destroyBot } from '@/lib/bot-v2/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Wifi, WifiOff, Plug, Unplug, Shield, ShieldCheck } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Wifi, WifiOff, Plug, Unplug, ShieldCheck, ArrowLeftRight, ChevronDown } from 'lucide-react';
+
+// Token storage keyed by account loginid
+const ACCOUNT_TOKENS_KEY = 'deriv-account-tokens';
+
+function getStoredAccountTokens(): Record<string, string> {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem(ACCOUNT_TOKENS_KEY) || '{}');
+  } catch { return {}; }
+}
+
+function setStoredAccountTokens(tokens: Record<string, string>) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(ACCOUNT_TOKENS_KEY, JSON.stringify(tokens));
+}
 
 export function ConnectionPanel() {
-  const { connected, auth, isVirtual, balance, connectionError, phase, running, logs } = useBotStore();
+  const { connected, auth, isVirtual, balance, connectionError, phase, running, accountList, switchingAccount } = useBotStore();
   const [token, setToken] = useState('');
   const [connecting, setConnecting] = useState(false);
+  const [switchTokenInput, setSwitchTokenInput] = useState('');
+  const [showTokenDialog, setShowTokenDialog] = useState(false);
+  const [pendingSwitchAccount, setPendingSwitchAccount] = useState<string | null>(null);
 
   const handleConnect = async () => {
     if (!token.trim()) return;
@@ -20,8 +39,14 @@ export function ConnectionPanel() {
     try {
       const bot = getBot();
       await bot.connect(token.trim());
-      // Persist token for session
       sessionStorage.setItem('deriv-token', token.trim());
+      // Store token for this account
+      const newAuth = bot.getStatus().auth;
+      if (newAuth) {
+        const stored = getStoredAccountTokens();
+        stored[newAuth.loginid] = token.trim();
+        setStoredAccountTokens(stored);
+      }
     } catch (err) {
       // Error already logged by bot
     } finally {
@@ -40,8 +65,64 @@ export function ConnectionPanel() {
       auth: null,
       balance: 0,
       phase: 'idle',
+      accountList: [],
     });
   };
+
+  // Account switcher: initiate switch to a different account
+  const initiateSwitch = (targetLoginId: string) => {
+    const stored = getStoredAccountTokens();
+    const existingToken = stored[targetLoginId];
+    if (existingToken) {
+      // We have a token for this account — switch directly
+      performSwitch(targetLoginId, existingToken);
+    } else {
+      // Need user to provide token
+      setPendingSwitchAccount(targetLoginId);
+      setSwitchTokenInput('');
+      setShowTokenDialog(true);
+    }
+  };
+
+  const performSwitch = async (targetLoginId: string, targetToken: string) => {
+    const wasRunning = running;
+    if (running) getBot().stop();
+    destroyBot();
+
+    useBotStore.getState().updateState({ switchingAccount: true, connectionError: null });
+
+    try {
+      const bot = getBot();
+      await bot.connect(targetToken);
+      const newAuth = bot.getStatus().auth;
+      if (newAuth && newAuth.loginid === targetLoginId) {
+        sessionStorage.setItem('deriv-token', targetToken);
+        const stored = getStoredAccountTokens();
+        stored[targetLoginId] = targetToken;
+        setStoredAccountTokens(stored);
+      }
+      // Auto-restart bot if it was running before
+      if (wasRunning) {
+        bot.start();
+      }
+    } catch (err) {
+      // Error already logged
+    } finally {
+      useBotStore.getState().updateState({ switchingAccount: false });
+    }
+  };
+
+  const submitSwitchToken = () => {
+    if (!switchTokenInput.trim() || !pendingSwitchAccount) return;
+    const stored = getStoredAccountTokens();
+    stored[pendingSwitchAccount] = switchTokenInput.trim();
+    setStoredAccountTokens(stored);
+    setShowTokenDialog(false);
+    performSwitch(pendingSwitchAccount, switchTokenInput.trim());
+  };
+
+  // Filter account list to exclude current account
+  const otherAccounts = accountList.filter(a => a.loginid !== auth?.loginid);
 
   // Auto-restore token from session storage or env
   const envToken = typeof window !== 'undefined' ? (process.env.NEXT_PUBLIC_DERIV_TOKEN || '') : '';
@@ -65,7 +146,7 @@ export function ConnectionPanel() {
         <div className="flex items-center gap-2 text-sm">
           <div className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground'}`} />
           <span className="font-medium">
-            {connected ? 'Connected' : connecting ? 'Connecting...' : 'Disconnected'}
+            {switchingAccount ? 'Switching...' : connected ? 'Connected' : connecting ? 'Connecting...' : 'Disconnected'}
           </span>
           {auth && (
             <Badge variant={isVirtual ? 'secondary' : 'default'} className="text-xs">
@@ -76,18 +157,76 @@ export function ConnectionPanel() {
 
         {/* Account info */}
         {auth && (
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="rounded-md bg-muted/50 p-2">
-              <div className="text-muted-foreground text-xs">Account</div>
-              <div className="font-mono font-medium">{auth.loginid}</div>
-            </div>
-            <div className="rounded-md bg-muted/50 p-2">
-              <div className="text-muted-foreground text-xs">Balance</div>
-              <div className={`font-mono font-bold ${balance > 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                ${balance.toFixed(2)}
+          <>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="rounded-md bg-muted/50 p-2">
+                <div className="text-muted-foreground text-xs">Account</div>
+                <div className="font-mono font-medium">{auth.loginid}</div>
+              </div>
+              <div className="rounded-md bg-muted/50 p-2">
+                <div className="text-muted-foreground text-xs">Balance</div>
+                <div className={`font-mono font-bold ${balance > 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+                  ${balance.toFixed(2)}
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Account Switcher */}
+            {otherAccounts.length > 0 && (
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <ArrowLeftRight className="h-3 w-3" />
+                  <span>Switch Account</span>
+                </div>
+                <Select
+                  onValueChange={(loginId) => initiateSwitch(loginId)}
+                  disabled={switchingAccount}
+                >
+                  <SelectTrigger className="h-8 text-xs font-mono">
+                    <SelectValue placeholder="Select account..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {otherAccounts.map(acc => {
+                      const hasToken = !!getStoredAccountTokens()[acc.loginid];
+                      return (
+                        <SelectItem key={acc.loginid} value={acc.loginid}>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={acc.isVirtual ? 'secondary' : 'default'} className="text-[9px] px-1 py-0">
+                              {acc.isVirtual ? 'DEMO' : 'REAL'}
+                            </Badge>
+                            <span className="font-mono">{acc.loginid}</span>
+                            <span className="text-muted-foreground">({acc.currency})</span>
+                            {!hasToken && <span className="text-yellow-500 text-[9px]">+token</span>}
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+                {running && otherAccounts.length > 0 && (
+                  <p className="text-[10px] text-muted-foreground">Bot will auto-restart on the new account</p>
+                )}
+              </div>
+            )}
+
+            {/* All accounts overview (collapsed) */}
+            {accountList.length > 1 && (
+              <div className="space-y-1">
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wide">All Accounts ({accountList.length})</div>
+                <div className="flex flex-wrap gap-1">
+                  {accountList.map(acc => (
+                    <Badge
+                      key={acc.loginid}
+                      variant={acc.loginid === auth?.loginid ? 'default' : 'outline'}
+                      className="text-[9px] font-mono px-1.5 py-0"
+                    >
+                      {acc.isVirtual ? 'D' : 'R'}:{acc.loginid.slice(-4)}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {/* Token input */}
@@ -125,7 +264,7 @@ export function ConnectionPanel() {
           <Button
             variant="outline"
             onClick={handleDisconnect}
-            disabled={running}
+            disabled={running || switchingAccount}
             className="w-full"
             size="sm"
           >
@@ -137,6 +276,50 @@ export function ConnectionPanel() {
         {/* Error */}
         {connectionError && (
           <p className="text-xs text-red-500 bg-red-500/10 rounded-md p-2">{connectionError}</p>
+        )}
+
+        {/* Token dialog for account switch */}
+        {showTokenDialog && pendingSwitchAccount && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <Card className="w-80">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Token Required</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  Enter the API token for account <span className="font-mono font-bold">{pendingSwitchAccount}</span>.
+                  This token will be saved for future switches.
+                </p>
+                <Input
+                  type="password"
+                  placeholder="Paste API token..."
+                  value={switchTokenInput}
+                  onChange={(e) => setSwitchTokenInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && submitSwitchToken()}
+                  className="font-mono text-xs"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowTokenDialog(false)}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={submitSwitchToken}
+                    disabled={!switchTokenInput.trim()}
+                    className="flex-1"
+                    size="sm"
+                  >
+                    Connect & Switch
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </CardContent>
     </Card>

@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Activity, DollarSign, TrendingUp, BarChart3, Zap, Brain } from 'lucide-react';
 
 export default function Page() {
-  const { connected, running, phase, stats, balance, isVirtual, auth } = useBotStore();
+  const { connected, running, phase, stats, balance, isVirtual, auth, accountList } = useBotStore();
   const autoConnectAttempted = useRef(false);
 
   // Auto-connect on mount if token is available

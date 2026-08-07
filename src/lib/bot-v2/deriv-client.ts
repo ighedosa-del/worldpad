@@ -8,6 +8,13 @@ const WS_URL = 'wss://ws.derivws.com/websockets/v3';
 
 type MsgHandler = (data: any) => void;
 
+export interface AccountInfo {
+  loginid: string;
+  isVirtual: boolean;
+  currency: string;
+  balance?: number;
+}
+
 export interface AuthResult {
   loginid: string;
   fullname: string;
@@ -15,6 +22,7 @@ export interface AuthResult {
   currency: string;
   isVirtual: boolean;
   scopes: string[];
+  accountList: AccountInfo[];
 }
 
 export interface TickData {
@@ -155,6 +163,12 @@ export class DerivClient {
         return;
       }
       const a = data.authorize;
+      const accountList: AccountInfo[] = (a.account_list || []).map((acc: any) => ({
+        loginid: acc.loginid,
+        isVirtual: !!acc.is_virtual,
+        currency: acc.currency || 'USD',
+        balance: acc.balance ? parseFloat(acc.balance) : undefined,
+      }));
       this._authResolve?.({
         loginid: a.loginid,
         fullname: a.fullname || '',
@@ -162,6 +176,7 @@ export class DerivClient {
         currency: a.currency || 'USD',
         isVirtual: !!a.is_virtual,
         scopes: a.scopes || [],
+        accountList,
       });
       return;
     }
