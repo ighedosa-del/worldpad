@@ -30,11 +30,15 @@ interface StrategyRecord {
   losses: number;
   totalProfit: number;
   lastUsed: number;
+  // v4: Rolling window for recent performance
+  recentResults: boolean[]; // true=win, false=loss, last 30 trades
+  status: 'active' | 'watch' | 'retired';
+  retiredAt: number; // timestamp when retired
 }
 
 type StrategyKey = string; // `${symbol}:${contractType}:${barrier}`
 
-const MIN_DIGITS_FOR_AI = 50;
+const MIN_DIGITS_FOR_AI = 20;
 const EXPECTED_ENTROPY = 3.32193; // log2(10) — entropy of uniform distribution
 const MARKOV_DECAY = 0.995;       // EMA decay for Markov updates (recent data weighted more)
 const BAYESIAN_PSEUDO_COUNT = 2;  // Pseudo-count for Bayesian prior (smoothing)
@@ -54,12 +58,20 @@ class AIEngine {
   private totalTradesRecorded = 0;
 
   // Load persisted learning data from localStorage
+  // v2: Auto-wipes old data from pre-v2 (poisoned by the wrong-digit bug)
   loadLearningData() {
     if (typeof window === 'undefined') return;
     try {
-      const saved = localStorage.getItem('wp-ai-learning');
+      const LEARNING_VERSION = 2; // bump this to force a brain wipe
+      const saved = localStorage.getItem('wp-ai-learning-v2');
       if (saved) {
         const data = JSON.parse(saved);
+        // If version mismatch or no version field, wipe old data
+        if ((data.version || 1) < LEARNING_VERSION) {
+          console.log(`[AI] Wiping old v${data.version || 1} learning data (incompatible with v2 engine)`);
+          localStorage.removeItem('wp-ai-learning-v2');
+          return;
+        }
         if (data.strategyStats) {
           this.strategyStats = new Map(Object.entries(data.strategyStats));
         }
@@ -74,10 +86,11 @@ class AIEngine {
     if (typeof window === 'undefined') return;
     try {
       const data = {
+        version: 2,
         strategyStats: Object.fromEntries(this.strategyStats),
         totalTradesRecorded: this.totalTradesRecorded,
       };
-      localStorage.setItem('wp-ai-learning', JSON.stringify(data));
+      localStorage.setItem('wp-ai-learning-v2', JSON.stringify(data));
     } catch { /* ignore */ }
   }
 
@@ -181,28 +194,82 @@ class AIEngine {
   // Record a trade result so AI learns from it
   recordTradeResult(symbol: string, contractType: string, barrier: number | undefined, profit: number, signalStrength: number) {
     const key: StrategyKey = `${symbol}:${contractType}:${barrier ?? 'none'}`;
-    const record = this.strategyStats.get(key) || { wins: 0, losses: 0, totalProfit: 0, lastUsed: Date.now() };
+    const record = this.strategyStats.get(key) || {
+      wins: 0, losses: 0, totalProfit: 0, lastUsed: Date.now(),
+      recentResults: [], status: 'active' as const, retiredAt: 0,
+    };
 
-    if (profit > 0) record.wins++;
+    const won = profit > 0;
+    if (won) record.wins++;
     else record.losses++;
     record.totalProfit += profit;
     record.lastUsed = Date.now();
 
+    // v4: Rolling window (last 30 trades)
+    record.recentResults.push(won);
+    if (record.recentResults.length > 30) record.recentResults.shift();
+
+    // v4: Strategy rotation — auto-promote/demote/retire
+    const total = record.wins + record.losses;
+    if (total >= 15) {
+      const recentWins = record.recentResults.filter(Boolean).length;
+      const recentRate = recentWins / record.recentResults.length;
+
+      if (recentRate >= 0.70) {
+        record.status = 'active'; // Promote: 70%+ recent win rate
+      } else if (recentRate >= 0.50) {
+        record.status = 'watch'; // Watch: 50-70%
+      } else if (recentRate < 0.40 && record.recentResults.length >= 20) {
+        record.status = 'retired'; // Retire: <40% with 20+ recent trades
+        record.retiredAt = Date.now();
+      }
+    }
+
     this.strategyStats.set(key, record);
     this.totalTradesRecorded++;
 
-    // Persist every 5 trades
     if (this.totalTradesRecorded % 5 === 0) {
       this.saveLearningData();
     }
   }
 
-  // Get the learned win rate for a specific strategy+market combo
+  // Get the learned win rate — v4: uses rolling window for recent performance
   getStrategyWinRate(symbol: string, contractType: string, barrier: number | undefined): number {
     const key: StrategyKey = `${symbol}:${contractType}:${barrier ?? 'none'}`;
     const record = this.strategyStats.get(key);
-    if (!record || record.wins + record.losses < 3) return 0.5; // No data yet, assume 50%
+    if (!record) return 0.5;
+    if (record.wins + record.losses < 3) return 0.5;
+
+    // v4: Use recent rolling window if available (more responsive to changes)
+    if (record.recentResults.length >= 10) {
+      const recentWins = record.recentResults.filter(Boolean).length;
+      return recentWins / record.recentResults.length;
+    }
     return record.wins / (record.wins + record.losses);
+  }
+
+  // v4: Check if a strategy is retired (should not be used)
+  isStrategyRetired(symbol: string, contractType: string, barrier: number | undefined): boolean {
+    const key: StrategyKey = `${symbol}:${contractType}:${barrier ?? 'none'}`;
+    const record = this.strategyStats.get(key);
+    if (!record) return false;
+    if (record.status === 'retired') {
+      // Auto-unretire after 200 ticks (5 min at 1 tick/1.5s)
+      if (Date.now() - record.retiredAt > 300000) { // 5 minutes
+        record.status = 'watch';
+        record.retiredAt = 0;
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  // v4: Get strategy status for UI
+  getStrategyStatus(symbol: string, contractType: string, barrier: number | undefined): string {
+    const key: StrategyKey = `${symbol}:${contractType}:${barrier ?? 'none'}`;
+    const record = this.strategyStats.get(key);
+    return record?.status ?? 'active';
   }
 
   // Get the overall best-performing strategy for a market
@@ -267,7 +334,7 @@ class AIEngine {
 
     // --- Bayesian Score (0-25) ---
     const bayesPred = this.getBayesianPrediction(symbol, lastDigit);
-    const bayesScore = Math.round(bayesPred.confidence * 25);
+    const bayesianScore = Math.round(bayesPred.confidence * 25);
 
     // --- Learning Score (0-20) ---
     // Based on historical performance of strategies on this market
@@ -281,7 +348,6 @@ class AIEngine {
     // --- Generate AI Signal ---
     let signal: TradeSignal | null = null;
 
-    // Use the prediction source with highest confidence
     const sources = [
       { pred: markovPred, name: 'Markov' },
       { pred: bayesPred, name: 'Bayesian' },
@@ -290,28 +356,32 @@ class AIEngine {
 
     if (bestSource.pred.confidence > 0.3) {
       const predictedDigit = bestSource.pred.digit;
-      const winRate = this.getStrategyWinRate(symbol, 'DIGITMATCH', predictedDigit);
       const diffWinRate = this.getStrategyWinRate(symbol, 'DIGITDIFF', predictedDigit);
 
-      // AI decides between MATCH and DIFFER based on learned performance
-      if (diffWinRate > winRate && diffWinRate > 0.5) {
+      // v4: Always prefer DIGITDIFF (90% base + learned edge)
+      // Only use MATCH if the strategy has proven >15% win rate (breakeven is 11.8%)
+      const matchWinRate = this.getStrategyWinRate(symbol, 'DIGITMATCH', predictedDigit);
+      const matchRetired = this.isStrategyRetired(symbol, 'DIGITMATCH', predictedDigit);
+      const diffRetired = this.isStrategyRetired(symbol, 'DIGITDIFF', predictedDigit);
+
+      if (!diffRetired) {
         signal = {
           contractType: 'DIGITDIFF',
           barrier: predictedDigit,
-          reason: `AI ${bestSource.name}: d${predictedDigit} differ (learned ${Math.round(diffWinRate * 100)}% win)`,
+          reason: `AI ${bestSource.name}: d${predictedDigit} DIFF (learned ${Math.round(diffWinRate * 100)}%)`,
           confidence: bestSource.pred.confidence,
         };
-      } else {
+      } else if (!matchRetired && matchWinRate > 0.15) {
         signal = {
           contractType: 'DIGITMATCH',
           barrier: predictedDigit,
-          reason: `AI ${bestSource.name}: d${predictedDigit} match (conf ${Math.round(bestSource.pred.confidence * 100)}%)`,
+          reason: `AI ${bestSource.name}: d${predictedDigit} MATCH (${Math.round(matchWinRate * 100)}% wr)`,
           confidence: bestSource.pred.confidence,
         };
       }
     }
 
-    const totalScore = markovScore + entropyScore + bayesScore + learningScore;
+    const totalScore = markovScore + entropyScore + bayesianScore + learningScore;
 
     return {
       score: totalScore,
@@ -325,10 +395,14 @@ class AIEngine {
   // Get learning stats for UI display
   getLearningStats() {
     let totalWins = 0, totalLosses = 0, totalProfit = 0;
-    for (const record of this.strategyStats.values()) {
+    let activeCount = 0, watchCount = 0, retiredCount = 0;
+    for (const [key, record] of this.strategyStats) {
       totalWins += record.wins;
       totalLosses += record.losses;
       totalProfit += record.totalProfit;
+      if (record.status === 'active') activeCount++;
+      else if (record.status === 'watch') watchCount++;
+      else if (record.status === 'retired') retiredCount++;
     }
     return {
       strategiesLearned: this.strategyStats.size,
@@ -337,9 +411,13 @@ class AIEngine {
       totalLosses,
       totalProfit,
       winRate: totalWins + totalLosses > 0 ? totalWins / (totalWins + totalLosses) : 0,
+      activeCount,
+      watchCount,
+      retiredCount,
     };
   }
 }
 
 // Singleton instance
 export const aiEngine = new AIEngine();
+console.log('[AI Engine] v4-strategy-rotation-rolling-window');

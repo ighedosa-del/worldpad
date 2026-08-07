@@ -1,7 +1,6 @@
 'use client';
 
 import { useWorldpadStore, TradeResult } from '@/lib/store';
-import { isSimulating } from '@/lib/deriv-ws';
 
 export interface BotStrategyConfig {
   id: string;

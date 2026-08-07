@@ -1,0 +1,566 @@
+     1→'use client';
+     2→
+     3→import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+     4→import {
+     5→  getMarketData, SCANNED_MARKETS, startMultiMarketScan,
+     6→  type MarketSymbol, type MarketData,
+     7→} from '@/lib/multi-market-ws';
+     8→import { useWorldpadStore } from '@/lib/store';
+     9→import { useTradeExecution } from '@/hooks/use-trade-execution';
+    10→import {
+    11→  ArrowUp, ArrowDown, Equal, Hash, CircleDot,
+    12→  ChevronDown, CheckCircle2, XCircle, Loader2, TrendingUp, Clock,
+    13→} from 'lucide-react';
+    14→
+    15→// === Trade Types ===
+    16→type DigitTradeType = 'DIGITOVER' | 'DIGITUNDER' | 'DIGITMATCH' | 'DIGITDIFF' | 'DIGITEVEN' | 'DIGITODD';
+    17→
+    18→const TRADE_TYPES: { type: DigitTradeType; label: string; short: string; icon: typeof ArrowUp; color: string }[] = [
+    19→  { type: 'DIGITOVER',  label: 'Over',  short: 'OVR', icon: ArrowUp,    color: '#22c55e' },
+    20→  { type: 'DIGITUNDER', label: 'Under', short: 'UND', icon: ArrowDown,  color: '#3b82f6' },
+    21→  { type: 'DIGITMATCH', label: 'Match', short: 'MTCH', icon: Equal,      color: '#a855f7' },
+    22→  { type: 'DIGITDIFF',  label: 'Differ', short: 'DIFF', icon: Equal,      color: '#f97316' },
+    23→  { type: 'DIGITEVEN', label: 'Even',  short: 'EVN', icon: Hash,        color: '#06b6d4' },
+    24→  { type: 'DIGITODD',  label: 'Odd',   short: 'ODD', icon: CircleDot,   color: '#eab308' },
+    25→];
+    26→
+    27→// === Digit button ===
+    28→function DigitButton({ digit, selected, onClick, dist, total }: {
+    29→  digit: number; selected: boolean; onClick: () => void; dist: number; total: number;
+    30→}) {
+    31→  const pct = total > 0 ? (dist / total) * 100 : 10;
+    32→  const hot = pct >= 13;
+    33→  const cold = pct <= 7;
+    34→  return (
+    35→    <button
+    36→      onClick={onClick}
+    37→      className="relative flex flex-col items-center justify-center w-full aspect-square rounded-xl transition-all duration-200 group"
+    38→      style={{
+    39→        background: selected ? 'rgba(168,85,247,0.15)' : 'rgba(255,255,255,0.03)',
+    40→        border: selected ? '1.5px solid rgba(168,85,247,0.6)' : '1px solid rgba(255,255,255,0.06)',
+    41→        boxShadow: selected ? '0 0 16px rgba(168,85,247,0.2)' : hot ? `0 0 8px ${hot ? '#22c55e' : '#ef4444'}20` : 'none',
+    42→      }}
+    43→    >
+    44→      <span
+    45→        className="text-lg sm:text-xl font-black font-mono transition-all duration-200 group-hover:scale-110"
+    46→        style={{
+    47→          color: selected ? '#a855f7' : hot ? '#22c55e' : cold ? '#ef4444' : '#e2e8f0',
+    48→          textShadow: selected ? '0 0 10px rgba(168,85,247,0.5)' : 'none',
+    49→        }}
+    50→      >
+    51→        {digit}
+    52→      </span>
+    53→      <span className="text-[9px] font-mono mt-0.5" style={{ color: hot ? '#22c55e' : cold ? '#ef4444' : '#6b7280' }}>
+    54→        {pct.toFixed(1)}%
+    55→      </span>
+    56→    </button>
+    57→  );
+    58→}
+    59→
+    60→// === Trade history row ===
+    61→function TradeRow({ trade }: { trade: { id: string; type: string; symbol: string; stake: number; profit: number; won: boolean; timestamp: number; digit: number } }) {
+    62→  const formatCT = (t: string) => {
+    63→    const map: Record<string, string> = {
+    64→      DIGITOVER: 'Over', DIGITUNDER: 'Under', DIGITMATCH: 'Match',
+    65→      DIGITDIFF: 'Differ', DIGITEVEN: 'Even', DIGITODD: 'Odd',
+    66→    };
+    67→    return map[t] || t;
+    68→  };
+    69→  const fmtSymbol = (s: string) => s.replace('R_', 'V').replace('1HZ', 'V');
+    70→  return (
+    71→    <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+    72→      {trade.won
+    73→        ? <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
+    74→        : <XCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />}
+    75→      <div className="flex-1 min-w-0 flex items-center gap-1.5">
+    76→        <span className="text-[11px] font-bold text-white">{fmtSymbol(trade.symbol)}</span>
+    77→        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded" style={{
+    78→          background: trade.won ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+    79→          color: trade.won ? '#22c55e' : '#ef4444',
+    80→        }}>{formatCT(trade.type)}{trade.digit >= 0 ? ` d${trade.digit}` : ''}</span>
+    81→      </div>
+    82→      <div className="text-right shrink-0">
+    83→        <div className="text-xs font-bold font-mono" style={{ color: trade.profit >= 0 ? '#22c55e' : '#ef4444' }}>
+    84→          {trade.profit >= 0 ? '+' : ''}${trade.profit.toFixed(2)}
+    85→        </div>
+    86→        <div className="text-[9px] text-gray-600">${trade.stake.toFixed(2)}</div>
+    87→      </div>
+    88→      <span className="text-[9px] text-gray-600 font-mono shrink-0">
+    89→        {new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+    90→      </span>
+    91→    </div>
+    92→  );
+    93→}
+    94→
+    95→// === Main Trading Draft Component ===
+    96→export function TradingDraft() {
+    97→  const { placeTrade, isPlacingTrade } = useTradeExecution();
+    98→  const { tradeHistory, totalWins, totalLosses, totalProfit, isAuthorized, accountMode } = useWorldpadStore();
+    99→
+   100→  // Market selection
+   101→  const [selectedSymbol, setSelectedSymbol] = useState<MarketSymbol>('R_10');
+   102→  const [marketDropdownOpen, setMarketDropdownOpen] = useState(false);
+   103→  const dropdownRef = useRef<HTMLDivElement>(null);
+   104→
+   105→  // Trade config
+   106→  const [tradeType, setTradeType] = useState<DigitTradeType>('DIGITDIFF');
+   107→  const [selectedDigit, setSelectedDigit] = useState(5);
+   108→  const [stake, setStake] = useState(0.5);
+   109→  const [duration, setDuration] = useState(1);
+   110→
+   111→  // Result flash
+   112→  const [flashResult, setFlashResult] = useState<{ won: boolean; profit: number } | null>(null);
+   113→  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+   114→
+   115→  // Live market data from multi-market-ws polling
+   116→  const marketData = useMemo(() => {
+   117→    return getMarketData(selectedSymbol);
+   118→    // eslint-disable-next-line react-hooks/exhaustive-deps
+   119→  }, [selectedSymbol]);
+   120→
+   121→  // Force re-render on tick changes using a state trigger
+   122→  const [tickTrigger, setTickTrigger] = useState(0);
+   123→  useEffect(() => {
+   124→    const interval = setInterval(() => {
+   125→      setTickTrigger(t => t + 1);
+   126→    }, 500);
+   127→    return () => clearInterval(interval);
+   128→  }, []);
+   129→
+   130→  // Read fresh data on each trigger
+   131→  const liveData = useMemo(() => getMarketData(selectedSymbol), [selectedSymbol, tickTrigger]);
+   132→  const lastDigit = liveData.lastTick?.digit ?? null;
+   133→  const tickCount = liveData.tickCount;
+   134→  const distribution = liveData.distribution;
+   135→  const digitTotal = distribution.reduce((a, b) => a + b, 0);
+   136→  const priceStr = liveData.lastTick?.price ?? '---.---';
+   137→  const digits = liveData.digits;
+   138→
+   139→  // Recent pattern
+   140→  const recentPattern = useMemo(() => digits.slice(-30).map(d => d.toString()), [digits]);
+   141→
+   142→  // Market name
+   143→  const marketName = useMemo(() => {
+   144→    const m = SCANNED_MARKETS.find(m => m.symbol === selectedSymbol);
+   145→    return m ? m.name : selectedSymbol;
+   146→  }, [selectedSymbol]);
+   147→
+   148→  // Barrier needed?
+   149→  const needsBarrier = tradeType === 'DIGITOVER' || tradeType === 'DIGITUNDER' || tradeType === 'DIGITMATCH' || tradeType === 'DIGITDIFF';
+   150→
+   151→  // Place trade
+   152→  const handlePlaceTrade = useCallback(async () => {
+   153→    if (isPlacingTrade) return;
+   154→    const result = await placeTrade({
+   155→      contractType: tradeType,
+   156→      barrier: needsBarrier ? selectedDigit : undefined,
+   157→      stake,
+   158→      symbol: selectedSymbol,
+   159→      duration,
+   160→      durationUnit: 't',
+   161→    });
+   162→    if (result) {
+   163→      setFlashResult({ won: result.won, profit: result.profit });
+   164→      if (flashTimer.current) clearTimeout(flashTimer.current);
+   165→      flashTimer.current = setTimeout(() => setFlashResult(null), 1500);
+   166→    }
+   167→  }, [placeTrade, tradeType, needsBarrier, selectedDigit, stake, selectedSymbol, duration, isPlacingTrade]);
+   168→
+   169→  // Close dropdown on outside click
+   170→  useEffect(() => {
+   171→    const handler = (e: MouseEvent) => {
+   172→      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+   173→        setMarketDropdownOpen(false);
+   174→      }
+   175→    };
+   176→    document.addEventListener('mousedown', handler);
+   177→    return () => document.removeEventListener('mousedown', handler);
+   178→  }, []);
+   179→
+   180→  // Filter trade history for manual trades (non-AI)
+   181→  const manualTrades = tradeHistory.filter(t => !t.id.startsWith('ai-')).slice(-50).reverse();
+   182→  const winRate = totalWins + totalLosses > 0 ? (totalWins / (totalWins + totalLosses)) * 100 : 0;
+   183→
+   184→  // Simulate mode indicator
+   185→  const isSim = !isAuthorized;
+   186→
+   187→  return (
+   188→    <div className="h-[calc(100vh-52px)] flex flex-col overflow-hidden">
+   189→      {/* Top Bar */}
+   190→      <div className="flex items-center gap-3 px-4 py-2 flex-wrap" style={{
+   191→        background: 'rgba(22, 27, 34, 0.8)',
+   192→        borderBottom: '1px solid rgba(255,255,255,0.06)',
+   193→      }}>
+   194→        {/* Market Selector */}
+   195→        <div className="relative" ref={dropdownRef}>
+   196→          <button
+   197→            onClick={() => setMarketDropdownOpen(!marketDropdownOpen)}
+   198→            className="text-white text-xs font-medium px-3 py-1.5 rounded-lg flex items-center gap-2 transition-all duration-200 hover:border-[rgba(255,255,255,0.2)]"
+   199→            style={{
+   200→              background: 'rgba(0,212,170,0.08)',
+   201→              border: '1px solid rgba(0,212,170,0.2)',
+   202→            }}
+   203→          >
+   204→            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-wp-pulse" style={{ boxShadow: '0 0 6px rgba(34,197,94,0.6)' }} />
+   205→            <span>{marketName}</span>
+   206→            <ChevronDown className="w-3 h-3 text-gray-400" />
+   207→          </button>
+   208→          {marketDropdownOpen && (
+   209→            <div className="absolute top-full left-0 mt-1 bg-[#161b22] text-white rounded-lg z-50 min-w-[200px] py-1 max-h-72 overflow-y-auto wp-scroll" style={{
+   210→              border: '1px solid rgba(255,255,255,0.08)',
+   211→              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+   212→            }}>
+   213→              <div className="px-3 py-1.5 text-[9px] text-gray-500 uppercase tracking-wider font-bold">Standard Markets</div>
+   214→              {SCANNED_MARKETS.filter(m => m.type === 'standard').map(m => (
+   215→                <button
+   216→                  key={m.symbol}
+   217→                  onClick={() => { setSelectedSymbol(m.symbol as MarketSymbol); setMarketDropdownOpen(false); }}
+   218→                  className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${m.symbol === selectedSymbol ? 'font-bold text-[#00d4aa] bg-[rgba(0,212,170,0.06)]' : 'text-gray-300 hover:bg-[rgba(255,255,255,0.05)]'}`}
+   219→                >{m.name}</button>
+   220→              ))}
+   221→              <div className="px-3 py-1.5 text-[9px] text-gray-500 uppercase tracking-wider font-bold mt-1">Fast Markets (1s)</div>
+   222→              {SCANNED_MARKETS.filter(m => m.type === 'fast').map(m => (
+   223→                <button
+   224→                  key={m.symbol}
+   225→                  onClick={() => { setSelectedSymbol(m.symbol as MarketSymbol); setMarketDropdownOpen(false); }}
+   226→                  className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${m.symbol === selectedSymbol ? 'font-bold text-[#00d4aa] bg-[rgba(0,212,170,0.06)]' : 'text-gray-300 hover:bg-[rgba(255,255,255,0.05)]'}`}
+   227→                >{m.name}</button>
+   228→              ))}
+   229→            </div>
+   230→          )}
+   231→        </div>
+   232→
+   233→        {/* Mode badge */}
+   234→        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{
+   235→          background: isSim ? 'rgba(234,179,8,0.1)' : 'rgba(0,212,170,0.1)',
+   236→          border: `1px solid ${isSim ? 'rgba(234,179,8,0.2)' : 'rgba(0,212,170,0.2)'}`,
+   237→        }}>
+   238→          <div className={`w-1.5 h-1.5 rounded-full ${isSim ? 'bg-yellow-500' : 'bg-green-500'}`} />
+   239→          <span className="text-[10px] font-bold" style={{ color: isSim ? '#eab308' : '#00d4aa' }}>{isSim ? 'SIMULATION' : accountMode.toUpperCase()}</span>
+   240→        </div>
+   241→
+   242→        {/* Tick count */}
+   243→        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{
+   244→          background: 'rgba(59,130,246,0.08)',
+   245→          border: '1px solid rgba(59,130,246,0.15)',
+   246→        }}>
+   247→          <span className="text-[10px] font-bold text-blue-400">{tickCount} ticks</span>
+   248→        </div>
+   249→      </div>
+   250→
+   251→      {/* Main Content */}
+   252→      <div className="flex-1 overflow-y-auto wp-scroll p-4">
+   253→        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-7xl mx-auto">
+   254→          {/* LEFT: Trading Panel */}
+   255→          <div className="lg:col-span-2 space-y-4">
+   256→            {/* Live Price Display */}
+   257→            <div className="rounded-xl p-4 text-center relative overflow-hidden" style={{
+   258→              background: 'rgba(22, 27, 34, 0.8)',
+   259→              border: '1px solid rgba(255,255,255,0.06)',
+   260→            }}>
+   261→              <div className="absolute inset-0 opacity-20" style={{
+   262→                background: 'radial-gradient(ellipse at center, rgba(0,212,170,0.08), transparent 70%)',
+   263→              }} />
+   264→              <p className="text-[10px] text-gray-500 uppercase tracking-wider mb-1 font-medium relative">Live Price</p>
+   265→              <p className="text-3xl font-mono font-bold relative" style={{
+   266→                color: '#00d4aa',
+   267→                textShadow: '0 0 20px rgba(0, 212, 170, 0.4), 0 0 40px rgba(0, 212, 170, 0.15)',
+   268→              }}>
+   269→                {priceStr}
+   270→              </p>
+   271→              <div className="flex items-center justify-center gap-4 mt-2 relative">
+   272→                <div className="flex items-center gap-1.5">
+   273→                  <span className="text-[10px] text-gray-500 uppercase">Last Digit:</span>
+   274→                  <span className="text-sm font-black font-mono" style={{
+   275→                    color: lastDigit !== null ? '#e2e8f0' : '#374151',
+   276→                    textShadow: lastDigit !== null ? '0 0 10px rgba(255,255,255,0.3)' : 'none',
+   277→                  }}>{lastDigit !== null ? lastDigit : '-'}</span>
+   278→                </div>
+   279→                <div className="w-px h-4 bg-[#30363d]" />
+   280→                <div className="flex items-center gap-1.5">
+   281→                  <span className="text-[10px] text-gray-500 uppercase">Market:</span>
+   282→                  <span className="text-sm font-bold text-white">{marketName}</span>
+   283→                </div>
+   284→              </div>
+   285→
+   286→              {/* Flash result overlay */}
+   287→              {flashResult && (
+   288→                <div className="absolute inset-0 flex items-center justify-center rounded-xl" style={{
+   289→                  background: flashResult.won ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+   290→                  animation: 'fadeInOut 1.2s ease-out forwards',
+   291→                }}>
+   292→                  <div className="text-center">
+   293→                    {flashResult.won ? <CheckCircle2 className="w-10 h-10 text-green-400 mx-auto mb-1" /> : <XCircle className="w-10 h-10 text-red-400 mx-auto mb-1" />}
+   294→                    <span className="text-lg font-black font-mono" style={{
+   295→                      color: flashResult.won ? '#22c55e' : '#ef4444',
+   296→                      textShadow: `0 0 16px ${flashResult.won ? 'rgba(34,197,94,0.6)' : 'rgba(239,68,68,0.6)'}`,
+   297→                    }}>
+   298→                      {flashResult.won ? '+' : ''}{flashResult.profit.toFixed(2)}
+   299→                    </span>
+   300→                  </div>
+   301→                </div>
+   302→              )}
+   303→            </div>
+   304→
+   305→            {/* Trade Type Selector */}
+   306→            <div className="rounded-xl p-3" style={{
+   307→              background: 'rgba(22, 27, 34, 0.8)',
+   308→              border: '1px solid rgba(255,255,255,0.06)',
+   309→            }}>
+   310→              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+   311→                {TRADE_TYPES.map(tt => {
+   312→                  const Icon = tt.icon;
+   313→                  const active = tradeType === tt.type;
+   314→                  return (
+   315→                    <button
+   316→                      key={tt.type}
+   317→                      onClick={() => setTradeType(tt.type)}
+   318→                      className="flex flex-col items-center gap-1 px-2 py-2.5 rounded-lg transition-all duration-200"
+   319→                      style={{
+   320→                        background: active ? `${tt.color}18` : 'rgba(255,255,255,0.02)',
+   321→                        border: active ? `1.5px solid ${tt.color}50` : '1px solid rgba(255,255,255,0.06)',
+   322→                        boxShadow: active ? `0 0 12px ${tt.color}20` : 'none',
+   323→                      }}
+   324→                    >
+   325→                      <Icon className="w-4 h-4" style={{ color: active ? tt.color : '#6b7280' }} />
+   326→                      <span className="text-[10px] font-bold" style={{ color: active ? tt.color : '#9ca3af' }}>{tt.short}</span>
+   327→                      <span className="text-[9px] text-gray-600">{tt.label}</span>
+   328→                    </button>
+   329→                  );
+   330→                })}
+   331→              </div>
+   332→            </div>
+   333→
+   334→            {/* Digit Grid (for barrier types) + Even/Odd display */}
+   335→            {needsBarrier ? (
+   336→              <div className="rounded-xl p-4" style={{
+   337→                background: 'rgba(22, 27, 34, 0.8)',
+   338→                border: '1px solid rgba(255,255,255,0.06)',
+   339→              }}>
+   340→                <div className="flex items-center justify-between mb-3">
+   341→                  <h3 className="text-xs font-bold text-white uppercase tracking-wide" style={{ letterSpacing: '0.08em' }}>
+   342→                    Select Digit — <span style={{ color: TRADE_TYPES.find(t => t.type === tradeType)?.color }}>{TRADE_TYPES.find(t => t.type === tradeType)?.label}</span>
+   343→                  </h3>
+   344→                  <span className="text-[10px] text-gray-500">{tickCount} ticks collected</span>
+   345→                </div>
+   346→                <div className="grid grid-cols-5 sm:grid-cols-10 gap-2">
+   347→                  {[0,1,2,3,4,5,6,7,8,9].map(d => (
+   348→                    <DigitButton
+   349→                      key={d}
+   350→                      digit={d}
+   351→                      selected={selectedDigit === d}
+   352→                      onClick={() => setSelectedDigit(d)}
+   353→                      dist={distribution[d]}
+   354→                      total={digitTotal}
+   355→                    />
+   356→                  ))}
+   357→                </div>
+   358→              </div>
+   359→            ) : (
+   360→              <div className="rounded-xl p-4 text-center" style={{
+   361→                background: 'rgba(22, 27, 34, 0.8)',
+   362→                border: '1px solid rgba(255,255,255,0.06)',
+   363→              }}>
+   364→                <div className="flex items-center justify-center gap-4">
+   365→                  <div className="text-center">
+   366→                    <div className="flex items-center gap-1.5 justify-center mb-1">
+   367→                      <Hash className="w-4 h-4 text-cyan-400" />
+   368→                      <span className="text-xs font-bold text-cyan-400">EVEN</span>
+   369→                    </div>
+   370→                    <span className="text-2xl font-black font-mono text-white">
+   371→                      {digitTotal > 0 ? (distribution[0] + distribution[2] + distribution[4] + distribution[6] + distribution[8]) : 0}
+   372→                    </span>
+   373→                    <p className="text-[10px] text-gray-500 mt-0.5">
+   374→                      {digitTotal > 0 ? (((distribution[0] + distribution[2] + distribution[4] + distribution[6] + distribution[8]) / digitTotal) * 100).toFixed(1) : 0}%
+   375→                    </p>
+   376→                  </div>
+   377→                  <div className="w-px h-12 bg-[#30363d]" />
+   378→                  <div className="text-center">
+   379→                    <div className="flex items-center gap-1.5 justify-center mb-1">
+   380→                      <CircleDot className="w-4 h-4 text-yellow-400" />
+   381→                      <span className="text-xs font-bold text-yellow-400">ODD</span>
+   382→                    </div>
+   383→                    <span className="text-2xl font-black font-mono text-white">
+   384→                      {digitTotal > 0 ? (distribution[1] + distribution[3] + distribution[5] + distribution[7] + distribution[9]) : 0}
+   385→                    </span>
+   386→                    <p className="text-[10px] text-gray-500 mt-0.5">
+   387→                      {digitTotal > 0 ? (((distribution[1] + distribution[3] + distribution[5] + distribution[7] + distribution[9]) / digitTotal) * 100).toFixed(1) : 0}%
+   388→                    </p>
+   389→                  </div>
+   390→                </div>
+   391→              </div>
+   392→            )}
+   393→
+   394→            {/* Recent Digits Pattern */}
+   395→            <div className="rounded-xl p-3" style={{
+   396→              background: 'rgba(22, 27, 34, 0.8)',
+   397→              border: '1px solid rgba(255,255,255,0.06)',
+   398→            }}>
+   399→              <h3 className="text-[10px] text-gray-500 uppercase tracking-wider font-bold mb-2">Recent Digits</h3>
+   400→              <div className="flex items-center gap-1 flex-wrap">
+   401→                {recentPattern.length === 0 ? (
+   402→                  <span className="text-xs text-gray-600">Waiting for data...</span>
+   403→                ) : recentPattern.map((d, i) => (
+   404→                  <span
+   405→                    key={i}
+   406→                    className="w-6 h-6 rounded flex items-center justify-center text-[10px] font-bold font-mono"
+   407→                    style={{
+   408→                      background: i === 0 ? 'rgba(0,212,170,0.15)' : 'rgba(255,255,255,0.04)',
+   409→                      color: i === 0 ? '#00d4aa' : '#6b7280',
+   410→                      border: i === 0 ? '1px solid rgba(0,212,170,0.3)' : '1px solid rgba(255,255,255,0.04)',
+   411→                    }}
+   412→                  >{d}</span>
+   413→                ))}
+   414→              </div>
+   415→            </div>
+   416→          </div>
+   417→
+   418→          {/* RIGHT: Controls + History */}
+   419→          <div className="space-y-4">
+   420→            {/* Trade Controls */}
+   421→            <div className="rounded-xl p-4" style={{
+   422→              background: 'rgba(22, 27, 34, 0.8)',
+   423→              border: '1px solid rgba(255,255,255,0.06)',
+   424→            }}>
+   425→              <h3 className="text-xs font-bold text-white uppercase tracking-wide mb-4" style={{ letterSpacing: '0.08em' }}>Trade Setup</h3>
+   426→
+   427→              {/* Stake */}
+   428→              <div className="mb-3">
+   429→                <label className="text-[10px] text-gray-500 uppercase tracking-wider font-medium block mb-1">Stake ($)</label>
+   430→                <input
+   431→                  type="number"
+   432→                  value={stake}
+   433→                  onChange={(e) => setStake(parseFloat(e.target.value) || 0)}
+   434→                  step={0.1}
+   435→                  min={0.35}
+   436→                  className="w-full text-white text-sm px-3 py-2 rounded-lg outline-none transition-all duration-200 focus:border-[rgba(0,212,170,0.4)] font-mono"
+   437→                  style={{
+   438→                    background: '#000000',
+   439→                    border: '1px solid rgba(255,255,255,0.1)',
+   440→                  }}
+   441→                />
+   442→              </div>
+   443→
+   444→              {/* Duration */}
+   445→              <div className="mb-4">
+   446→                <label className="text-[10px] text-gray-500 uppercase tracking-wider font-medium block mb-1">Duration (Ticks)</label>
+   447→                <input
+   448→                  type="number"
+   449→                  value={duration}
+   450→                  onChange={(e) => setDuration(parseInt(e.target.value) || 1)}
+   451→                  min={1}
+   452→                  max={10}
+   453→                  className="w-full text-white text-sm px-3 py-2 rounded-lg outline-none transition-all duration-200 focus:border-[rgba(0,212,170,0.4)] font-mono"
+   454→                  style={{
+   455→                    background: '#000000',
+   456→                    border: '1px solid rgba(255,255,255,0.1)',
+   457→                  }}
+   458→                />
+   459→              </div>
+   460→
+   461→              {/* Trade Summary */}
+   462→              <div className="rounded-lg p-3 mb-4" style={{
+   463→                background: 'rgba(255,255,255,0.02)',
+   464→                border: '1px solid rgba(255,255,255,0.04)',
+   465→              }}>
+   466→                <div className="flex items-center justify-between mb-1.5">
+   467→                  <span className="text-[10px] text-gray-500 uppercase">Type</span>
+   468→                  <span className="text-xs font-bold" style={{ color: TRADE_TYPES.find(t => t.type === tradeType)?.color }}>
+   469→                    {TRADE_TYPES.find(t => t.type === tradeType)?.label}
+   470→                  </span>
+   471→                </div>
+   472→                {needsBarrier && (
+   473→                  <div className="flex items-center justify-between mb-1.5">
+   474→                    <span className="text-[10px] text-gray-500 uppercase">Barrier</span>
+   475→                    <span className="text-xs font-bold text-white font-mono">Digit {selectedDigit}</span>
+   476→                  </div>
+   477→                )}
+   478→                <div className="flex items-center justify-between mb-1.5">
+   479→                  <span className="text-[10px] text-gray-500 uppercase">Stake</span>
+   480→                  <span className="text-xs font-bold text-white font-mono">${stake.toFixed(2)}</span>
+   481→                </div>
+   482→                <div className="flex items-center justify-between">
+   483→                  <span className="text-[10px] text-gray-500 uppercase">Potential Payout</span>
+   484→                  <span className="text-xs font-bold text-green-400 font-mono">
+   485→                    ${(stake * (tradeType === 'DIGITMATCH' ? 8.5 : 0.85)).toFixed(2)}
+   486→                  </span>
+   487→                </div>
+   488→              </div>
+   489→
+   490→              {/* BUY Button */}
+   491→              <button
+   492→                onClick={handlePlaceTrade}
+   493→                disabled={isPlacingTrade}
+   494→                className="w-full py-3 rounded-xl text-sm font-black transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+   495→                style={{
+   496→                  background: isPlacingTrade
+   497→                    ? 'rgba(107,114,128,0.3)'
+   498→                    : `linear-gradient(135deg, ${TRADE_TYPES.find(t => t.type === tradeType)?.color}, ${TRADE_TYPES.find(t => t.type === tradeType)?.color}cc)`,
+   499→                  color: tradeType === 'DIGITMATCH' ? '#fff' : '#0d1117',
+   500→                  boxShadow: isPlacingTrade ? 'none' : `0 0 20px ${TRADE_TYPES.find(t => t.type === tradeType)?.color}30`,
+   501→                }}
+   502→              >
+   503→                {isPlacingTrade ? <Loader2 className="w-4 h-4 animate-spin" /> : <TrendingUp className="w-4 h-4" />}
+   504→                {isPlacingTrade ? 'PLACING...' : `BUY ${TRADE_TYPES.find(t => t.type === tradeType)?.label.toUpperCase()}`}
+   505→              </button>
+   506→            </div>
+   507→
+   508→            {/* Stats Summary */}
+   509→            <div className="grid grid-cols-2 gap-2">
+   510→              <div className="rounded-xl p-3 text-center" style={{
+   511→                background: 'rgba(34,197,94,0.04)',
+   512→                border: '1px solid rgba(34,197,94,0.12)',
+   513→              }}>
+   514→                <span className="text-[9px] text-gray-500 uppercase">Wins</span>
+   515→                <div className="text-lg font-bold font-mono text-green-400">{totalWins}</div>
+   516→              </div>
+   517→              <div className="rounded-xl p-3 text-center" style={{
+   518→                background: 'rgba(239,68,68,0.04)',
+   519→                border: '1px solid rgba(239,68,68,0.12)',
+   520→              }}>
+   521→                <span className="text-[9px] text-gray-500 uppercase">Losses</span>
+   522→                <div className="text-lg font-bold font-mono text-red-400">{totalLosses}</div>
+   523→              </div>
+   524→              <div className="rounded-xl p-3 text-center" style={{
+   525→                background: 'rgba(59,130,246,0.04)',
+   526→                border: '1px solid rgba(59,130,246,0.12)',
+   527→              }}>
+   528→                <span className="text-[9px] text-gray-500 uppercase">Win Rate</span>
+   529→                <div className="text-lg font-bold font-mono" style={{ color: winRate >= 50 ? '#22c55e' : '#ef4444' }}>{winRate.toFixed(0)}%</div>
+   530→              </div>
+   531→              <div className="rounded-xl p-3 text-center" style={{
+   532→                background: totalProfit >= 0 ? 'rgba(34,197,94,0.04)' : 'rgba(239,68,68,0.04)',
+   533→                border: `1px solid ${totalProfit >= 0 ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)'}`,
+   534→              }}>
+   535→                <span className="text-[9px] text-gray-500 uppercase">Net P/L</span>
+   536→                <div className="text-lg font-bold font-mono" style={{ color: totalProfit >= 0 ? '#22c55e' : '#ef4444' }}>
+   537→                  {totalProfit >= 0 ? '+' : ''}{totalProfit.toFixed(2)}
+   538→                </div>
+   539→              </div>
+   540→            </div>
+   541→
+   542→            {/* Trade History */}
+   543→            <div className="rounded-xl overflow-hidden" style={{
+   544→              background: 'rgba(22, 27, 34, 0.8)',
+   545→              border: '1px solid rgba(255,255,255,0.06)',
+   546→            }}>
+   547→              <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+   548→                <h3 className="text-xs font-bold text-white uppercase tracking-wide" style={{ letterSpacing: '0.08em' }}>Trade History</h3>
+   549→                <span className="text-[10px] text-gray-500 font-mono">{manualTrades.length} trades</span>
+   550→              </div>
+   551→              <div className="max-h-72 overflow-y-auto wp-scroll p-2 space-y-1">
+   552→                {manualTrades.length === 0 ? (
+   553→                  <div className="text-center py-6">
+   554→                    <Clock className="w-5 h-5 mx-auto mb-2 text-gray-600" />
+   555→                    <p className="text-xs text-gray-500">No trades yet. Select a trade type and click BUY.</p>
+   556→                  </div>
+   557→                ) : manualTrades.map(t => <TradeRow key={t.id} trade={t} />)}
+   558→              </div>
+   559→            </div>
+   560→          </div>
+   561→        </div>
+   562→      </div>
+   563→    </div>
+   564→  );
+   565→}
+   566→

@@ -18,6 +18,7 @@ import { BulkTrader } from '@/components/worldpad/bulk-trader';
 import { AISoftware } from '@/components/worldpad/ai-software';
 import { AIScanner } from '@/components/worldpad/ai-scanner';
 import { AuthModal } from '@/components/worldpad/auth-modal';
+import { GlobalAI } from '@/components/worldpad/global-ai';
 import {
   Bot, Zap, Settings, Gauge, Brain,
   ScanSearch, Hand, Layers, LineChart,
@@ -78,6 +79,8 @@ export default function WorldpadPage() {
 
   return (
     <div className="min-h-screen flex flex-col relative">
+      {/* GlobalAI — invisible background bot, always mounted */}
+      <GlobalAI />
       {/* Top Navigation Bar */}
       <header
         className="sticky top-0 z-50"
