@@ -1,12 +1,12 @@
 'use client';
 
-// === LUCAS Engine v20 — Digit Under 7/8/9 Switcher ===
-// Matches dbtraders "Under 7 8 9 Switcher" bot from user's video.
+// === LUCAS Engine v21 — Digit Under 7/8/9 Switcher ===
+// Matches dbtraders bot from user's videos.
 // Contract: DIGITUNDER on 1HZ100V (Volatility 100 1s Index)
 // Barriers cycle: 7 → 8 → 9 → 7 → 8 → 9...
 // Stake: $0.40 base, D'Alembert progression
 // Take Profit: $2 | Stop Loss: $6
-// Dual-socket: OTP WS for data + server proxy for trading.
+// v21: Direct WS auth (try first) → OTP+proxy (fallback)
 
 import { MultiMarketClient } from './deriv-client';
 import type { TickData, AuthResult } from './types';
@@ -163,7 +163,7 @@ export class DerivBot {
 
       this.phase = 'idle';
       this.storeUpdate({ connected: true, auth, balance: auth.balance, isVirtual: auth.isVirtual, accountList: auth.accountList });
-      this.log(`LUCAS v20 ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Market: 1HZ100V DIGITUNDER 7/8/9 Switcher.`);
+      this.log(`LUCAS v21 ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Market: 1HZ100V DIGITUNDER 7/8/9 Switcher.`);
       this._pushGates();
       return auth;
     } catch (err) {
@@ -202,7 +202,7 @@ export class DerivBot {
     this.lastTradeError = null;
     this.isTrading = false;
 
-    this.log(`LUCAS v20 STARTED. DIGITUNDER 7/8/9 Switcher on 1HZ100V. Stake: $${this.config.stake.toFixed(2)} | TP: $${this.config.takeProfit} | SL: $${this.config.stopLoss}`);
+    this.log(`LUCAS v21 STARTED. DIGITUNDER 7/8/9 Switcher on 1HZ100V. Stake: $${this.config.stake.toFixed(2)} | TP: $${this.config.takeProfit} | SL: $${this.config.stopLoss}`);
     this.storeUpdate({ running: true });
 
     this.markets = createMarketStates();
