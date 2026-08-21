@@ -230,3 +230,4 @@ export function scoreAndRank(markets: Map<string, MarketState>): ScoredMarket[] 
   scored.forEach((m, i) => { m.rank = i + 1; });
   return scored;
 }
+// v20 deploy trigger
