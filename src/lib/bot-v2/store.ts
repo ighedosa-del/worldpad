@@ -49,6 +49,7 @@ export interface BotStoreState {
   takeProfit: number;
   maxConsecutiveLosses: number;
   cycleIntervalMs: number;
+  activeStrategy: string;
 
   // Data
   rankedMarkets: RankedMarketDisplay[];
@@ -72,7 +73,7 @@ export interface BotStoreState {
   updateState: (partial: Partial<BotStoreState>) => void;
   addLog: (msg: string) => void;
   clearLogs: () => void;
-  setConfig: (config: Partial<Pick<BotStoreState, 'stake' | 'stopLoss' | 'takeProfit' | 'maxConsecutiveLosses' | 'cycleIntervalMs'>>) => void;
+  setConfig: (config: Partial<Pick<BotStoreState, 'stake' | 'stopLoss' | 'takeProfit' | 'maxConsecutiveLosses' | 'cycleIntervalMs' | 'activeStrategy'>>) => void;
   setAppId: (id: string) => void;
   setToken: (token: string) => void;
   resetSession: () => void;
@@ -103,6 +104,7 @@ export const useBotStore = create<BotStoreState>((set) => ({
   takeProfit: 2,
   maxConsecutiveLosses: 10,
   cycleIntervalMs: 2000,
+  activeStrategy: 'under-7-8-9',
 
   appId: '',
   token: '',

@@ -1,15 +1,19 @@
 'use client';
 
 import { useBotStore, getBot, destroyBot } from '@/lib/bot-v2/store';
+import { STRATEGIES } from '@/lib/bot-v2/strategies';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Play, Square, RotateCcw, Settings2, Zap, AlertTriangle } from 'lucide-react';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import { Play, Square, RotateCcw, Settings2, Zap, AlertTriangle, Crosshair } from 'lucide-react';
 
 export function BotControls() {
-  const { connected, running, phase, stats, stake, stopLoss, takeProfit, maxConsecutiveLosses, cycleIntervalMs, isVirtual, ticks } = useBotStore();
+  const { connected, running, phase, stats, stake, stopLoss, takeProfit, maxConsecutiveLosses, cycleIntervalMs, isVirtual, ticks, activeStrategy } = useBotStore();
   const avgEV = stats?.avgEV ?? 0;
   const aiStrategies = stats?.aiStrategiesLearned ?? 0;
   const recoveryMode = stats?.recoveryMode ?? false;
@@ -17,7 +21,7 @@ export function BotControls() {
 
   const handleStart = () => {
     const bot = getBot();
-    bot.updateConfig({ stake, stopLoss, takeProfit, maxConsecutiveLosses, cycleIntervalMs });
+    bot.updateConfig({ stake, stopLoss, takeProfit, maxConsecutiveLosses, cycleIntervalMs, activeStrategy });
     bot.start();
   };
 
@@ -38,6 +42,12 @@ export function BotControls() {
     bot.updateConfig({ [key]: num } as any);
   };
 
+  const handleStrategyChange = (value: string) => {
+    useBotStore.getState().setConfig({ activeStrategy: value });
+    const bot = getBot();
+    bot.updateConfig({ activeStrategy: value });
+  };
+
   const phaseColors: Record<string, string> = {
     idle: 'bg-gray-500',
     connecting: 'bg-yellow-500',
@@ -47,13 +57,15 @@ export function BotControls() {
     stopped: 'bg-red-500',
   };
 
+  const currentStrat = STRATEGIES.find(s => s.id === activeStrategy);
+
   return (
     <Card className="border-border">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-base">
             <Zap className="h-4 w-4" />
-            Bot Controls
+            LUCAS v22
           </span>
           <Badge variant="outline" className="text-xs font-mono">
             <span className={`inline-block h-2 w-2 rounded-full mr-1.5 ${phaseColors[phase] || 'bg-gray-500'}`} />
@@ -62,6 +74,32 @@ export function BotControls() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Strategy Selector */}
+        <div className="space-y-1.5">
+          <Label className="text-xs text-muted-foreground flex items-center gap-1.5">
+            <Crosshair className="h-3 w-3" />
+            Strategy
+          </Label>
+          <Select value={activeStrategy} onValueChange={handleStrategyChange} disabled={running}>
+            <SelectTrigger className="h-9 text-xs font-mono">
+              <SelectValue placeholder="Select strategy" />
+            </SelectTrigger>
+            <SelectContent>
+              {STRATEGIES.map(s => (
+                <SelectItem key={s.id} value={s.id} className="text-xs">
+                  <div className="flex items-center justify-between w-full gap-4">
+                    <span className="font-medium">{s.name}</span>
+                    <span className="text-muted-foreground">{s.contractType} {(s.expectedWinRate * 100).toFixed(0)}%</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {currentStrat && (
+            <p className="text-[10px] text-muted-foreground leading-relaxed">{currentStrat.description}</p>
+          )}
+        </div>
+
         {/* Start/Stop buttons */}
         <div className="flex gap-2">
           <Button onClick={handleStart} disabled={!connected || running} className="flex-1" size="sm">
@@ -87,9 +125,8 @@ export function BotControls() {
             <StatBox label="Cycles" value={stats.cycles.toString()} />
             <StatBox label="Ticks" value={ticks.toString()} />
             <StatBox label="Stake" value={`$${stats.currentStake.toFixed(2)}`} />
-            <StatBox label="Avg EV" value={`${avgEV > 0 ? '+' : ''}${avgEV.toFixed(3)}`} color={avgEV > 0 ? 'text-emerald-500' : 'text-red-500'} />
-            <StatBox label="AI Strat" value={aiStrategies.toString()} />
-            <StatBox label="Min EV" value={`${adaptiveMinEV > 0 ? '+' : ''}${adaptiveMinEV.toFixed(3)}`} color={recoveryMode ? 'text-yellow-500' : 'text-muted-foreground'} />
+            <StatBox label="Step" value={stats.martingaleStep.toString()} />
+            <StatBox label="Strategy" value={currentStrat?.contractType || '-'} />
           </div>
           {recoveryMode && (
             <div className="flex items-center gap-2 rounded-md bg-yellow-500/10 border border-yellow-500/20 p-2 text-xs text-yellow-500">
@@ -109,19 +146,19 @@ export function BotControls() {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">Stake ($)</Label>
-              <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateNum('stake', e.target.value, 0.35)} disabled={running} className="h-8 text-xs font-mono" />
+              <Input type="number" step="0.05" min="0.1" value={stake} onChange={(e) => updateNum('stake', e.target.value, 0.40)} disabled={running} className="h-8 text-xs font-mono" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">Stop Loss ($)</Label>
-              <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateNum('stopLoss', e.target.value, 0)} className="h-8 text-xs font-mono" />
+              <Input type="number" step="1" min="0" value={stopLoss} onChange={(e) => updateNum('stopLoss', e.target.value, 6)} className="h-8 text-xs font-mono" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">Take Profit ($)</Label>
-              <Input type="number" step="1" min="0" value={takeProfit} onChange={(e) => updateNum('takeProfit', e.target.value, 0)} className="h-8 text-xs font-mono" />
+              <Input type="number" step="1" min="0" value={takeProfit} onChange={(e) => updateNum('takeProfit', e.target.value, 2)} className="h-8 text-xs font-mono" />
             </div>
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">Max Losses</Label>
-              <Input type="number" step="1" min="1" max="20" value={maxConsecutiveLosses} onChange={(e) => updateNum('maxConsecutiveLosses', e.target.value, 5)} className="h-8 text-xs font-mono" />
+              <Input type="number" step="1" min="1" max="20" value={maxConsecutiveLosses} onChange={(e) => updateNum('maxConsecutiveLosses', e.target.value, 10)} className="h-8 text-xs font-mono" />
             </div>
           </div>
           <div className="space-y-1">

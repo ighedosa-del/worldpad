@@ -80,7 +80,7 @@ export interface GateInputs {
   cycles: number;
 }
 
-export function computeGates(inputs: GateInputs): GateStatus[] {
+export function computeGates(inputs: GateInputs): GateState {
   const g: GateState = {
     serverLoop: inputs.running,
     auth: inputs.connected,

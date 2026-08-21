@@ -1,19 +1,19 @@
 'use client';
 
-// === LUCAS Engine v21 — Digit Under 7/8/9 Switcher ===
-// Matches dbtraders bot from user's videos.
-// Contract: DIGITUNDER on 1HZ100V (Volatility 100 1s Index)
-// Barriers cycle: 7 → 8 → 9 → 7 → 8 → 9...
+// === LUCAS Engine v22 — Multi-Strategy Digit Bot ===
+// 6 strategies: Under 7/8/9, Over 0/1/2, Even, Odd, Match(5), Differ(5)
+// Market: 1HZ100V (Volatility 100 1s Index)
 // Stake: $0.40 base, D'Alembert progression
 // Take Profit: $2 | Stop Loss: $6
-// v21: Direct WS auth (try first) → OTP+proxy (fallback)
+// v22: Multi-strategy support with selector
 
 import { MultiMarketClient } from './deriv-client';
 import type { TickData, AuthResult } from './types';
 import {
   ALL_MARKETS, TRADE_MARKETS, DISPLAY_MARKETS,
-  createMarketStates, feedTick, runAllStrategies, getRSI,
-  recordMarketResult, getMarketConsecutiveLosses,
+  createMarketStates, feedTick, runStrategy, getRSI,
+  recordMarketResult, getMarketConsecutiveLosses, resetBarrierIndex,
+  STRATEGIES, type StrategyDef,
   type MarketState, type TradeSignal,
 } from './strategies';
 import { computeGates, type GateInputs } from './gate-monitor';
@@ -28,6 +28,7 @@ export interface BotConfig {
   maxConsecutiveLosses: number;
   cycleIntervalMs: number;
   minTicksBeforeTrade: number;
+  activeStrategy: string;
 }
 
 export const DEFAULT_CONFIG: BotConfig = {
@@ -37,6 +38,7 @@ export const DEFAULT_CONFIG: BotConfig = {
   maxConsecutiveLosses: 10,
   cycleIntervalMs: 1000,
   minTicksBeforeTrade: 5,
+  activeStrategy: 'under-7-8-9',
 };
 
 export interface TradeRecord {
@@ -98,6 +100,7 @@ export class DerivBot {
   private tradeHistory: TradeRecord[] = [];
   private currentBalance = 0;
   private isTrading = false; // mutex for trade execution
+  private activeStrategyId = 'under-7-8-9';
 
   // Gate tracking
   private lastProposalOk = false;
@@ -120,6 +123,9 @@ export class DerivBot {
     this.config = { ...this.config, ...partial };
     if (partial.stake !== undefined && this.dAlembertStep === 0) {
       this.currentStake = partial.stake;
+    }
+    if (partial.activeStrategy !== undefined) {
+      this.activeStrategyId = partial.activeStrategy;
     }
   }
 
@@ -163,7 +169,8 @@ export class DerivBot {
 
       this.phase = 'idle';
       this.storeUpdate({ connected: true, auth, balance: auth.balance, isVirtual: auth.isVirtual, accountList: auth.accountList });
-      this.log(`LUCAS v21 ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Market: 1HZ100V DIGITUNDER 7/8/9 Switcher.`);
+      const stratName = STRATEGIES.find(s => s.id === this.activeStrategyId)?.name || this.activeStrategyId;
+      this.log(`LUCAS v22 ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Strategy: ${stratName}.`);
       this._pushGates();
       return auth;
     } catch (err) {
@@ -202,7 +209,10 @@ export class DerivBot {
     this.lastTradeError = null;
     this.isTrading = false;
 
-    this.log(`LUCAS v21 STARTED. DIGITUNDER 7/8/9 Switcher on 1HZ100V. Stake: $${this.config.stake.toFixed(2)} | TP: $${this.config.takeProfit} | SL: $${this.config.stopLoss}`);
+    const strat = STRATEGIES.find(s => s.id === this.activeStrategyId);
+    const stratName = strat?.name || this.activeStrategyId;
+    resetBarrierIndex(this.activeStrategyId);
+    this.log(`LUCAS v22 STARTED. ${stratName} on 1HZ100V. Stake: $${this.config.stake.toFixed(2)} | TP: $${this.config.takeProfit} | SL: $${this.config.stopLoss}`);
     this.storeUpdate({ running: true });
 
     this.markets = createMarketStates();
@@ -271,7 +281,7 @@ export class DerivBot {
     const state = this.markets.get(tradeMarket.symbol);
     if (!state) return;
 
-    const signal = runAllStrategies(state);
+    const signal = runStrategy(state, this.activeStrategyId);
     if (!signal) {
       this.log('No signal (consecutive loss limit?)');
       this._pushGates();
@@ -308,19 +318,20 @@ export class DerivBot {
 
   private async executeTrade(state: MarketState, signal: TradeSignal): Promise<void> {
     const stake = this.currentStake;
+    const stratDef = STRATEGIES.find(s => s.id === this.activeStrategyId);
 
-    this.log(`TRADE: DIGITUNDER ${signal.barrier} on ${state.symbol} | $${stake.toFixed(2)} | ${signal.reason}`);
+    this.log(`TRADE: ${signal.contractType} ${signal.barrier !== undefined ? signal.barrier : ''} on ${state.symbol} | $${stake.toFixed(2)} | ${signal.reason}`);
 
     try {
       const proposalStart = Date.now();
 
       const proposal = await this.client.getProposal({
-        contractType: 'DIGITUNDER',
+        contractType: signal.contractType,
         symbol: state.symbol,
         stake,
         barrier: signal.barrier,
-        duration: 1,
-        durationUnit: 't',
+        duration: stratDef?.duration || 1,
+        durationUnit: stratDef?.durationUnit || 't',
       });
 
       const proposalLatency = Date.now() - proposalStart;
@@ -339,7 +350,7 @@ export class DerivBot {
       const record: TradeRecord = {
         id: buyResult.contractId,
         contractId: buyResult.contractId,
-        contractType: 'DIGITUNDER',
+        contractType: signal.contractType,
         symbol: state.symbol,
         name: state.name,
         stake,
@@ -384,7 +395,7 @@ export class DerivBot {
 
     this.log(`D'Alembert step ${this.dAlembertStep}, next stake $${this.currentStake.toFixed(2)}`);
 
-    this.storeUpdate({ tradeHistory: [...this.tradeHistory], sessionProfit: this.sessionProfit });
+    this.storeUpdate({ tradeHistory: [...this.tradeHistory] });
   }
 
   // --- Gate Monitor ---
