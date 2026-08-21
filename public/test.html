@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html><head><title>Deriv WebSocket Test</title>
+<style>
+body { background: #0a0a0a; color: #ccc; font-family: monospace; padding: 20px; }
+.pass { color: #4ade80; } .fail { color: #f87171; } .info { color: #60a5fa; }
+button { background: #f59e0b; color: #000; border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; margin: 8px 0; }
+#log { background: #111; border: 1px solid #333; border-radius: 8px; padding: 16px; margin-top: 12px; max-height: 400px; overflow-y: auto; font-size: 13px; line-height: 1.6; }
+</style></head><body>
+<h1>Deriv WebSocket Connection Test</h1>
+<p>This page tests your connection to Deriv's servers. No token needed.</p>
+<button onclick="runTest()">Run Full Test</button>
+<button onclick="runTest('frontend')">Test Fallback Endpoint</button>
+<div id="log"></div>
+<script>
+const log = document.getElementById('log');
+function addLog(msg, cls='') {
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  log.appendChild(d);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function runTest(endpoint) {
+  log.innerHTML = '';
+  const url = endpoint === 'frontend'
+    ? 'wss://frontend.ws.derivws.com/websockets/v3?app_id=1089'
+    : 'wss://ws.derivws.com/websockets/v3?app_id=1089';
+  const name = endpoint === 'frontend' ? 'FALLBACK' : 'PRIMARY';
+
+  addLog(`Testing ${name}: ${url}`, 'info');
+
+  // Step 1: Create WebSocket
+  addLog('Creating WebSocket...');
+  let ws;
+  try { ws = new WebSocket(url); addLog('WebSocket object created', 'pass'); }
+  catch(e) { addLog('FAILED to create WebSocket: ' + e.message, 'fail'); return; }
+
+  // Step 2: Wait for open
+  addLog('Waiting for connection to open...');
+  const opened = await new Promise((resolve) => {
+    const t = setTimeout(() => { addLog('Timed out waiting for open (15s)', 'fail'); resolve(false); }, 15000);
+    ws.onopen = () => { clearTimeout(t); addLog('WebSocket OPENED successfully', 'pass'); resolve(true); };
+    ws.onerror = (e) => { clearTimeout(t); addLog('onerror fired: ' + (e.message || 'no message'), 'fail'); resolve(false); };
+    ws.onclose = (e) => { clearTimeout(t); addLog(`onclose fired BEFORE onopen! code=${e.code} reason=${e.reason}`, 'fail'); resolve(false); };
+  });
+
+  if (!opened) { addLog('Connection FAILED - could not open WebSocket', 'fail'); return; }
+
+  // Step 3: Send time request
+  addLog('Sending time request...');
+  const timeResult = await new Promise((resolve) => {
+    const t = setTimeout(() => { addLog('Timed out waiting for time response (10s)', 'fail'); resolve(null); }, 10000);
+    ws.onmessage = (e) => { clearTimeout(t); addLog('Received: ' + e.data.substring(0, 200)); resolve(JSON.parse(e.data)); };
+    ws.onclose = (e) => { clearTimeout(t); addLog(`Connection CLOSED before response! code=${e.code} reason=${e.reason}`, 'fail'); resolve(null); };
+    ws.onerror = () => { clearTimeout(t); addLog('onerror during request', 'fail'); resolve(null); };
+    ws.send(JSON.stringify({ time: 1, req_id: 99 }));
+  });
+
+  if (!timeResult) { addLog('FAILED - could not get response from Deriv', 'fail'); ws.close(); return; }
+  if (timeResult.error) { addLog('Deriv returned error: ' + JSON.stringify(timeResult.error), 'fail'); ws.close(); return; }
+  if (timeResult.time) {
+    addLog('SUCCESS! Deriv time: ' + new Date(timeResult.time * 1000).toLocaleString(), 'pass');
+  } else {
+    addLog('Unexpected response: ' + JSON.stringify(timeResult).substring(0, 200), 'fail');
+  }
+
+  // Step 4: Keep connection open for 5 seconds to test stability
+  addLog('Testing connection stability (keeping open for 5s)...');
+  await new Promise((resolve) => {
+    let closed = false;
+    const t = setTimeout(() => {
+      if (!closed) { addLog('Connection stayed open for 5s - STABLE', 'pass'); resolve(true); }
+    }, 5000);
+    ws.onclose = (e) => {
+      closed = true;
+      clearTimeout(t);
+      addLog(`Connection CLOSED prematurely after handshake! code=${e.code} reason="${e.reason}"`, 'fail');
+      resolve(false);
+    };
+  });
+
+  addLog('Closing connection.');
+  ws.close();
+  addLog('--- TEST COMPLETE ---', 'info');
+}
+</script></body></html>
