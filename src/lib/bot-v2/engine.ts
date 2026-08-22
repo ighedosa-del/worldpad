@@ -1,11 +1,10 @@
 'use client';
 
-// === LUCAS Engine v22 — Multi-Strategy Digit Bot ===
-// 6 strategies: Under 7/8/9, Over 0/1/2, Even, Odd, Match(5), Differ(5)
-// Market: 1HZ100V (Volatility 100 1s Index)
-// Stake: $0.40 base, D'Alembert progression
-// Take Profit: $2 | Stop Loss: $6
-// v22: Multi-strategy support with selector
+// === LUCAS Engine v23 — DB Traders Style ===
+// Matches dbtraders.com behavior from user's videos
+// Strategies: Even/Odd Alt, Even/Odd Loss Alt, Under 7/8/9, Over 0/1/2, Even, Odd, Differ, Match
+// Market: 1HZ100V | 1 tick trades | 2s cycle | Martingale multiplier
+// v23: reportTradeResult for alternation, 3-tick min start
 
 import { MultiMarketClient } from './deriv-client';
 import type { TickData, AuthResult } from './types';
@@ -13,6 +12,7 @@ import {
   ALL_MARKETS, TRADE_MARKETS, DISPLAY_MARKETS,
   createMarketStates, feedTick, runStrategy, getRSI,
   recordMarketResult, getMarketConsecutiveLosses, resetBarrierIndex,
+  reportTradeResult,
   STRATEGIES, type StrategyDef,
   type MarketState, type TradeSignal,
 } from './strategies';
@@ -36,9 +36,9 @@ export const DEFAULT_CONFIG: BotConfig = {
   stopLoss: 6,
   takeProfit: 2,
   maxConsecutiveLosses: 10,
-  cycleIntervalMs: 1000,
-  minTicksBeforeTrade: 5,
-  activeStrategy: 'under-7-8-9',
+  cycleIntervalMs: 2000,
+  minTicksBeforeTrade: 3,
+  activeStrategy: 'even-odd-alt',
 };
 
 export interface TradeRecord {
@@ -170,7 +170,7 @@ export class DerivBot {
       this.phase = 'idle';
       this.storeUpdate({ connected: true, auth, balance: auth.balance, isVirtual: auth.isVirtual, accountList: auth.accountList });
       const stratName = STRATEGIES.find(s => s.id === this.activeStrategyId)?.name || this.activeStrategyId;
-      this.log(`LUCAS v22 ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Strategy: ${stratName}.`);
+      this.log(`LUCAS v23 ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Strategy: ${stratName}.`);
       this._pushGates();
       return auth;
     } catch (err) {
@@ -212,7 +212,7 @@ export class DerivBot {
     const strat = STRATEGIES.find(s => s.id === this.activeStrategyId);
     const stratName = strat?.name || this.activeStrategyId;
     resetBarrierIndex(this.activeStrategyId);
-    this.log(`LUCAS v22 STARTED. ${stratName} on 1HZ100V. Stake: $${this.config.stake.toFixed(2)} | TP: $${this.config.takeProfit} | SL: $${this.config.stopLoss}`);
+    this.log(`LUCAS v23 STARTED. ${stratName} on 1HZ100V. Stake: $${this.config.stake.toFixed(2)} | TP: $${this.config.takeProfit} | SL: $${this.config.stopLoss} | Cycle: ${this.config.cycleIntervalMs}ms`);
     this.storeUpdate({ running: true });
 
     this.markets = createMarketStates();
@@ -390,10 +390,14 @@ export class DerivBot {
       this.dAlembertStep++;
     }
 
+    // Report result to strategy (for Even/Odd alternation)
+    reportTradeResult(this.activeStrategyId, record.won);
+
+    // D'Alembert: stake = base + (step * base)
     this.currentStake = this.config.stake + (this.dAlembertStep * this.config.stake);
     this.currentStake = Math.round(this.currentStake * 100) / 100;
 
-    this.log(`D'Alembert step ${this.dAlembertStep}, next stake $${this.currentStake.toFixed(2)}`);
+    this.log(`Step ${this.dAlembertStep}, next stake $${this.currentStake.toFixed(2)}`);
 
     this.storeUpdate({ tradeHistory: [...this.tradeHistory] });
   }

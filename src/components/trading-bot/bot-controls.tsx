@@ -65,7 +65,7 @@ export function BotControls() {
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-base">
             <Zap className="h-4 w-4" />
-            LUCAS v22
+            LUCAS v23
           </span>
           <Badge variant="outline" className="text-xs font-mono">
             <span className={`inline-block h-2 w-2 rounded-full mr-1.5 ${phaseColors[phase] || 'bg-gray-500'}`} />

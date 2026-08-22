@@ -104,7 +104,7 @@ export const useBotStore = create<BotStoreState>((set) => ({
   takeProfit: 2,
   maxConsecutiveLosses: 10,
   cycleIntervalMs: 2000,
-  activeStrategy: 'under-7-8-9',
+  activeStrategy: 'even-odd-alt',
 
   appId: '',
   token: '',

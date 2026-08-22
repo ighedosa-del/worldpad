@@ -1,8 +1,14 @@
 'use client';
 
-// === LUCAS Strategies v2 — Multi-Strategy Registry ===
-// All strategies run on 1HZ100V (Volatility 100 1s Index)
-// D'Alembert progression: $0.40 base, +$0.40 on loss, -$0.40 on win (min $0.40)
+// === LUCAS Strategies v3 — DB Traders Style ===
+// Matches dbtraders.com bot behavior from user's videos.
+// Key features from videos:
+//   1. Even/Odd Alternator — alternates DIGITEVEN/DIGITODD every trade
+//   2. Even/Odd Alternate on Loss — only switches on loss
+//   3. Under/Over Switcher — cycles barriers
+//   4. Match/Differ — digit match or differ
+//   5. All trades: 1 tick duration, execute every 1-4 seconds
+//   6. Martingale multiplier (not D'Alembert)
 
 import type { TickData } from './types';
 
@@ -23,12 +29,12 @@ export const ALL_MARKETS = [...TRADE_MARKETS, ...DISPLAY_MARKETS];
 export const SCANNED_MARKETS = ALL_MARKETS;
 export type MarketSymbol = (typeof ALL_MARKETS)[number]['symbol'];
 
-// === Strategy Types ===
+// === Types ===
 
 export interface TradeSignal {
-  contractType: string;  // 'DIGITUNDER', 'DIGITOVER', 'DIGITEVEN', 'DIGITODD', 'DIGITMATCH', 'DIGITDIFF'
-  barrier: number | undefined;  // For DIGITUNDER/OVER: 0-9, for MATCH/DIFF: 0-9, for EVEN/ODD: undefined
-  prediction: string;   // Human-readable prediction
+  contractType: string;
+  barrier: number | undefined;
+  prediction: string;
   confidence: number;
   reason: string;
   expectedWinRate: number;
@@ -39,12 +45,13 @@ export interface StrategyDef {
   id: string;
   name: string;
   description: string;
-  contractType: string;
-  barrierCount: number;  // Number of barrier variants (0 = no barrier like EVEN/ODD)
-  barriers: number[];    // Barriers to cycle through (empty for EVEN/ODD)
+  contractTypes: string[];  // Can use multiple contract types (e.g. EVEN+ODD)
+  barriers: number[];      // Barriers to cycle (empty for EVEN/ODD)
   expectedWinRate: number;
   duration: number;
   durationUnit: string;
+  alternates: boolean;    // Does it alternate between contract types?
+  alternateOnLoss: boolean; // Only alternate on loss?
 }
 
 export interface MarketState {
@@ -68,7 +75,7 @@ export interface ScoredMarket extends MarketState {
   rank: number;
 }
 
-// === Compatibility exports for engine ===
+// === Compatibility exports ===
 export const RSI_PERIOD = 5;
 export const RSI_OVERSOLD = 40;
 export const RSI_OVERBOUGHT = 60;
@@ -80,104 +87,144 @@ export const DAILY_STOP_LOSS_PCT = 0.15;
 export const MIN_PAYOUT_RATIO = 1.10;
 
 // ============================================================
-// STRATEGY REGISTRY — All 6 strategies
+// STRATEGY REGISTRY — Matches DB Traders strategies from videos
 // ============================================================
 
 export const STRATEGIES: StrategyDef[] = [
   {
+    id: 'even-odd-alt',
+    name: 'Even/Odd Alternator',
+    description: 'Alternates DIGITEVEN and DIGITODD every trade. Like DB Traders "Alternate Even and Odd" toggle. 50% win rate, ~1.86x payout.',
+    contractTypes: ['DIGITEVEN', 'DIGITODD'],
+    barriers: [],
+    expectedWinRate: 0.50,
+    duration: 1,
+    durationUnit: 't',
+    alternates: true,
+    alternateOnLoss: false,
+  },
+  {
+    id: 'even-odd-loss',
+    name: 'Even/Odd Alternate on Loss',
+    description: 'Starts with DIGITEVEN, switches to DIGITODD only on loss, then back on next loss. Like DB Traders "Alternate on Loss" toggle. 50% win rate.',
+    contractTypes: ['DIGITEVEN', 'DIGITODD'],
+    barriers: [],
+    expectedWinRate: 0.50,
+    duration: 1,
+    durationUnit: 't',
+    alternates: true,
+    alternateOnLoss: true,
+  },
+  {
     id: 'under-7-8-9',
     name: 'Under 7/8/9 Switcher',
     description: 'DIGITUNDER cycling barriers 7 -> 8 -> 9. Win if last digit < barrier. 70-90% win rate.',
-    contractType: 'DIGITUNDER',
-    barrierCount: 3,
+    contractTypes: ['DIGITUNDER'],
     barriers: [7, 8, 9],
-    expectedWinRate: 0.80, // average of 70% + 80% + 90% / 3
+    expectedWinRate: 0.80,
     duration: 1,
     durationUnit: 't',
+    alternates: false,
+    alternateOnLoss: false,
   },
   {
     id: 'over-0-1-2',
     name: 'Over 0/1/2 Switcher',
     description: 'DIGITOVER cycling barriers 0 -> 1 -> 2. Win if last digit > barrier. 90-100% win rate.',
-    contractType: 'DIGITOVER',
-    barrierCount: 3,
+    contractTypes: ['DIGITOVER'],
     barriers: [0, 1, 2],
     expectedWinRate: 0.90,
     duration: 1,
     durationUnit: 't',
+    alternates: false,
+    alternateOnLoss: false,
   },
   {
     id: 'even',
     name: 'Even Digit',
-    description: 'DIGITEVEN — win if last digit is even (0,2,4,6,8). 50% win rate, ~1.86x payout.',
-    contractType: 'DIGITEVEN',
-    barrierCount: 0,
+    description: 'DIGITEVEN only — win if last digit is even (0,2,4,6,8). 50% win rate, ~1.86x payout.',
+    contractTypes: ['DIGITEVEN'],
     barriers: [],
     expectedWinRate: 0.50,
     duration: 1,
     durationUnit: 't',
+    alternates: false,
+    alternateOnLoss: false,
   },
   {
     id: 'odd',
     name: 'Odd Digit',
-    description: 'DIGITODD — win if last digit is odd (1,3,5,7,9). 50% win rate, ~1.86x payout.',
-    contractType: 'DIGITODD',
-    barrierCount: 0,
+    description: 'DIGITODD only — win if last digit is odd (1,3,5,7,9). 50% win rate, ~1.86x payout.',
+    contractTypes: ['DIGITODD'],
     barriers: [],
     expectedWinRate: 0.50,
     duration: 1,
     durationUnit: 't',
+    alternates: false,
+    alternateOnLoss: false,
+  },
+  {
+    id: 'differ-5',
+    name: 'Digit Differ (5)',
+    description: 'DIGITDIFF — win if last digit is NOT 5. 90% win rate, ~1.03x payout. Safe, small profit per trade.',
+    contractTypes: ['DIGITDIFF'],
+    barriers: [5],
+    expectedWinRate: 0.90,
+    duration: 1,
+    durationUnit: 't',
+    alternates: false,
+    alternateOnLoss: false,
   },
   {
     id: 'match-5',
     name: 'Digit Match (5)',
     description: 'DIGITMATCH — win if last digit equals 5. 10% win rate, ~9.3x payout. High risk, high reward.',
-    contractType: 'DIGITMATCH',
-    barrierCount: 1,
+    contractTypes: ['DIGITMATCH'],
     barriers: [5],
     expectedWinRate: 0.10,
     duration: 1,
     durationUnit: 't',
-  },
-  {
-    id: 'differ-5',
-    name: 'Digit Differ (5)',
-    description: 'DIGITDIFF — win if last digit is NOT 5. 90% win rate, ~1.03x payout. Safe, small profit.',
-    contractType: 'DIGITDIFF',
-    barrierCount: 1,
-    barriers: [5],
-    expectedWinRate: 0.90,
-    duration: 1,
-    durationUnit: 't',
+    alternates: false,
+    alternateOnLoss: false,
   },
 ];
 
 // ============================================================
-// STATE MANAGEMENT
+// STATE — track which contract/barrier to use next per strategy
 // ============================================================
 
-// Per-strategy barrier cycling index
-const strategyBarrierIndex = new Map<string, number>();
+// Tracks the current index for strategies that alternate or cycle
+const strategyState = new Map<string, { contractIdx: number; barrierIdx: number; lastWon: boolean | null }>();
 
-function getBarrierIndex(strategyId: string): number {
-  if (!strategyBarrierIndex.has(strategyId)) strategyBarrierIndex.set(strategyId, 0);
-  return strategyBarrierIndex.get(strategyId)!;
-}
-
-function advanceBarrierIndex(strategyId: string, count: number): number {
-  const idx = getBarrierIndex(strategyId);
-  const val = idx % count;
-  strategyBarrierIndex.set(strategyId, idx + 1);
-  return val;
+function getStrategyState(id: string) {
+  if (!strategyState.has(id)) {
+    strategyState.set(id, { contractIdx: 0, barrierIdx: 0, lastWon: null });
+  }
+  return strategyState.get(id)!;
 }
 
 export function resetBarrierIndex(strategyId?: string): void {
-  if (strategyId) {
-    strategyBarrierIndex.delete(strategyId);
-  } else {
-    strategyBarrierIndex.clear();
+  if (strategyId) strategyState.delete(strategyId);
+  else strategyState.clear();
+}
+
+// Called after each trade result to update alternation state
+export function reportTradeResult(strategyId: string, won: boolean): void {
+  const st = getStrategyState(strategyId);
+  st.lastWon = won;
+
+  const strat = STRATEGIES.find(s => s.id === strategyId);
+  if (!strat) return;
+
+  // If alternateOnLoss and loss, switch contract type
+  if (strat.alternateOnLoss && !won) {
+    st.contractIdx = (st.contractIdx + 1) % strat.contractTypes.length;
   }
 }
+
+// ============================================================
+// MARKET STATE
+// ============================================================
 
 export function createMarketStates(): Map<string, MarketState> {
   const states = new Map<string, MarketState>();
@@ -264,26 +311,18 @@ export function getRSI(state: MarketState): number {
 }
 
 // ============================================================
-// CORE STRATEGY RUNNER — picks the active strategy and generates a signal
+// CORE STRATEGY RUNNER
 // ============================================================
 
-/**
- * Run the selected strategy. Returns a TradeSignal or null if blocked.
- * @param state - Market state with tick history
- * @param strategyId - Which strategy to run (from STRATEGIES registry)
- */
 export function runStrategy(
   state: MarketState,
   strategyId: string,
 ): TradeSignal | null {
   const strat = STRATEGIES.find(s => s.id === strategyId);
-  if (!strat) {
-    console.error(`[Strategies] Unknown strategy: ${strategyId}`);
-    return null;
-  }
+  if (!strat) return null;
 
-  // Need at least 5 ticks
-  if (state.totalTicks < 5) return null;
+  // Need at least 3 ticks (fast start)
+  if (state.totalTicks < 3) return null;
 
   // Block if 10+ consecutive losses
   const consecutiveLosses = getMarketConsecutiveLosses(state);
@@ -291,113 +330,85 @@ export function runStrategy(
 
   const rsi = getRSI(state);
   const recentDigits = state.digitHistory.slice(-20);
+  const st = getStrategyState(strategyId);
 
-  // --- DIGITUNDER 7/8/9 Switcher ---
-  if (strat.id === 'under-7-8-9') {
-    const idx = advanceBarrierIndex(strat.id, strat.barriers.length);
-    const barrier = strat.barriers[idx];
-    const expectedWR = barrier / 10;
-    const underCount = recentDigits.filter(d => d < barrier).length;
-    const recentRate = recentDigits.length > 0 ? underCount / recentDigits.length : expectedWR;
-    const confidence = Math.min(0.75, expectedWR + (expectedWR - recentRate > 0.15 ? 0.05 : 0));
+  // --- Strategies with barrier cycling (UNDER/OVER) ---
+  if (strat.barriers.length > 0 && !strat.alternates) {
+    const barrier = strat.barriers[st.barrierIdx % strat.barriers.length];
+    st.barrierIdx++;
+
+    const contractType = strat.contractTypes[0];
+    const isUnder = contractType === 'DIGITUNDER';
+    const expectedWR = isUnder ? barrier / 10 : (9 - barrier) / 10;
+    const relevantDigits = isUnder
+      ? recentDigits.filter(d => d < barrier).length
+      : recentDigits.filter(d => d > barrier).length;
+    const recentRate = recentDigits.length > 0 ? relevantDigits / recentDigits.length : expectedWR;
+    const label = isUnder ? 'UNDER' : (contractType === 'DIGITMATCH' ? 'MATCH' : contractType === 'DIGITDIFF' ? 'DIFFER' : 'OVER');
 
     return {
-      contractType: 'DIGITUNDER',
+      contractType,
       barrier,
-      prediction: `Digit UNDER ${barrier}`,
-      confidence,
-      reason: `UNDER ${barrier} | recent=${(recentRate * 100).toFixed(0)}% | hist=${underCount}/${recentDigits.length}`,
+      prediction: `${label} ${barrier}`,
+      confidence: Math.min(0.90, expectedWR),
+      reason: `${label} ${barrier} | recent=${(recentRate * 100).toFixed(0)}% (${relevantDigits}/${recentDigits.length})`,
       expectedWinRate: expectedWR,
       rsiValue: rsi,
     };
   }
 
-  // --- DIGITOVER 0/1/2 Switcher ---
-  if (strat.id === 'over-0-1-2') {
-    const idx = advanceBarrierIndex(strat.id, strat.barriers.length);
-    const barrier = strat.barriers[idx];
-    const expectedWR = (9 - barrier) / 10;
-    const overCount = recentDigits.filter(d => d > barrier).length;
-    const recentRate = recentDigits.length > 0 ? overCount / recentDigits.length : expectedWR;
-    const confidence = Math.min(0.90, expectedWR + (expectedWR - recentRate > 0.15 ? 0.05 : 0));
-
-    return {
-      contractType: 'DIGITOVER',
-      barrier,
-      prediction: `Digit OVER ${barrier}`,
-      confidence,
-      reason: `OVER ${barrier} | recent=${(recentRate * 100).toFixed(0)}% | hist=${overCount}/${recentDigits.length}`,
-      expectedWinRate: expectedWR,
-      rsiValue: rsi,
-    };
-  }
-
-  // --- DIGITEVEN ---
-  if (strat.id === 'even') {
+  // --- Even/Odd Alternator (always alternate) ---
+  if (strat.id === 'even-odd-alt') {
+    const contractType = strat.contractTypes[st.contractIdx % strat.contractTypes.length];
+    st.contractIdx++;
+    const isEven = contractType === 'DIGITEVEN';
     const evenCount = recentDigits.filter(d => d % 2 === 0).length;
-    const recentRate = recentDigits.length > 0 ? evenCount / recentDigits.length : 0.50;
-    const confidence = Math.min(0.60, 0.50 + (recentRate < 0.40 ? 0.10 : 0));
+    const recentRate = recentDigits.length > 0 ? (isEven ? evenCount / recentDigits.length : 1 - evenCount / recentDigits.length) : 0.50;
 
     return {
-      contractType: 'DIGITEVEN',
+      contractType,
       barrier: undefined,
-      prediction: 'Even digit (0,2,4,6,8)',
-      confidence,
-      reason: `EVEN | recent=${(recentRate * 100).toFixed(0)}% | hist=${evenCount}/${recentDigits.length}`,
+      prediction: isEven ? 'Even digit' : 'Odd digit',
+      confidence: 0.55,
+      reason: `${isEven ? 'EVEN' : 'ODD'} | recent even=${(evenCount / (recentDigits.length || 1) * 100).toFixed(0)}%`,
       expectedWinRate: 0.50,
       rsiValue: rsi,
     };
   }
 
-  // --- DIGITODD ---
-  if (strat.id === 'odd') {
-    const oddCount = recentDigits.filter(d => d % 2 === 1).length;
-    const recentRate = recentDigits.length > 0 ? oddCount / recentDigits.length : 0.50;
-    const confidence = Math.min(0.60, 0.50 + (recentRate < 0.40 ? 0.10 : 0));
+  // --- Even/Odd Alternate on Loss ---
+  if (strat.id === 'even-odd-loss') {
+    const contractType = strat.contractTypes[st.contractIdx % strat.contractTypes.length];
+    const isEven = contractType === 'DIGITEVEN';
+    const evenCount = recentDigits.filter(d => d % 2 === 0).length;
 
     return {
-      contractType: 'DIGITODD',
+      contractType,
       barrier: undefined,
-      prediction: 'Odd digit (1,3,5,7,9)',
-      confidence,
-      reason: `ODD | recent=${(recentRate * 100).toFixed(0)}% | hist=${oddCount}/${recentDigits.length}`,
+      prediction: isEven ? 'Even digit' : 'Odd digit',
+      confidence: 0.55,
+      reason: `${isEven ? 'EVEN' : 'ODD'} (alt on loss) | even rate=${(evenCount / (recentDigits.length || 1) * 100).toFixed(0)}%`,
       expectedWinRate: 0.50,
       rsiValue: rsi,
     };
   }
 
-  // --- DIGITMATCH (5) ---
-  if (strat.id === 'match-5') {
-    const matchDigit = 5;
-    const matchCount = recentDigits.filter(d => d === matchDigit).length;
-    const recentRate = recentDigits.length > 0 ? matchCount / recentDigits.length : 0.10;
-    const confidence = Math.min(0.25, 0.10 + (recentRate > 0.15 ? 0.10 : 0));
+  // --- Single contract strategies (even, odd) ---
+  if (strat.contractTypes.length === 1 && strat.barriers.length === 0) {
+    const contractType = strat.contractTypes[0];
+    const isEven = contractType === 'DIGITEVEN';
+    const evenCount = recentDigits.filter(d => d % 2 === 0).length;
+    const recentRate = recentDigits.length > 0
+      ? (isEven ? evenCount / recentDigits.length : 1 - evenCount / recentDigits.length)
+      : 0.50;
 
     return {
-      contractType: 'DIGITMATCH',
-      barrier: matchDigit,
-      prediction: `Digit = ${matchDigit}`,
-      confidence,
-      reason: `MATCH ${matchDigit} | recent=${(recentRate * 100).toFixed(0)}% | hist=${matchCount}/${recentDigits.length}`,
-      expectedWinRate: 0.10,
-      rsiValue: rsi,
-    };
-  }
-
-  // --- DIGITDIFF (5) ---
-  if (strat.id === 'differ-5') {
-    const diffDigit = 5;
-    const diffCount = recentDigits.filter(d => d !== diffDigit).length;
-    const recentRate = recentDigits.length > 0 ? diffCount / recentDigits.length : 0.90;
-    const confidence = Math.min(0.92, 0.90 + (recentRate > 0.95 ? 0.02 : 0));
-
-    return {
-      contractType: 'DIGITDIFF',
-      barrier: diffDigit,
-      prediction: `Digit != ${diffDigit}`,
-      confidence,
-      reason: `DIFFER ${diffDigit} | recent=${(recentRate * 100).toFixed(0)}% | hist=${diffCount}/${recentDigits.length}`,
-      expectedWinRate: 0.90,
+      contractType,
+      barrier: undefined,
+      prediction: isEven ? 'Even digit' : 'Odd digit',
+      confidence: 0.55,
+      reason: `${isEven ? 'EVEN' : 'ODD'} | recent=${(recentRate * 100).toFixed(0)}%`,
+      expectedWinRate: 0.50,
       rsiValue: rsi,
     };
   }
@@ -405,13 +416,9 @@ export function runStrategy(
   return null;
 }
 
-// === Backward compat: runAllStrategies calls the selected strategy ===
-export function runAllStrategies(
-  state: MarketState,
-  _features?: any,
-  _priceHistory?: number[],
-): TradeSignal | null {
-  return runStrategy(state, 'under-7-8-9'); // default
+// === Backward compat ===
+export function runAllStrategies(state: MarketState, _features?: any, _priceHistory?: number[]): TradeSignal | null {
+  return runStrategy(state, 'under-7-8-9');
 }
 
 // === Score and rank ===
@@ -421,14 +428,11 @@ export function scoreAndRank(markets: Map<string, MarketState>): ScoredMarket[] 
   for (const [symbol, state] of markets) {
     const signal = state.tradable ? runAllStrategies(state) : null;
     let score = 0;
-    if (signal) {
-      score = signal.confidence * 100;
-      if (state.tradable) score += 20;
-    }
+    if (signal) { score = signal.confidence * 100; if (state.tradable) score += 20; }
     scored.push({ ...state, score, signal, rank: 0 });
   }
   scored.sort((a, b) => b.score - a.score);
   scored.forEach((m, i) => { m.rank = i + 1; });
   return scored;
 }
-// v22 multi-strategy
+// v23 dbtraders-style strategies
