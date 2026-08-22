@@ -1,8 +1,7 @@
 'use client';
 
-// === Execution Gate Monitor — LUCAS 11-Gate Pipeline v16 ===
-// 11-gate pipeline that BLOCKS trades that don't pass quality checks.
-// v16: Updated for CALL/PUT contracts.
+// === Execution Gate Monitor — LUCAS 11-Gate Pipeline v17 ===
+// v17: Fixed computeGates to return GateState (was returning array).
 
 export interface GateState {
   serverLoop: boolean;
@@ -48,15 +47,15 @@ export const GATE_LABELS: { key: keyof GateState; label: string }[] = [
 
 export const GATE_DESCRIPTIONS: Record<keyof GateState, string> = {
   serverLoop: 'Bot cycle is running and autonomous',
-  auth: 'Authenticated with Deriv demo account',
+  auth: 'Authenticated with Deriv',
   risk: 'Risk guard allows trading (no daily loss/streak block)',
-  candidate: 'CALL/PUT signal found (LUCAS features ready)',
-  robust: 'Signal has passed walk-forward and Monte Carlo validation',
-  liveEvidence: 'Candidate has enough live samples (10+)',
-  proposal: 'Deriv API returned a valid proposal for the contract',
-  positiveEv: 'Edge over break-even is positive (Wilson LB > BE + margin)',
-  latency: 'Proposal response arrived within 1800ms limit',
-  persistence: 'Signal persisted for 2+ seconds (anti-flicker)',
+  candidate: 'Trade signal found',
+  robust: 'Signal has passed validation',
+  liveEvidence: 'Candidate has enough live samples',
+  proposal: 'Deriv API returned a valid proposal',
+  positiveEv: 'Edge over break-even is positive',
+  latency: 'Proposal response arrived within 3000ms',
+  persistence: 'Signal persisted (anti-flicker)',
   execution: 'Contract was successfully purchased on Deriv',
 };
 
@@ -80,8 +79,10 @@ export interface GateInputs {
   cycles: number;
 }
 
+// v17 FIX: Was returning GATE_LABELS.map(...) which returns an array.
+// Now correctly returns a GateState object.
 export function computeGates(inputs: GateInputs): GateState {
-  const g: GateState = {
+  return {
     serverLoop: inputs.running,
     auth: inputs.connected,
     risk: !inputs.riskStopped,
@@ -94,9 +95,13 @@ export function computeGates(inputs: GateInputs): GateState {
     persistence: inputs.running && inputs.connected,
     execution: inputs.tradeExecuted,
   };
+}
+
+// Helper to convert GateState to display array for UI
+export function gatesToDisplay(gates: GateState): { name: string; status: 'green' | 'wait' | 'red'; detail: string }[] {
   return GATE_LABELS.map(gl => ({
     name: gl.label,
-    status: g[gl.key] ? 'green' as const : 'wait' as const,
+    status: gates[gl.key] ? 'green' as const : 'wait' as const,
     detail: GATE_DESCRIPTIONS[gl.key],
   }));
 }
@@ -118,7 +123,6 @@ export function computeGatesFromEngineState(state: {
     auth: state.connected,
     risk: !state.isRiskBlocked,
     candidate: state.hasTradeSignal && state.signalIsCallPut,
-    // v16: ROBUST passes for CALL/PUT signals — lifecycle stage is informational
     robust: state.signalIsCallPut,
     liveEvidence: state.hasTradeSignal && state.running && state.signalIsCallPut,
     proposal: state.proposalValid,

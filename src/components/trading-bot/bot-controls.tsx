@@ -65,7 +65,7 @@ export function BotControls() {
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-base">
             <Zap className="h-4 w-4" />
-            LUCAS v23
+            LUCAS v24
           </span>
           <Badge variant="outline" className="text-xs font-mono">
             <span className={`inline-block h-2 w-2 rounded-full mr-1.5 ${phaseColors[phase] || 'bg-gray-500'}`} />
@@ -89,7 +89,7 @@ export function BotControls() {
                 <SelectItem key={s.id} value={s.id} className="text-xs">
                   <div className="flex items-center justify-between w-full gap-4">
                     <span className="font-medium">{s.name}</span>
-                    <span className="text-muted-foreground">{s.contractType} {(s.expectedWinRate * 100).toFixed(0)}%</span>
+                    <span className="text-muted-foreground">{s.contractTypes[0]} {(s.expectedWinRate * 100).toFixed(0)}%</span>
                   </div>
                 </SelectItem>
               ))}
@@ -126,7 +126,7 @@ export function BotControls() {
             <StatBox label="Ticks" value={ticks.toString()} />
             <StatBox label="Stake" value={`$${stats.currentStake.toFixed(2)}`} />
             <StatBox label="Step" value={stats.martingaleStep.toString()} />
-            <StatBox label="Strategy" value={currentStrat?.contractType || '-'} />
+            <StatBox label="Strategy" value={currentStrat?.contractTypes[0] || '-'} />
           </div>
           {recoveryMode && (
             <div className="flex items-center gap-2 rounded-md bg-yellow-500/10 border border-yellow-500/20 p-2 text-xs text-yellow-500">

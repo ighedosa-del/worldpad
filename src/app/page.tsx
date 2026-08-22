@@ -784,7 +784,7 @@ export default function Dashboard() {
                 <span className="text-[10px] tracking-[0.14em] font-bold text-[#7FB0D0]">EXECUTION GATE MONITOR</span>
                 <div className="flex items-center gap-2">
                   <span className={`text-[8px] px-2 h-4 rounded-full font-bold tracking-widest flex items-center ${storeRobustnessStage === 'VERIFIED' ? 'bg-[#22C55E]/20 text-[#22C55E] border border-[#22C55E]/30' : storeRobustnessStage === 'ROBUST' ? 'bg-[#22D3EE]/20 text-[#22D3EE] border border-[#22D3EE]/30' : storeRobustnessStage === 'QUARANTINED' ? 'bg-[#EF4444]/20 text-[#EF4444] border border-[#EF4444]/30' : storeRobustnessStage === 'DEGRADING' ? 'bg-[#F97316]/20 text-[#F97316] border border-[#F97316]/30' : 'bg-[#EAB308]/20 text-[#EAB308] border border-[#EAB308]/30'}`} style={MONO}>{storeRobustnessStage}</span>
-                  <span className="text-[9px] px-2 h-4 rounded-full bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30 flex items-center" style={MONO}>V18.1h</span>
+                  <span className="text-[9px] px-2 h-4 rounded-full bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30 flex items-center" style={MONO}>V24</span>
                 </div>
               </div>
               <div className="grid grid-cols-11 gap-1.5">
@@ -923,7 +923,7 @@ export default function Dashboard() {
                   <span className={`w-1.5 h-1.5 rounded-full shadow-[0_0_6px] ${isConnected ? "bg-[#22C55E] shadow-[#22C55E]" : "bg-[#5B6B86] shadow-[#5B6B86]"}`} />
                   CONNECTION <span className={isConnected ? "text-[#22C55E]" : "text-[#EF4444]"}>{isConnected ? "STABLE" : "OFFLINE"}</span>
                 </span>
-                <span>ENGINE <span className="text-[#60A5FA]">V18.1h</span></span>
+                <span>ENGINE <span className="text-[#60A5FA]">V24</span></span>
                 <span className="px-2 h-4 rounded-full bg-[#065F46]/60 text-[#60A5FA] border border-[#047857] flex items-center">
                   {isConnected ? "DATA FEED REAL-TIME" : "NO DATA FEED"}
                 </span>

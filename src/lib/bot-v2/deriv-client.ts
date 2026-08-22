@@ -1,11 +1,9 @@
 'use client';
 
-// === DerivClient v11 — Direct WS Auth (primary) + OTP proxy (fallback) ===
-// v11: Try standard WS { authorize: token } FIRST.
-// If that works (it should for PAT_ tokens with Trade scope),
-// we use ONE WebSocket for everything — ticks, balance, AND trading.
-// No server-side proxy needed. Works on Vercel.
-// Only falls back to OTP+proxy if direct auth fails.
+// === DerivClient v12 — Single-handler, robust trading ===
+// v12: Fixed duplicate handler bug. Single message handler.
+//     Proper forget_all after proposals. Enhanced logging.
+//     Direct WS auth (primary) + OTP proxy (fallback).
 
 import type { TickData, AuthResult, AccountInfo, ProposalResult, BuyResult } from './types';
 
@@ -30,7 +28,10 @@ export class DerivClient {
   private closeHandlers: (() => void)[] = [];
   private openPromise: Promise<AuthResult> | null = null;
   private destroyed = false;
-  private useProxy = false; // true = trading goes through server proxy
+  private useProxy = false;
+  private _authResolve: ((v: AuthResult) => void) | null = null;
+  private _authReject: ((e: Error) => void) | null = null;
+  private _authTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(appId: string) {
     this.appId = appId;
@@ -77,6 +78,7 @@ export class DerivClient {
   }
 
   // === Strategy 1: Direct WebSocket Auth ===
+  // v12 FIX: Single message handler instead of duplicate onmessage + addEventListener
 
   private _connectDirectWS(token: string): Promise<AuthResult> {
     return new Promise((resolve, reject) => {
@@ -89,7 +91,11 @@ export class DerivClient {
       }
       this.ws = ws;
 
-      const authTimer = setTimeout(() => {
+      this._authResolve = resolve;
+      this._authReject = reject;
+      this._authTimer = setTimeout(() => {
+        this._authResolve = null;
+        this._authReject = null;
         ws.close();
         reject(new Error('Direct WS auth timeout (10s)'));
       }, 10000);
@@ -99,6 +105,7 @@ export class DerivClient {
         ws.send(JSON.stringify({ authorize: token }));
       };
 
+      // v12: SINGLE message handler — no more duplicate processing
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
@@ -108,66 +115,16 @@ export class DerivClient {
         }
       };
 
-      // Handle authorize response
-      const origHandler = this._handleMessage.bind(this);
-      const authHandler = (event: MessageEvent) => {
-        try {
-          const data = JSON.parse(event.data);
-          
-          if (data.msg_type === 'authorize') {
-            ws.removeEventListener('message', authHandler);
-            clearTimeout(authTimer);
-            
-            if (data.error) {
-              console.error('[DerivClient] Direct auth FAILED:', data.error.message);
-              ws.close();
-              reject(new Error(`Direct auth failed: ${data.error.message}`));
-              return;
-            }
-
-            const auth = data.authorize;
-            const result: AuthResult = {
-              loginid: auth.loginid,
-              fullname: auth.fullname || '',
-              balance: parseFloat(auth.balance) || 0,
-              currency: auth.currency || 'USD',
-              isVirtual: auth.is_virtual,
-              scopes: auth.scopes || [],
-              accountList: auth.account_list?.map((a: any) => ({
-                loginid: a.loginid,
-                isVirtual: a.is_virtual,
-                currency: a.currency || 'USD',
-                balance: a.balance ? parseFloat(a.balance) : undefined,
-              })) || [],
-            };
-
-            this.authorized = true;
-            this.authResult = result;
-            console.log(`[DerivClient] Direct auth OK: ${result.loginid} $${result.balance.toFixed(2)} ${result.isVirtual ? 'DEMO' : 'REAL'}`);
-
-            // Subscribe to balance
-            try { ws.send(JSON.stringify({ balance: 1, subscribe: 1 })); } catch {}
-
-            resolve(result);
-            return;
-          }
-
-          // Route other messages through normal handler
-          this._handleMessage(data);
-        } catch (e) {
-          console.error('[DerivClient] Parse error', e);
-        }
-      };
-
-      ws.addEventListener('message', authHandler);
-
       ws.onclose = (event) => {
-        clearTimeout(authTimer);
+        console.log(`[DerivClient] WS closed code=${event.code} reason=${event.reason}`);
+        clearTimeout(this._authTimer!);
         const wasAuthed = this.authorized;
         this.authorized = false;
         this.authResult = null;
         this.openPromise = null;
         this.ws = null;
+        this._authResolve = null;
+        this._authReject = null;
         this.rejectAllPending('WebSocket closed');
         if (!wasAuthed) {
           reject(new Error(`WebSocket closed (code ${event.code})`));
@@ -176,8 +133,8 @@ export class DerivClient {
         }
       };
 
-      ws.onerror = () => {
-        // onclose will follow
+      ws.onerror = (err) => {
+        console.error('[DerivClient] WS error:', err);
       };
     });
   }
@@ -185,7 +142,6 @@ export class DerivClient {
   // === Strategy 2: OTP Flow (fallback) ===
 
   private async _connectViaOTP(token: string, preferredAccountId?: string): Promise<AuthResult> {
-    // Step 1: Get accounts via REST
     console.log('[DerivClient] OTP Step 1: Fetching accounts...');
     const accRes = await fetch('/api/deriv-auth?action=accounts', {
       headers: {
@@ -213,7 +169,6 @@ export class DerivClient {
 
     console.log(`[DerivClient] Found ${allAccounts.length} account(s). Using: ${firstAccount.account_id}`);
 
-    // Step 2: Get OTP WebSocket URL
     console.log('[DerivClient] OTP Step 2: Getting OTP WebSocket URL...');
     const otpRes = await fetch('/api/deriv-auth', {
       method: 'POST',
@@ -252,11 +207,9 @@ export class DerivClient {
       })),
     };
 
-    // Step 3: Connect OTP WebSocket for DATA only
     console.log('[DerivClient] OTP Step 3: Connecting OTP WS (data only)...');
     await this._connectOTPWS(otpData.data.url, authResult);
 
-    // Step 4: Warm-up test server proxy
     this.useProxy = true;
     console.log('[DerivClient] OTP Step 4: Testing server proxy...');
     try {
@@ -314,14 +267,57 @@ export class DerivClient {
   }
 
   // === Message Handling ===
+  // v12: Auth response handled here too — single entry point
 
   private _handleMessage(data: any) {
+    // 1. Handle authorize response
+    if (data.msg_type === 'authorize' && this._authResolve) {
+      clearTimeout(this._authTimer!);
+      const resolveAuth = this._authResolve;
+      const rejectAuth = this._authReject;
+      this._authResolve = null;
+      this._authReject = null;
+
+      if (data.error) {
+        console.error('[DerivClient] Auth FAILED:', data.error.message, 'code:', data.error.code);
+        rejectAuth?.(new Error(`Auth failed: ${data.error.message} (code: ${data.error.code})`));
+        return;
+      }
+
+      const auth = data.authorize;
+      const result: AuthResult = {
+        loginid: auth.loginid,
+        fullname: auth.fullname || '',
+        balance: parseFloat(auth.balance) || 0,
+        currency: auth.currency || 'USD',
+        isVirtual: auth.is_virtual,
+        scopes: auth.scopes || [],
+        accountList: auth.account_list?.map((a: any) => ({
+          loginid: a.loginid,
+          isVirtual: a.is_virtual,
+          currency: a.currency || 'USD',
+          balance: a.balance ? parseFloat(a.balance) : undefined,
+        })) || [],
+      };
+
+      this.authorized = true;
+      this.authResult = result;
+      console.log(`[DerivClient] Auth OK: ${result.loginid} $${result.balance.toFixed(2)} ${result.isVirtual ? 'DEMO' : 'REAL'} scopes=[${result.scopes.join(',')}]`);
+
+      // Subscribe to balance updates
+      try { this.ws?.send(JSON.stringify({ balance: 1, subscribe: 1 })); } catch {}
+
+      resolveAuth?.(result);
+      return;
+    }
+
+    // 2. Handle pending request responses (proposal, buy, etc.)
     if (data.req_id !== undefined && this.pending.has(data.req_id)) {
       const p = this.pending.get(data.req_id)!;
       this.pending.delete(data.req_id);
       clearTimeout(p.timer);
       if (data.error) {
-        console.error('[DerivClient] API ERROR:', JSON.stringify(data.error));
+        console.error('[DerivClient] API ERROR req_id=' + data.req_id + ':', JSON.stringify(data.error));
         p.reject(new Error(data.error.message || 'API error'));
       } else {
         console.log(`[DerivClient] API OK req_id=${data.req_id} msg_type=${data.msg_type}`);
@@ -330,24 +326,30 @@ export class DerivClient {
       return;
     }
 
+    // 3. Handle tick streams
     if (data.msg_type === 'tick' && data.tick) {
       const handlers = this.tickHandlers.get(data.tick.symbol);
       if (handlers) {
         const priceStr = data.tick.quote.toString();
         const lastDigit = parseInt(priceStr[priceStr.length - 1], 10);
-        handlers.forEach(h => h({
+        const tick: TickData = {
           symbol: data.tick.symbol,
           price: parseFloat(data.tick.quote),
           digit: lastDigit,
           epoch: data.tick.epoch,
           timestamp: Date.now(),
-        }));
+        };
+        handlers.forEach(h => h(tick));
       }
+      return;
     }
 
+    // 4. Handle balance updates
     if (data.msg_type === 'balance' && data.balance) {
       const bal = parseFloat(data.balance.balance);
+      if (this.authResult) this.authResult.balance = bal;
       this.balanceHandlers.forEach(h => h({ balance: bal, loginid: data.balance.loginid }));
+      return;
     }
   }
 
@@ -404,6 +406,20 @@ export class DerivClient {
     return this._wsBuy(proposalId, askPrice);
   }
 
+  // v12: Forget all open proposals to prevent stream buildup
+  async forgetAllProposals(): Promise<void> {
+    if (this.useProxy) {
+      await this._serverProxyForget();
+    } else if (this.ws?.readyState === WebSocket.OPEN) {
+      try {
+        this.ws.send(JSON.stringify({ forget_all: 'proposals' }));
+        console.log('[DerivClient] Sent forget_all proposals');
+      } catch (e) {
+        console.warn('[DerivClient] forget_all failed:', (e as Error).message);
+      }
+    }
+  }
+
   // --- Direct WS Trading ---
 
   private async _wsProposal(params: {
@@ -419,21 +435,24 @@ export class DerivClient {
     };
     if (params.barrier !== undefined) payload.barrier = params.barrier.toString();
 
-    console.log('[DerivClient] WS proposal:', params.contractType, params.symbol, 'barrier=' + params.barrier, '$' + params.stake);
+    console.log(`[DerivClient] WS proposal: ${params.contractType} ${params.symbol} barrier=${params.barrier ?? '-'} $${params.stake} dur=${params.duration}${params.durationUnit}`);
     const data = await this._sendRequest(payload, 8000);
     if (!data.proposal) throw new Error(data.error?.message || 'No proposal in response');
-    console.log('[DerivClient] WS proposal OK: ask=$' + parseFloat(data.proposal.ask_price).toFixed(2) + ' payout=$' + parseFloat(data.proposal.payout).toFixed(2));
-    return { id: data.proposal.id, askPrice: parseFloat(data.proposal.ask_price) || 0, payout: parseFloat(data.proposal.payout) || 0 };
+    const askPrice = parseFloat(data.proposal.ask_price) || 0;
+    const payout = parseFloat(data.proposal.payout) || 0;
+    console.log(`[DerivClient] WS proposal OK: id=${data.proposal.id} ask=$${askPrice.toFixed(2)} payout=$${payout.toFixed(2)}`);
+    return { id: data.proposal.id, askPrice, payout };
   }
 
   private async _wsBuy(proposalId: string, askPrice: number): Promise<BuyResult> {
     this.ensureConnected();
+    console.log(`[DerivClient] WS buy: proposal=${proposalId.slice(0, 20)}... price=$${askPrice.toFixed(2)}`);
     const data = await this._sendRequest({ buy: proposalId, price: askPrice }, 15000);
     if (!data.buy) throw new Error(data.error?.message || 'Buy failed');
     const buyPrice = parseFloat(data.buy.buy_price) || 0;
     const payout = parseFloat(data.buy.payout) || 0;
-    const profit = payout - buyPrice;
-    console.log('[DerivClient] WS buy OK: contract=' + (data.buy.contract_id || '?') + ' profit=$' + profit.toFixed(2));
+    const profit = parseFloat(data.buy.profit) || (payout - buyPrice);
+    console.log(`[DerivClient] WS buy OK: contract=${data.buy.contract_id} buyPrice=$${buyPrice.toFixed(2)} payout=$${payout.toFixed(2)} profit=$${profit.toFixed(2)}`);
     return { contractId: data.buy.contract_id?.toString() || '', buyPrice, payout, profit, balanceAfter: parseFloat(data.buy.balance_after) || 0 };
   }
 
@@ -451,32 +470,34 @@ export class DerivClient {
     if (params.duration !== undefined) body.duration = params.duration;
     if (params.durationUnit) body.durationUnit = params.durationUnit;
 
-    console.log('[DerivClient] PROXY proposal:', params.contractType, params.symbol, 'barrier=' + params.barrier, '$' + params.stake);
+    console.log(`[DerivClient] PROXY proposal: ${params.contractType} ${params.symbol} barrier=${params.barrier ?? '-'} $${params.stake}`);
     const res = await fetch('/api/deriv-trade', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body), signal: AbortSignal.timeout(10000),
     });
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message || data.error || 'Proxy proposal failed');
-    if (!data.proposal) throw new Error(data.error?.message || 'No proposal in proxy response');
-    console.log('[DerivClient] PROXY proposal OK: ask=$' + parseFloat(data.proposal.ask_price).toFixed(2));
-    return { id: data.proposal.id, askPrice: parseFloat(data.proposal.ask_price) || 0, payout: parseFloat(data.proposal.payout) || 0 };
+    if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message || 'Proxy proposal failed');
+    if (!data.proposal) throw new Error('No proposal in proxy response');
+    const askPrice = parseFloat(data.proposal.ask_price) || 0;
+    const payout = parseFloat(data.proposal.payout) || 0;
+    console.log(`[DerivClient] PROXY proposal OK: id=${data.proposal.id} ask=$${askPrice.toFixed(2)} payout=$${payout.toFixed(2)}`);
+    return { id: data.proposal.id, askPrice, payout };
   }
 
   private async _serverProxyBuy(proposalId: string, askPrice: number): Promise<BuyResult> {
     const body = { action: 'buy', token: this.token, appId: this.appId, proposalId, askPrice };
-    console.log('[DerivClient] PROXY buy:', proposalId.slice(0, 16));
+    console.log(`[DerivClient] PROXY buy: ${proposalId.slice(0, 20)}...`);
     const res = await fetch('/api/deriv-trade', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body), signal: AbortSignal.timeout(15000),
     });
     const data = await res.json();
-    if (data.error) throw new Error(data.error.message || data.error || 'Proxy buy failed');
-    if (!data.buy) throw new Error(data.error?.message || 'No buy in proxy response');
+    if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message || 'Proxy buy failed');
+    if (!data.buy) throw new Error('No buy in proxy response');
     const buyPrice = parseFloat(data.buy.buy_price) || 0;
     const payout = parseFloat(data.buy.payout) || 0;
-    const profit = payout - buyPrice;
-    console.log('[DerivClient] PROXY buy OK: contract=' + (data.buy.contract_id || '?') + ' profit=$' + profit.toFixed(2));
+    const profit = parseFloat(data.buy.profit) || (payout - buyPrice);
+    console.log(`[DerivClient] PROXY buy OK: contract=${data.buy.contract_id} profit=$${profit.toFixed(2)}`);
     return { contractId: data.buy.contract_id?.toString() || '', buyPrice, payout, profit, balanceAfter: parseFloat(data.buy.balance_after) || 0 };
   }
 
@@ -507,9 +528,11 @@ export class DerivClient {
     return new Promise((resolve, reject) => {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) { reject(new Error('WebSocket not connected')); return; }
       const reqId = ++this.reqId;
-      const timer = setTimeout(() => { this.pending.delete(reqId); reject(new Error('Request timed out')); }, timeoutMs);
+      const timer = setTimeout(() => { this.pending.delete(reqId); reject(new Error('Request timed out (' + timeoutMs + 'ms)')); }, timeoutMs);
       this.pending.set(reqId, { resolve, reject, timer });
-      this.ws.send(JSON.stringify({ ...msg, req_id: reqId }));
+      const payload = { ...msg, req_id: reqId };
+      console.log(`[DerivClient] >> Sending req_id=${reqId} msg_type=${(msg as any).proposal !== undefined ? 'proposal' : (msg as any).buy !== undefined ? 'buy' : 'other'}`);
+      this.ws.send(JSON.stringify(payload));
     });
   }
 
@@ -521,6 +544,9 @@ export class DerivClient {
     this.authorized = false;
     this.authResult = null;
     this.openPromise = null;
+    this._authResolve = null;
+    this._authReject = null;
+    clearTimeout(this._authTimer!);
     this.rejectAllPending('Client destroyed');
     this.tickHandlers.clear();
     this.balanceHandlers = [];
@@ -555,7 +581,7 @@ export class MultiMarketClient {
     this.token = token;
     const primary = this.getOrCreateClient('primary');
     this.authResult = await primary.connect(token, accountId);
-    this._onLog(`Connected: ${this.authResult.loginid} | ${this.authResult.isVirtual ? 'DEMO' : 'REAL'} | $${this.authResult.balance.toFixed(2)} | ${primary.connectionType}`);
+    this._onLog(`Connected: ${this.authResult.loginid} | ${this.authResult.isVirtual ? 'DEMO' : 'REAL'} | $${this.authResult.balance.toFixed(2)} | ${primary.connectionType} | scopes=[${this.authResult.scopes.join(',')}]`);
     return this.authResult;
   }
 
@@ -583,6 +609,12 @@ export class MultiMarketClient {
     const primary = this.clients.get('primary');
     if (!primary) throw new Error('Not connected');
     return primary.buyContract(proposalId, askPrice);
+  }
+
+  async forgetAllProposals(): Promise<void> {
+    const primary = this.clients.get('primary');
+    if (!primary) return;
+    return primary.forgetAllProposals();
   }
 
   onBalance(handler: (data: { balance: number; loginid: string }) => void): () => void {
