@@ -1,9 +1,12 @@
 'use client';
 
-// === DerivClient v12 — Single-handler, robust trading ===
-// v12: Fixed duplicate handler bug. Single message handler.
-//     Proper forget_all after proposals. Enhanced logging.
-//     Direct WS auth (primary) + OTP proxy (fallback).
+// === DerivClient v13 — FIXED: get_price instead of proposal stream ===
+// v13 ROOT CAUSE FIX: proposal:1 creates a STREAM (not one-shot).
+//     The initial stream msg may not carry req_id, so _sendRequest
+//     times out at 8s and the trade never fires.
+//     Fix: use get_price:1 (explicit single-shot) + subscribe:0.
+//     Also handle both 'pricing' and 'proposal' response fields.
+//     Added catch-all logging for unhandled WS messages.
 
 import type { TickData, AuthResult, AccountInfo, ProposalResult, BuyResult } from './types';
 
@@ -58,7 +61,7 @@ export class DerivClient {
     console.log('[DerivClient] Strategy 1: Direct WebSocket authorization...');
     try {
       const result = await this._connectDirectWS(token);
-      console.log('[DerivClient] Direct WS auth SUCCESS — single socket for everything');
+      console.log('[DerivClient] Direct WS auth SUCCESS');
       this.useProxy = false;
       return result;
     } catch (err) {
@@ -78,7 +81,6 @@ export class DerivClient {
   }
 
   // === Strategy 1: Direct WebSocket Auth ===
-  // v12 FIX: Single message handler instead of duplicate onmessage + addEventListener
 
   private _connectDirectWS(token: string): Promise<AuthResult> {
     return new Promise((resolve, reject) => {
@@ -101,11 +103,11 @@ export class DerivClient {
       }, 10000);
 
       ws.onopen = () => {
-        console.log('[DerivClient] WS open, sending { authorize }...');
+        console.log('[DerivClient] WS open, sending authorize...');
         ws.send(JSON.stringify({ authorize: token }));
       };
 
-      // v12: SINGLE message handler — no more duplicate processing
+      // SINGLE message handler
       ws.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
@@ -267,9 +269,14 @@ export class DerivClient {
   }
 
   // === Message Handling ===
-  // v12: Auth response handled here too — single entry point
 
   private _handleMessage(data: any) {
+    // v13: Log ALL messages for debugging (first 200 chars)
+    if (data.msg_type !== 'tick') {
+      console.log(`[DerivClient] << msg_type=${data.msg_type} req_id=${data.req_id ?? '-'} has_error=${!!data.error}`,
+        JSON.stringify(data).slice(0, 300));
+    }
+
     // 1. Handle authorize response
     if (data.msg_type === 'authorize' && this._authResolve) {
       clearTimeout(this._authTimer!);
@@ -311,13 +318,13 @@ export class DerivClient {
       return;
     }
 
-    // 2. Handle pending request responses (proposal, buy, etc.)
+    // 2. Handle pending request responses (get_price, buy, etc.)
     if (data.req_id !== undefined && this.pending.has(data.req_id)) {
       const p = this.pending.get(data.req_id)!;
       this.pending.delete(data.req_id);
       clearTimeout(p.timer);
       if (data.error) {
-        console.error('[DerivClient] API ERROR req_id=' + data.req_id + ':', JSON.stringify(data.error));
+        console.error(`[DerivClient] API ERROR req_id=${data.req_id}:`, JSON.stringify(data.error));
         p.reject(new Error(data.error.message || 'API error'));
       } else {
         console.log(`[DerivClient] API OK req_id=${data.req_id} msg_type=${data.msg_type}`);
@@ -350,6 +357,14 @@ export class DerivClient {
       if (this.authResult) this.authResult.balance = bal;
       this.balanceHandlers.forEach(h => h({ balance: bal, loginid: data.balance.loginid }));
       return;
+    }
+
+    // 5. v13: Log unhandled messages (helps debug streaming issues)
+    if (data.msg_type === 'proposal' || data.msg_type === 'price') {
+      // These should have been caught by req_id handler above.
+      // If we get here, it means a stream update came without req_id.
+      console.warn(`[DerivClient] Unhandled ${data.msg_type} stream update (no req_id match)`,
+        JSON.stringify(data).slice(0, 200));
     }
   }
 
@@ -406,14 +421,14 @@ export class DerivClient {
     return this._wsBuy(proposalId, askPrice);
   }
 
-  // v12: Forget all open proposals to prevent stream buildup
   async forgetAllProposals(): Promise<void> {
     if (this.useProxy) {
       await this._serverProxyForget();
     } else if (this.ws?.readyState === WebSocket.OPEN) {
       try {
-        this.ws.send(JSON.stringify({ forget_all: 'proposals' }));
-        console.log('[DerivClient] Sent forget_all proposals');
+        // Send forget_all and wait for acknowledgment
+        await this._sendRequest({ forget_all: 'proposals' }, 3000);
+        console.log('[DerivClient] forget_all proposals OK');
       } catch (e) {
         console.warn('[DerivClient] forget_all failed:', (e as Error).message);
       }
@@ -421,39 +436,64 @@ export class DerivClient {
   }
 
   // --- Direct WS Trading ---
+  // v13 CRITICAL FIX: Use get_price:1 (single-shot) instead of proposal:1 (stream)
 
   private async _wsProposal(params: {
     contractType: string; symbol: string; stake: number;
     barrier?: number; duration?: number; durationUnit?: string;
   }): Promise<ProposalResult> {
     this.ensureConnected();
+
+    // v13: Use get_price:1 for single-shot proposal (no stream)
+    // Also explicitly set subscribe:0 to prevent any streaming behavior
     const payload: Record<string, unknown> = {
-      proposal: 1, amount: params.stake, basis: 'stake',
-      contract_type: params.contractType, symbol: params.symbol,
-      duration: params.duration || 1, duration_unit: params.durationUnit || 't',
+      get_price: 1,
+      amount: params.stake,
+      basis: 'stake',
+      contract_type: params.contractType,
+      symbol: params.symbol,
+      duration: params.duration || 1,
+      duration_unit: params.durationUnit || 't',
       currency: 'USD',
+      subscribe: 0,
     };
     if (params.barrier !== undefined) payload.barrier = params.barrier.toString();
 
-    console.log(`[DerivClient] WS proposal: ${params.contractType} ${params.symbol} barrier=${params.barrier ?? '-'} $${params.stake} dur=${params.duration}${params.durationUnit}`);
-    const data = await this._sendRequest(payload, 8000);
-    if (!data.proposal) throw new Error(data.error?.message || 'No proposal in response');
-    const askPrice = parseFloat(data.proposal.ask_price) || 0;
-    const payout = parseFloat(data.proposal.payout) || 0;
-    console.log(`[DerivClient] WS proposal OK: id=${data.proposal.id} ask=$${askPrice.toFixed(2)} payout=$${payout.toFixed(2)}`);
-    return { id: data.proposal.id, askPrice, payout };
+    console.log(`[DerivClient] WS get_price: ${params.contractType} ${params.symbol} barrier=${params.barrier ?? '-'} $${params.stake} dur=${params.duration}${params.durationUnit}`);
+    const data = await this._sendRequest(payload, 10000);
+
+    // v13: Handle both 'pricing' (from get_price) and 'proposal' (fallback) response fields
+    const priceData = data.pricing || data.proposal;
+    if (!priceData) {
+      const errMsg = data.error?.message || `No pricing/proposal in response. msg_type=${data.msg_type}`;
+      console.error('[DerivClient] get_price FAILED:', errMsg, JSON.stringify(data).slice(0, 300));
+      throw new Error(errMsg);
+    }
+
+    const askPrice = parseFloat(priceData.ask_price) || 0;
+    const payout = parseFloat(priceData.payout) || 0;
+    console.log(`[DerivClient] get_price OK: id=${priceData.id} ask=$${askPrice.toFixed(2)} payout=$${payout.toFixed(2)}`);
+    return { id: priceData.id, askPrice, payout };
   }
 
   private async _wsBuy(proposalId: string, askPrice: number): Promise<BuyResult> {
     this.ensureConnected();
     console.log(`[DerivClient] WS buy: proposal=${proposalId.slice(0, 20)}... price=$${askPrice.toFixed(2)}`);
     const data = await this._sendRequest({ buy: proposalId, price: askPrice }, 15000);
-    if (!data.buy) throw new Error(data.error?.message || 'Buy failed');
+    if (!data.buy) {
+      const errMsg = data.error?.message || 'Buy failed: no buy data in response';
+      console.error('[DerivClient] buy FAILED:', errMsg, JSON.stringify(data).slice(0, 300));
+      throw new Error(errMsg);
+    }
     const buyPrice = parseFloat(data.buy.buy_price) || 0;
     const payout = parseFloat(data.buy.payout) || 0;
     const profit = parseFloat(data.buy.profit) || (payout - buyPrice);
-    console.log(`[DerivClient] WS buy OK: contract=${data.buy.contract_id} buyPrice=$${buyPrice.toFixed(2)} payout=$${payout.toFixed(2)} profit=$${profit.toFixed(2)}`);
-    return { contractId: data.buy.contract_id?.toString() || '', buyPrice, payout, profit, balanceAfter: parseFloat(data.buy.balance_after) || 0 };
+    console.log(`[DerivClient] buy OK: contract=${data.buy.contract_id} buyPrice=$${buyPrice.toFixed(2)} payout=$${payout.toFixed(2)} profit=$${profit.toFixed(2)}`);
+    return {
+      contractId: data.buy.contract_id?.toString() || '',
+      buyPrice, payout, profit,
+      balanceAfter: parseFloat(data.buy.balance_after) || 0
+    };
   }
 
   // --- Server Proxy Trading (fallback) ---
@@ -476,12 +516,14 @@ export class DerivClient {
       body: JSON.stringify(body), signal: AbortSignal.timeout(10000),
     });
     const data = await res.json();
+    // v13: Handle both pricing and proposal from proxy too
+    const priceData = data.pricing || data.proposal;
     if (data.error) throw new Error(typeof data.error === 'string' ? data.error : data.error.message || 'Proxy proposal failed');
-    if (!data.proposal) throw new Error('No proposal in proxy response');
-    const askPrice = parseFloat(data.proposal.ask_price) || 0;
-    const payout = parseFloat(data.proposal.payout) || 0;
-    console.log(`[DerivClient] PROXY proposal OK: id=${data.proposal.id} ask=$${askPrice.toFixed(2)} payout=$${payout.toFixed(2)}`);
-    return { id: data.proposal.id, askPrice, payout };
+    if (!priceData) throw new Error('No pricing/proposal in proxy response');
+    const askPrice = parseFloat(priceData.ask_price) || 0;
+    const payout = parseFloat(priceData.payout) || 0;
+    console.log(`[DerivClient] PROXY proposal OK: id=${priceData.id} ask=$${askPrice.toFixed(2)} payout=$${payout.toFixed(2)}`);
+    return { id: priceData.id, askPrice, payout };
   }
 
   private async _serverProxyBuy(proposalId: string, askPrice: number): Promise<BuyResult> {
@@ -528,10 +570,14 @@ export class DerivClient {
     return new Promise((resolve, reject) => {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) { reject(new Error('WebSocket not connected')); return; }
       const reqId = ++this.reqId;
-      const timer = setTimeout(() => { this.pending.delete(reqId); reject(new Error('Request timed out (' + timeoutMs + 'ms)')); }, timeoutMs);
+      const timer = setTimeout(() => {
+        this.pending.delete(reqId);
+        reject(new Error('Request timed out (' + timeoutMs + 'ms)'));
+      }, timeoutMs);
       this.pending.set(reqId, { resolve, reject, timer });
       const payload = { ...msg, req_id: reqId };
-      console.log(`[DerivClient] >> Sending req_id=${reqId} msg_type=${(msg as any).proposal !== undefined ? 'proposal' : (msg as any).buy !== undefined ? 'buy' : 'other'}`);
+      const msgType = (msg as any).get_price !== undefined ? 'get_price' : (msg as any).buy !== undefined ? 'buy' : (msg as any).forget_all !== undefined ? 'forget_all' : 'other';
+      console.log(`[DerivClient] >> req_id=${reqId} type=${msgType} ${JSON.stringify(msg).slice(0, 200)}`);
       this.ws.send(JSON.stringify(payload));
     });
   }

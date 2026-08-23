@@ -176,6 +176,12 @@ export function getBot(): DerivBot {
   return botInstance;
 }
 
+// v25: Expose testTrade for debugging
+export async function testTrade(): Promise<string> {
+  const bot = getBot();
+  return bot.testTrade();
+}
+
 export function destroyBot(): void {
   if (botInstance) {
     botInstance.destroy();

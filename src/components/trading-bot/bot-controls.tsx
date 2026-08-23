@@ -1,6 +1,7 @@
 'use client';
 
-import { useBotStore, getBot, destroyBot } from '@/lib/bot-v2/store';
+import { useBotStore, getBot, destroyBot, testTrade } from '@/lib/bot-v2/store';
+import { useState } from 'react';
 import { STRATEGIES } from '@/lib/bot-v2/strategies';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -65,7 +66,7 @@ export function BotControls() {
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2 text-base">
             <Zap className="h-4 w-4" />
-            LUCAS v24
+            LUCAS v25
           </span>
           <Badge variant="outline" className="text-xs font-mono">
             <span className={`inline-block h-2 w-2 rounded-full mr-1.5 ${phaseColors[phase] || 'bg-gray-500'}`} />
@@ -114,6 +115,11 @@ export function BotControls() {
             <RotateCcw className="h-4 w-4" />
           </Button>
         </div>
+
+        {/* v25: Test Trade button — proves the trading pipeline works */}
+        {connected && !running && (
+          <TestTradeButton />
+        )}
 
         {/* Stats summary */}
         {stats && (
@@ -184,6 +190,49 @@ function StatBox({ label, value, color }: { label: string; value: string; color?
     <div className="rounded-md bg-muted/50 p-2 text-center">
       <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</div>
       <div className={`text-sm font-bold font-mono ${color || ''}`}>{value}</div>
+    </div>
+  );
+}
+
+// v25: Test Trade button — fires a single $0.35 DIGITEVEN trade to verify the pipeline
+function TestTradeButton() {
+  const [status, setStatus] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+
+  const handleTest = async () => {
+    setLoading(true);
+    setStatus('Sending test trade...');
+    try {
+      const result = await testTrade();
+      setStatus(result);
+    } catch (err) {
+      setStatus(`Error: ${(err as Error).message}`);
+    } finally {
+      setLoading(false);
+      setTimeout(() => setStatus(''), 10000);
+    }
+  };
+
+  return (
+    <div className="space-y-1.5">
+      <Button
+        onClick={handleTest}
+        disabled={loading}
+        variant="outline"
+        className="w-full text-xs border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+        size="sm"
+      >
+        {loading ? 'Trading...' : 'Test Trade ($0.35 DIGITEVEN)'}
+      </Button>
+      {status && (
+        <p className={`text-[10px] font-mono p-1.5 rounded ${
+          status.startsWith('SUCCESS') ? 'bg-emerald-500/10 text-emerald-400' :
+          status.startsWith('FAILED') || status.startsWith('ERROR') ? 'bg-red-500/10 text-red-400' :
+          'bg-muted text-muted-foreground'
+        }`}>
+          {status}
+        </p>
+      )}
     </div>
   );
 }

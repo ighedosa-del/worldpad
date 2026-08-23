@@ -158,19 +158,21 @@ export async function POST(req: NextRequest) {
     if (!conn) return NextResponse.json({ error: 'Connection lost' }, { status: 500 });
 
     if (action === 'proposal') {
+      // v13: Use get_price:1 (single-shot) instead of proposal:1 (stream)
       const msg: Record<string, unknown> = {
-        proposal: 1,
+        get_price: 1,
         amount: params.stake,
         basis: 'stake',
         contract_type: params.contractType,
         symbol: params.symbol,
         currency: 'USD',
+        subscribe: 0,
       };
       if (params.duration !== undefined) msg.duration = params.duration;
       if (params.durationUnit) msg.duration_unit = params.durationUnit;
       if (params.barrier !== undefined) msg.barrier = params.barrier.toString();
 
-      console.log('[deriv-trade] Proposal:', params.contractType, params.symbol, 'barrier=' + params.barrier, '$' + params.stake);
+      console.log('[deriv-trade] get_price:', params.contractType, params.symbol, 'barrier=' + params.barrier, '$' + params.stake);
       const result = await sendAndWait(ws, conn, msg, 10000);
       return NextResponse.json(result);
     }

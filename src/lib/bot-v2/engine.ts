@@ -1,9 +1,10 @@
 'use client';
 
-// === LUCAS Engine v24 — Fixed Trading Execution ===
-// v24: Fixed trade execution. forget_all after proposals.
-//      Enhanced logging. Randomized cycle 1-4s. D'Alembert +$0.40/step.
-//      Better error handling and connection checks.
+// === LUCAS Engine v25 — ROOT CAUSE FIX: get_price instead of proposal stream ===
+// v25: The core bug was in deriv-client.ts using proposal:1 (creates a stream)
+//     instead of get_price:1 (single-shot). The stream response may not carry
+//     req_id, causing the pending request to time out silently.
+//     Also: randomized 1-4s cycle, verbose logging, testTrade method.
 
 import { MultiMarketClient } from './deriv-client';
 import type { TickData, AuthResult } from './types';
@@ -81,7 +82,7 @@ export class DerivBot {
   private config: BotConfig;
   private markets: Map<string, MarketState>;
   private running = false;
-  private cycleTimer: ReturnType<typeof setInterval> | null = null;
+  private cycleTimer: ReturnType<typeof setTimeout> | null = null;
   private dAlembertStep = 0;
   private currentStake: number;
   private sessionProfit = 0;
@@ -100,6 +101,7 @@ export class DerivBot {
   private currentBalance = 0;
   private isTrading = false;
   private activeStrategyId = 'even-odd-alt';
+  private firstSignalLogged = false;
 
   // Gate tracking
   private lastProposalOk = false;
@@ -169,7 +171,7 @@ export class DerivBot {
       this.phase = 'idle';
       this.storeUpdate({ connected: true, auth, balance: auth.balance, isVirtual: auth.isVirtual, accountList: auth.accountList });
       const stratName = STRATEGIES.find(s => s.id === this.activeStrategyId)?.name || this.activeStrategyId;
-      this.log(`LUCAS v24 ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Strategy: ${stratName}.`);
+      this.log(`LUCAS v25 ready. ${auth.isVirtual ? 'DEMO' : 'REAL'} $${auth.balance.toFixed(2)}. Strategy: ${stratName}.`);
       this._pushGates();
       return auth;
     } catch (err) {
@@ -196,7 +198,6 @@ export class DerivBot {
   start(): void {
     if (this.running) { this.log('LUCAS is already running!'); return; }
 
-    // v24: Check connection before starting
     if (!this.client.isConnected) {
       this.log('ERROR: Cannot start — not connected to Deriv. Please reconnect.');
       this.storeUpdate({ connected: false });
@@ -213,11 +214,12 @@ export class DerivBot {
     this.lastTradeExecuted = false;
     this.lastTradeError = null;
     this.isTrading = false;
+    this.firstSignalLogged = false;
 
     const strat = STRATEGIES.find(s => s.id === this.activeStrategyId);
     const stratName = strat?.name || this.activeStrategyId;
     resetBarrierIndex(this.activeStrategyId);
-    this.log(`LUCAS v24 STARTED. ${stratName} on 1HZ100V. Stake: $${this.config.stake.toFixed(2)} | TP: $${this.config.takeProfit} | SL: $${this.config.stopLoss}`);
+    this.log(`LUCAS v25 STARTED. ${stratName} on 1HZ100V. Stake: $${this.config.stake.toFixed(2)} | TP: $${this.config.takeProfit} | SL: $${this.config.stopLoss}`);
     this.storeUpdate({ running: true });
 
     this.markets = createMarketStates();
@@ -228,17 +230,25 @@ export class DerivBot {
     this.losses = 0;
     this.phase = 'collecting';
 
-    // v24: Randomized cycle interval 1-4 seconds for natural trading
-    const baseInterval = this.config.cycleIntervalMs;
-    this.cycleTimer = setInterval(() => {
-      this.runCycle();
-    }, baseInterval);
+    // v25: Use recursive setTimeout for randomized 1-4s intervals
+    this.scheduleNextCycle();
     this._pushGates();
+  }
+
+  private scheduleNextCycle(): void {
+    if (!this.running) return;
+    // Random interval between 1000ms and 4000ms
+    const delay = 1000 + Math.random() * 3000;
+    this.cycleTimer = setTimeout(() => {
+      this.runCycle().finally(() => {
+        if (this.running) this.scheduleNextCycle();
+      });
+    }, delay);
   }
 
   stop(): void {
     this.running = false;
-    if (this.cycleTimer) { clearInterval(this.cycleTimer); this.cycleTimer = null; }
+    if (this.cycleTimer) { clearTimeout(this.cycleTimer); this.cycleTimer = null; }
     this.phase = 'stopped';
     this.storeUpdate({ running: false });
     this.log(`LUCAS STOPPED. ${this.totalTrades} trades, P/L: $${this.sessionProfit.toFixed(2)}`);
@@ -251,7 +261,7 @@ export class DerivBot {
     if (!this.running || this.isTrading) return;
     this.cycles++;
 
-    // v24: Connection health check
+    // v25: Connection health check
     if (!this.client.isConnected) {
       this.log('WARNING: WebSocket disconnected during cycle. Waiting for reconnect...');
       this.storeUpdate({ connected: false });
@@ -267,13 +277,13 @@ export class DerivBot {
       }
     }
     if (!allReady) {
-      if (this.cycles % 5 === 0) {
+      if (this.cycles % 3 === 0) {
         const tm = TRADE_MARKETS.map(m => {
           const s = this.markets.get(m.symbol);
           return `${m.symbol}:${s?.totalTicks ?? 0}`;
         }).join(' ');
         this.phase = 'collecting';
-        this.log(`Collecting ticks... ${tm}`);
+        this.log(`Waiting for ticks... ${tm} (need ${this.config.minTicksBeforeTrade})`);
       }
       this._pushGates();
       return;
@@ -301,11 +311,17 @@ export class DerivBot {
     const signal = runStrategy(state, this.activeStrategyId);
     if (!signal) {
       if (this.cycles % 10 === 0) {
-        this.log('No signal (consecutive loss limit or insufficient data)');
+        this.log('No signal (10+ consecutive losses or insufficient data)');
       }
       this._pushGates();
       this.pushStatsToStore();
       return;
+    }
+
+    // v25: Log the first signal prominently
+    if (!this.firstSignalLogged) {
+      this.log(`*** FIRST SIGNAL RECEIVED: ${signal.contractType} | Bot is about to trade! ***`);
+      this.firstSignalLogged = true;
     }
 
     this.log(`Signal: ${signal.contractType} ${signal.barrier !== undefined ? 'd' + signal.barrier : ''} | ${signal.reason}`);
@@ -354,6 +370,7 @@ export class DerivBot {
     try {
       const proposalStart = Date.now();
 
+      this.log(`Requesting get_price for ${signal.contractType}...`);
       const proposal = await this.client.getProposal({
         contractType: signal.contractType,
         symbol: state.symbol,
@@ -366,10 +383,12 @@ export class DerivBot {
       const proposalLatency = Date.now() - proposalStart;
       this.lastProposalLatencyMs = proposalLatency;
       this.lastProposalOk = true;
+      this.lastProposalError = null;
       proposalId = proposal.id;
       askPrice = proposal.askPrice;
-      this.log(`Proposal OK (${proposalLatency}ms): ask=$${askPrice.toFixed(2)} payout=$${proposal.payout.toFixed(2)}`);
+      this.log(`Price received (${proposalLatency}ms): id=${proposalId.slice(0, 12)}... ask=$${askPrice.toFixed(2)} payout=$${proposal.payout.toFixed(2)}`);
 
+      this.log(`Buying contract...`);
       const buyResult = await this.client.buyContract(proposalId, askPrice);
       const won = buyResult.profit > 0;
       const profit = buyResult.profit;
@@ -400,12 +419,47 @@ export class DerivBot {
       this.lastProposalError = errMsg;
       this.lastTradeError = errMsg;
       this.lastProposalOk = false;
-      this.log(`TRADE FAILED: ${errMsg}`);
+      this.log(`*** TRADE FAILED: ${errMsg} ***`);
     } finally {
-      // v24: Clean up any open proposal streams
+      // v25: Clean up any open proposal streams
       try {
         await this.client.forgetAllProposals();
       } catch {}
+    }
+  }
+
+  // v25: Test trade method — bypasses strategy, fires a single DIGITEVEN $0.35 trade
+  // This is for debugging: proves the WS trading pipeline works end-to-end
+  async testTrade(): Promise<string> {
+    if (!this.client.isConnected) return 'ERROR: Not connected';
+    if (this.isTrading) return 'ERROR: Trade in progress';
+
+    this.isTrading = true;
+    try {
+      this.log('*** TEST TRADE: DIGITEVEN $0.35 ***');
+
+      const proposal = await this.client.getProposal({
+        contractType: 'DIGITEVEN',
+        symbol: '1HZ100V',
+        stake: 0.35,
+        duration: 1,
+        durationUnit: 't',
+      });
+
+      this.log(`TEST: Price OK ask=$${proposal.askPrice.toFixed(2)} payout=$${proposal.payout.toFixed(2)}`);
+
+      const buyResult = await this.client.buyContract(proposal.id, proposal.askPrice);
+      const won = buyResult.profit > 0;
+
+      this.log(`TEST: ${won ? 'WIN' : 'LOSS'} $${Math.abs(buyResult.profit).toFixed(2)} contract=${buyResult.contractId}`);
+      return `SUCCESS: ${won ? 'WIN' : 'LOSS'} $${Math.abs(buyResult.profit).toFixed(2)}`;
+    } catch (err) {
+      const msg = (err as Error).message;
+      this.log(`TEST FAILED: ${msg}`);
+      return `FAILED: ${msg}`;
+    } finally {
+      this.isTrading = false;
+      try { await this.client.forgetAllProposals(); } catch {}
     }
   }
 
@@ -430,10 +484,7 @@ export class DerivBot {
     // Report result to strategy (for Even/Odd alternation)
     reportTradeResult(this.activeStrategyId, record.won);
 
-    // v24: D'Alembert — step * $0.40 as user specified
-    // Each loss: step +1, stake += $0.40
-    // Each win: step -1, stake -= $0.40
-    // Minimum stake: $0.40
+    // D'Alembert — step * $0.40 as user specified
     this.currentStake = this.config.stake + (this.dAlembertStep * 0.40);
     this.currentStake = Math.max(0.40, Math.round(this.currentStake * 100) / 100);
 
